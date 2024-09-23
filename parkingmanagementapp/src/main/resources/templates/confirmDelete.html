@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Xác Nhận Xóa</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .confirmation-box {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .confirmation-header {
+            margin-bottom: 20px;
+        }
+        .confirmation-body {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="confirmation-box bg-light">
+            <h2 class="confirmation-header text-center text-danger">Xác Nhận Xóa</h2>
+            <div class="confirmation-body">
+                <p class="text-warning">Bạn có đồng ý xóa vé với các thông tin sau không?</p>
+                <ul class="list-group mb-4">    
+                    <li class="list-group-item">Tầng: <strong th:text="${ticket.floor.floorNumber}"></strong></li>
+                    <li class="list-group-item">Dãy: <strong th:text="${ticket.line.line}"></strong></li>
+                    <li class="list-group-item">Vị trí: <strong th:text="${ticket.position.position}"></strong></li>
+                    <li class="list-group-item">Người sở hữu: <strong th:text="${ticket.userOwned.name}"></strong></li>
+                    <li class="list-group-item">Người tạo: <strong th:text="${ticket.userCreate.name}"></strong></li>
+                </ul>
+            </div>
+            <div class="text-center">
+                <form action="#" th:action="@{/tickets/{id}/delete(id=${ticket.id})}" method="post">
+                    <input type="hidden" name="confirm" value="true"/>
+                    <button type="submit" class="btn btn-danger me-2">Có</button>
+                    <a href="#" class="btn btn-secondary" onclick="history.back()">Không</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

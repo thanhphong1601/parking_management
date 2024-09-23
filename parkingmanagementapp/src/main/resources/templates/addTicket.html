@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template-->
+
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Trang Chủ</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <style>
+
+        </style>
+    </head>
+    <body>
+        <!--         Include header -->
+        <div th:replace="fragments/header :: header"></div>
+
+        <!--         Main content -->
+        <div class="container" th:fragment="content">
+            <h1 class="text-center mt-3 mb-1">Vé xe</h1>
+            
+            <div class="alert alert-danger" th:if="${errMsg != null}" th:text="${errMsg}"></div>
+
+            
+            <form th:action="@{/tickets/add}" th:object="${ticket}" method="post">
+
+                <div class="form-floating mb-3 mt-3">         
+                    <select class="form-select" th:field="*{floor}" id="floor">
+                        <option th:each="floor : ${floors}" 
+                                th:value="${floor.id}"
+                                th:selected="${ticket.floor != null and floor.id == ticket.floor.id}"  
+                                th:text="${floor.floorNumber}"></option>
+                    </select>
+                    <label class="form-label" for="floor">Chọn tầng:</label>
+                </div>
+
+                <div class="form-floating mb-3 mt-3">                 
+                    <select class="form-select" th:field="*{line}" id="line">
+                        <option th:each="line : ${lines}" 
+                                th:value="${line.id}" 
+                                th:selected="${ticket.line != null and line.id == ticket.line.id}"
+                                th:text="${line.line}"></option>
+                    </select>
+                    <label class="form-label" for="line">Chọn dãy:</label>
+                </div>
+
+                <div class="form-floating mb-3 mt-3">                    
+                    <select class="form-select" th:field="*{position}" id="position">
+                        <option th:each="position : ${positions}" 
+                                th:value="${position.id}"
+                                th:selected="${ticket.position != null and position.id == ticket.position.id}"
+                                th:text="${position.position}"></option>
+                    </select>
+                    <label class="form-label" for="position">Chọn vị trí trong dãy:</label>
+                </div>
+
+                
+                <div class="form-floating mb-3 mt-3">                    
+                    <select class="form-select" th:field="*{price}" id="price">
+                        <option th:each="price : ${prices}" 
+                                th:value="${price.id}"
+                                th:selected="${ticket.price != null and price.id == ticket.price.id}">[[${price.price}]] VNĐ</option>
+                    </select>
+                    <label class="form-label" for="price">Chọn giá vé:</label>
+                </div>
+                
+                <div class="form-floating mb-3 mt-3">   
+                    <select class="form-select" th:field="*{userOwned}" id="customers">
+                        <option th:each="c : ${customers}" 
+                                th:value="${c.id}" 
+                                th:selected="${ticket.userOwned != null and c.id == ticket.userOwned.id}"
+                                th:text="${c.name}"></option>
+                    </select>
+                    <label for="customers">Khách hàng:</label>
+                </div>
+
+                <div class="form-floating mb-3 mt-3">                 
+                    <select class="form-select" th:field="*{userCreate}" id="security">
+                        <option th:each="security : ${securities}" 
+                                th:value="${security.id}" 
+                                th:selected="${ticket.userCreate != null and security.id == ticket.userCreate.id}"
+                                th:text="${security.name}"></option>
+                    </select>
+                    <label for="security">Nhân viên:</label>
+                </div>
+
+                <div class="form-floating mb-3 mt-3">
+                    <button type="submit" class="btn btn-info">Thêm vé</button>
+                     <input type="hidden" th:field="*{id}"/>
+                </div>
+
+
+            </form>
+        </div>
+
+        <!--         Include footer -->
+        <div th:replace="fragments/footer :: footer"></div>
+    </body>
+</html>

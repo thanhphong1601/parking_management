@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Trang Chủ</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <style>
+            .container {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                height: 100%;
+                align-items: center;
+            }
+            .searchBar {
+                margin-top: 30px;
+            }
+            .styled-table {
+                border-collapse: collapse;
+                margin: 25px 0;
+                font-size: 0.9em;
+                font-family: sans-serif;
+                min-width: 400px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+            }
+            .styled-table thead tr {
+                background-color: #009879;
+                color: #ffffff;
+                text-align: left;
+            }
+            .styled-table th,
+            .styled-table td {
+                padding: 12px 15px;
+            }
+            .styled-table tbody tr {
+                border-bottom: 1px solid #dddddd;
+            }
+
+
+            .styled-table tbody tr:last-of-type {
+                border-bottom: 2px solid #009879;
+            }
+            .styled-table tbody tr.active-row {
+                font-weight: bold;
+                color: #009879;
+            }
+            td {
+                text-align: center
+            }
+            th {
+                text-align: center;
+                font-weight: bold
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Include header -->
+        <div th:replace="fragments/header :: header"></div>
+
+        <!-- Main content -->
+        <div class="container" th:fragment="content">
+            <form class="searchBar" th:action="@{/users/{role_number}(role_number=${roleNum})}" method="get">
+                <label for="name">Tìm tên người dùng hoặc CMND:</label>
+                <input type="text" id="name" name="name" placeholder="Nhập tên người dùng" />
+                <input type="text" id="identityNumber" name="identityNumber" placeholder="Nhập CMND (12 ký tự)" maxlength="12"/>
+                <button type="submit">Tìm</button>
+            </form>
+
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Id người dùng</th>
+                        <th>Tên người dùng</th>
+                        <th>Tài khoản người dùng</th>
+                        <th>CMND</th>
+                        <th>Địa chỉ</th>
+                        <th>Ngày sinh</th>
+                        <th>Vai trò</th>
+                        <th><th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="u : ${users}">
+                        <td>[[${u.id}]]</td>
+                        <td>[[${u.name}]]</td>
+                        <td>[[${u.username}]]</td>
+                        <td>[[${u.identityNumber}]]</td>
+                        <td>[[${u.address}]]</td>
+                        <td>[[${#dates.format(u.birthday, 'dd/MM/yyyy')}]]</td>
+                        <td>
+                            <span th:if="${u.role.role == 'ROLE_CUSTOMER'}" 
+                                  th:text="#{user.role.customer}">Khách hàng</span>
+                            <span th:if="${u.role.role == 'ROLE_SECURITY'}" 
+                                  th:text="#{user.role.security}">Nhân viên bảo vệ</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/users/{role_number}/{uid}/info(role_number=${roleNum}, uid=${u.id})}" class="btn btn-info">Sửa thông tin</a>
+                        </td>
+                        <td>
+                            <a th:href="@{/users/{role_number}/{uid}/delete(role_number=${roleNum}, uid=${u.id})}" class="btn btn-danger">Xóa</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <a class="btn btn-info" th:href="@{/users/{role_number}/add(role_number=${roleNum})}">Thêm người dùng</a>
+        </div>
+
+        <!-- Include footer -->
+        <div th:replace="fragments/footer :: footer"></div>
+
+    </body>
+</html>

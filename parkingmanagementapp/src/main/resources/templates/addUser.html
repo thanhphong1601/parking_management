@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template-->
+
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Trang Chủ</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <style>
+            .containerTable {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                height: 100%;
+                align-items: center;
+            }
+            .styled-table {
+                border-collapse: collapse;
+                margin: 25px 0;
+                font-size: 0.9em;
+                font-family: sans-serif;
+                min-width: 400px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+            }
+            .styled-table thead tr {
+                background-color: #009879;
+                color: #ffffff;
+                text-align: left;
+            }
+            .styled-table th,
+            .styled-table td {
+                padding: 12px 15px;
+            }
+            .styled-table tbody tr {
+                border-bottom: 1px solid #dddddd;
+            }
+
+
+            .styled-table tbody tr:last-of-type {
+                border-bottom: 2px solid #009879;
+            }
+            .styled-table tbody tr.active-row {
+                font-weight: bold;
+                color: #009879;
+            }
+            td {
+                text-align: center
+            }
+            th {
+                text-align: center;
+                font-weight: bold
+            }
+        </style>
+    </head>
+    <body>
+        <!--         Include header -->
+        <div th:replace="fragments/header :: header"></div>
+
+        <!--         Main content -->
+        <div class="container" th:fragment="content">
+            <h1 class="text-center mt-3 mb-1">Thông tin người dùng</h1>
+
+            <div class="alert alert-danger" th:if="${errMsg != null}" th:text="${errMsg}"></div>
+
+
+            <form th:action="@{/users/{roleNumber}/add(roleNumber=${roleNum})}" th:object="${user}" method="post" enctype="multipart/form-data">
+
+                <div class="form-floating mb-3 mt-3">         
+                    <input class="form-control" type="text" th:field="*{username}" id="username" placeholder="Tài khoản" name="username"/>
+                    <label class="form-label" for="username">Tài khoản</label>
+                </div>
+
+                <div class="form-floating mb-3 mt-3">         
+                    <input class="form-control" type="password" th:field="*{password}" id="password" placeholder="Mật khẩu" name="password"/>
+                    <label class="form-label" for="password">Mật khẩu</label>
+                </div>
+
+                <div class="form-floating mb-3 mt-3">         
+                    <input class="form-control" type="text" th:field="*{name}" id="name" placeholder="Họ tên" name="name"/>
+                    <label class="form-label" for="name">Họ tên:</label>
+                </div>
+
+                <div class="form-floating mb-3 mt-3">         
+                    <input class="form-control" type="email" th:field="*{email}" id="email" placeholder="Email" name="email"/>
+                    <label class="form-label" for="email">Email</label>
+                </div>
+
+                <div class="form-floating mb-3 mt-3">         
+                    <input class="form-control" type="text" th:field="*{phone}" id="phone" placeholder="Số điện thoại" name="phone" maxlength="10"/>
+                    <label class="form-label" for="phone">Số điện thoại</label>
+                </div>
+
+                <div class="form-floating mb-3 mt-3">         
+                    <input class="form-control" type="text" th:field="*{identityNumber}" id="identityNumber" placeholder="CMND" name="identityNumber" maxlength="12"/>
+                    <label class="form-label" for="identityNumber">Số CMND</label>
+                </div>
+
+                <!--                <div class="form-floating mb-3 mt-3">
+                                    <input type="date" class="form-control" th:field="*{birthday}" id="birthday" name="birthday" placeholder="dd/MM/yyyy" maxlength="10" oninput="formatDate(this)" />
+                                    <label for="birthDate">Ngày sinh:</label>
+                                </div>-->
+                <div class="form-floating mb-3 mt-3">
+                    <input type="date" class="form-control" th:field="*{birthday}" id="birthday" name="birthday" />
+                    <label for="birthday">Ngày sinh:</label>
+                </div>
+
+                <div class="form-floating mb-3 mt-3">         
+                    <input class="form-control" type="text" th:field="*{address}" id="address" placeholder="Địa chỉ" name="address"/>
+                    <label class="form-label" for="address">Địa chỉ</label>
+                </div>
+
+
+
+                <div class="form-floating mb-3 mt-3">                 
+                    <select class="form-select" th:field="*{role}" id="role">
+                        <option th:each="r : ${roles}" 
+                                th:value="${r.id}" 
+                                th:selected="${user.role != null and r.id == user.role.id}"
+                                th:text="${r.role}"></option>
+                    </select>
+                    <label for="role">Vai trò</label>
+                </div>
+
+                <div class="form-floating mb-3 mt-3">
+                    <input type="file" accept=".png, .jpg" class="form-control" id="file" th:field="*{file}"/>
+                    <label for="file">Ảnh đại diện</label>
+                    <img th:if="${user.avatar != null}" src="${user.avatar()}" width="200" />
+                </div>
+
+
+                <div class="containerTable">
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th>Tên phương tiện</th>
+                                <th>Loại phương tiện</th>
+                                <th>Biển số xe</th>
+                            </tr>
+                        </thead>
+                        <tbody th:if="${vehicles != null}">
+                            <tr th:each="v : ${vehicles}">
+                                <td>[[${v.name}]]</td>
+                                <td>[[${v.type.type}]]</td>
+                                <td>[[${v.plateLicense}]]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+
+                <div class="form-floating mb-3 mt-3">
+                    <button type="submit" th:if="*{id} == null" th:text="#{user.security.add}" class="btn btn-info">Thêm nhân viên</button>
+                    <button type="submit" th:if="*{id} != null" th:text="#{user.update}" class="btn btn-info">Lưu thông tin</button>
+
+                    <input type="hidden" th:field="*{id}"/>
+                    <input type="hidden" th:field="*{avatar}" />
+                </div>
+
+
+
+
+            </form>
+            <a th:if="${user.id == null}" th:href="@{/users/{role_num}/vehicles/add(role_num=${roleNum})}" class="btn btn-info">Thêm phương tiện</a>
+            <a th:if="${user.id != null}" th:href="@{/users/{role_num}/{uid}/vehicles/add(role_num=${roleNum}, uid=${user.id})}" class="btn btn-info">Thêm phương tiện</a>
+        </div>
+
+        <!--         Include footer -->
+        <div th:replace="fragments/footer :: footer"></div>
+
+        <script>
+            function formatDate(input) {
+                // Loại bỏ tất cả ký tự không phải là số
+                let value = input.value.replace(/\D/g, '');
+
+                // Nếu có nhiều hơn 2 số, thêm dấu "/"
+                if (value.length >= 2) {
+                    value = value.slice(0, 2) + '/' + value.slice(2);
+                }
+
+                // Nếu có nhiều hơn 4 số, thêm dấu "/"
+                if (value.length >= 5) {
+                    value = value.slice(0, 5) + '/' + value.slice(5);
+                }
+
+                // Giới hạn tối đa là 10 ký tự (dd/MM/yyyy)
+                input.value = value.slice(0, 10);
+            }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Xác Nhận Xóa</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <style>
+            .container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+            }
+            .confirmation-box {
+                max-width: 600px;
+                width: 100%;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .confirmation-header {
+                margin-bottom: 20px;
+            }
+            .confirmation-body {
+                margin-bottom: 20px;
+            }
+            .itemTitle{
+                margin-left: 7px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="confirmation-box bg-light">
+                <h2 class="confirmation-header text-center text-danger">Xác Nhận Xóa</h2>
+                <div class="confirmation-body">
+                    <p class="text-warning">Bạn có đồng ý xóa người dùng với các thông tin sau không?</p>
+                    <p class="text-warning">Lưu ý: Những thông tin liên quan đến người dùng cũng sẽ bị xóa!</p>
+                    <ul class="list-group mb-4">    
+                        <li class="list-group-item">Họ tên người dùng: <strong th:text="${user.name}"></strong></li>
+                        <li class="list-group-item">Tài khoản: <strong th:text="${user.username}"></strong></li>
+                        <li class="list-group-item">Ngày sinh <strong th:text="${user.birthday}"></strong></li>
+                        <li class="list-group-item">CMND: <strong th:text="${user.identityNumber}"></strong></li>
+                        <li class="list-group-item">Số điện thoại: <strong th:text="${user.phone}"></strong></li>
+                        <li class="list-group-item">Thông tin các vé của người dùng:
+                            <ul class="list-group mb-4" th:each="t : ${tickets}">
+                                <strong class="itemTitle">Id vé: [[${t.id}]]</strong>
+                                <li class="list-group-item">Tầng: <strong th:text="${t.floor.floorNumber}"></strong> - Dãy: <strong th:text="${t.line.line}"></strong> - Vị trí: <strong th:text="${t.position.position}"></strong></li>
+                            </ul>
+                        </li>
+                        <li class="list-group-item">Phương tiện người dùng:
+                            <ul class="list-group mb-4" th:each="v : ${vehicles}">
+                                <strong class="itemTitle">Id phương tiện: [[${v.id}]]</strong>
+                                <li class="list-group-item">Tên phương tiện: <strong th:text="${v.name}"></strong></li>
+                                <li class="list-group-item">Loại phương tiện: <strong th:text="${v.type.type}"></strong></li>
+                                <li class="list-group-item">Biển số: <strong th:text="${v.plateLicense}"></strong></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <div class="text-center">
+                    <form action="#" th:action="@{/users/{id}/delete(id=${user.id})}" method="post">
+                        <input type="hidden" name="confirm" value="true"/>
+                        <button type="submit" class="btn btn-danger me-2">Có</button>
+                        <a href="#" class="btn btn-secondary" onclick="history.back()">Không</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
