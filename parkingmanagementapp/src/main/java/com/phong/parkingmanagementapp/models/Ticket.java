@@ -17,10 +17,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.Collection;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  *
@@ -69,6 +71,21 @@ public class Ticket {
     @JoinColumn(name = "vehicle_id")
     @ManyToOne(optional = true)
     private Vehicle vehicle;
+    
+    @Column(name = "start_day", nullable = true)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date startDay;
+    
+    @Column(name = "end_day", nullable = true)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date endDay;
+    
+    @JoinColumn(name = "total_price")
+    @Column(name = "total_price", nullable = true)
+    private int totalPrice;
+    
+    @Column(name = "is_paid", nullable = true)
+    private Boolean isPaid;
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "ticket")

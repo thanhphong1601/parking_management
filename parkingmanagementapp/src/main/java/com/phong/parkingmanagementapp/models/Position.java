@@ -10,9 +10,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.ToString;
 
 /**
  *
@@ -31,4 +34,9 @@ public class Position {
     @NotNull
     @Column(name = "position_number")
     private int position;
+    
+    @ToString.Exclude
+    @JoinColumn(name = "line_id")
+    @ManyToOne(optional = true)
+    private Line line;
 }

@@ -12,6 +12,7 @@ import com.phong.parkingmanagementapp.services.RoleService;
 import com.phong.parkingmanagementapp.services.TicketService;
 import com.phong.parkingmanagementapp.services.UserService;
 import com.phong.parkingmanagementapp.services.VehicleService;
+import io.github.cdimascio.dotenv.Dotenv;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +41,8 @@ public class TestController {
     }
     
     @GetMapping("/test/")
-    public List<Vehicle> test(){
-        return this.vehicleService.findVehiclesOfBlankUser();
+    public String test(){
+        Dotenv env = Dotenv.load();
+        return env.get("API_KEY");
     }
 }

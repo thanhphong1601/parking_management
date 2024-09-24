@@ -6,6 +6,7 @@ package com.phong.parkingmanagementapp.configurations;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,10 +18,11 @@ import org.springframework.context.annotation.Configuration;
 public class CloudinaryConfig {
     @Bean
     public Cloudinary cloudinary() {
+        Dotenv dotenv = Dotenv.load();
         return new Cloudinary(ObjectUtils.asMap(
                 "cloud_name", "dstjar2iy",
-                "api_key", "795947151141178",
-                "api_secret", "I9Zs8B0ilHsS6V85DvA3q0AueMM",
+                "api_key", dotenv.get("API_KEY"),
+                "api_secret", dotenv.get("API_SECRET"),
                 "secure", true
         ));
     }
