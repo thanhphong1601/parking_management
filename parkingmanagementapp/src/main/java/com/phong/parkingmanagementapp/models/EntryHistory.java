@@ -13,9 +13,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 import java.util.Date;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -24,6 +28,8 @@ import lombok.Data;
 @Entity
 @Data
 @Table(name = "entry_history")
+@NoArgsConstructor
+@AllArgsConstructor
 public class EntryHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,18 +37,34 @@ public class EntryHistory {
     @Column(name = "id")
     private Integer id;
     
-    @Column(name = "time_in")
-    @NotNull
+    @Column(name = "time_in", nullable = true)
     private Date timeIn;
-    @NotNull
-    @Column(name = "time_out")
+    @Basic(optional = true)
+    @Column(name = "plate_img_in")
+    private String plateImgIn;
+    
+    @Column(name = "time_out", nullable = true)
     private Date timeOut;
+    @Basic(optional = true)
+    @Column(name = "plate_img_out")
+    private String plateImgOut;
     
     //nhân viên
-    @JoinColumn(name = "user_id")
-    @ManyToOne(optional = false)
-    private User user;
+    @JoinColumn(name = "vehicle_owner_id")
+    @ManyToOne()
+    @NotNull(message = "{entry.user.notNull}")
+    private User owner;
+    
+    @JoinColumn(name = "creator_id")
+    @ManyToOne()
+    @NotNull(message = "{entry.user.notNull}")
+    private User creator;
+    
     @JoinColumn(name = "vehicle_id")
-    @ManyToOne(optional = false)
+    @ManyToOne()
+    @NotNull(message = "{entry.vehicle.notNull}")
     private Vehicle vehicle;
+    
+    @Transient
+    private MultipartFile file;
 }

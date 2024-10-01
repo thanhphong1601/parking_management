@@ -74,7 +74,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 </div>
 
                 <div class="form-floating mb-3 mt-3">         
-                    <input class="form-control" type="password" th:field="*{password}" id="password" placeholder="Mật khẩu" name="password"/>
+                    <input required="true" class="form-control" type="password" th:field="*{password}" id="password" placeholder="Mật khẩu" name="password"/>
                     <label class="form-label" for="password">Mật khẩu</label>
                 </div>
 
@@ -98,10 +98,6 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     <label class="form-label" for="identityNumber">Số CMND</label>
                 </div>
 
-                <!--                <div class="form-floating mb-3 mt-3">
-                                    <input type="date" class="form-control" th:field="*{birthday}" id="birthday" name="birthday" placeholder="dd/MM/yyyy" maxlength="10" oninput="formatDate(this)" />
-                                    <label for="birthDate">Ngày sinh:</label>
-                                </div>-->
                 <div class="form-floating mb-3 mt-3">
                     <input type="date" class="form-control" th:field="*{birthday}" id="birthday" name="birthday" />
                     <label for="birthday">Ngày sinh:</label>

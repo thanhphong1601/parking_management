@@ -101,7 +101,7 @@ public class User implements UserDetails{
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private Collection<Vehicle> vehicleCollection;
     @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
     private Collection<EntryHistory> entryHistoryCollection;
 
     @Override

@@ -34,5 +34,20 @@ public class PositionServiceImpl implements PositionService{
     public List<Position> findAll() {
         return this.positionRepo.findAll();
     }
+
+    @Override
+    public List<Position> findPositionsByLineId(int id) {
+        return this.positionRepo.findPositionsByLineId(id);
+    }
+
+    @Override
+    public void savePosition(Position position) {
+        this.positionRepo.save(position);
+    }
+
+    @Override
+    public Position getPositionById(int id) {
+        return this.positionRepo.getPositionById(id);
+    }
     
 }

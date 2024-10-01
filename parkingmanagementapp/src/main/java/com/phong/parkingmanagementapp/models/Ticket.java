@@ -82,10 +82,10 @@ public class Ticket {
     
     @JoinColumn(name = "total_price")
     @Column(name = "total_price", nullable = true)
-    private int totalPrice;
+    private Integer totalPrice;
     
     @Column(name = "is_paid", nullable = true)
-    private Boolean isPaid;
+    private Boolean isPaid = false;
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "ticket")

@@ -19,6 +19,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
@@ -28,6 +29,7 @@ import lombok.ToString;
 @Entity
 @Data
 @Table(name = "line")
+@NoArgsConstructor
 public class Line {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

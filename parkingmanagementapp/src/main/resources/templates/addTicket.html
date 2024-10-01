@@ -20,14 +20,14 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
         <!--         Main content -->
         <div class="container" th:fragment="content">
             <h1 class="text-center mt-3 mb-1">Vé xe</h1>
-            
+
             <div class="alert alert-danger" th:if="${errMsg != null}" th:text="${errMsg}"></div>
 
-            
+
             <form th:action="@{/tickets/add}" th:object="${ticket}" method="post">
 
                 <div class="form-floating mb-3 mt-3">         
-                    <select class="form-select" th:field="*{floor}" id="floor">
+                    <select class="form-select" th:field="*{floor}" id="floor" onchange="updateLine()">
                         <option th:each="floor : ${floors}" 
                                 th:value="${floor.id}"
                                 th:selected="${ticket.floor != null and floor.id == ticket.floor.id}"  
@@ -36,27 +36,41 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     <label class="form-label" for="floor">Chọn tầng:</label>
                 </div>
 
+                <!--                <div class="form-floating mb-3 mt-3">                 
+                                    <select class="form-select" th:field="*{line}" id="line">
+                                        <option th:each="line : ${floors[0].lineCollection}" 
+                                                th:value="${line.id}" 
+                                                th:selected="${ticket.line != null and line.id == ticket.line.id}"
+                                                th:text="${line.line}"></option>
+                                    </select>
+                                    <label class="form-label" for="line">Chọn dãy:</label>
+                                </div>-->
+
                 <div class="form-floating mb-3 mt-3">                 
-                    <select class="form-select" th:field="*{line}" id="line">
-                        <option th:each="line : ${lines}" 
-                                th:value="${line.id}" 
-                                th:selected="${ticket.line != null and line.id == ticket.line.id}"
-                                th:text="${line.line}"></option>
+                    <select class="form-select" th:field="*{line}" id="line" onchange="updatePosition()">
+                        <option value="" disabled="true" selected>Chọn dãy</option>
                     </select>
                     <label class="form-label" for="line">Chọn dãy:</label>
                 </div>
 
-                <div class="form-floating mb-3 mt-3">                    
+                <!--                <div class="form-floating mb-3 mt-3">                    
+                                    <select class="form-select" th:field="*{position}" id="position">
+                                        <option th:each="position : ${floors[0].lineCollection[0].positionCollection}" 
+                                                th:value="${position.id}"
+                                                th:selected="${ticket.position != null and position.id == ticket.position.id}"
+                                                th:text="${position.position}"></option>
+                                    </select>
+                                    <label class="form-label" for="position">Chọn vị trí trong dãy:</label>
+                                </div>-->
+
+                <div class="form-floating mb-3 mt-3">                 
                     <select class="form-select" th:field="*{position}" id="position">
-                        <option th:each="position : ${positions}" 
-                                th:value="${position.id}"
-                                th:selected="${ticket.position != null and position.id == ticket.position.id}"
-                                th:text="${position.position}"></option>
+                        <option value="" disabled="true" selected>Chọn vị trí</option>
                     </select>
-                    <label class="form-label" for="position">Chọn vị trí trong dãy:</label>
+                    <label class="form-label" for="position">Chọn ví trí:</label>
                 </div>
 
-                
+
                 <div class="form-floating mb-3 mt-3">                    
                     <select class="form-select" th:field="*{price}" id="price">
                         <option th:each="price : ${prices}" 
@@ -65,9 +79,19 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     </select>
                     <label class="form-label" for="price">Chọn giá vé:</label>
                 </div>
-                
+
+                <div class="form-floating mb-3 mt-3">
+                    <input type="date" class="form-control" th:field="*{startDay}" id="startDay" name="startDay" />
+                    <label for="startDay">Ngày bắt đầu:</label>
+                </div>
+
+                <div class="form-floating mb-3 mt-3">
+                    <input type="date" class="form-control" th:field="*{endDay}" id="endDay" name="endDay" />
+                    <label for="endDay">Ngày kết thúc:</label>
+                </div>
+
                 <div class="form-floating mb-3 mt-3">   
-                    <select class="form-select" th:field="*{userOwned}" id="customers">
+                    <select class="form-select" th:field="*{userOwned}" id="customers" onchange="updateVehicles()">
                         <option th:each="c : ${customers}" 
                                 th:value="${c.id}" 
                                 th:selected="${ticket.userOwned != null and c.id == ticket.userOwned.id}"
@@ -75,6 +99,18 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     </select>
                     <label for="customers">Khách hàng:</label>
                 </div>
+
+                <div class="form-floating mb-3 mt-3">
+                    <select class="form-select" th:field="*{vehicle}" id="vehicles">
+                        <option th:each="v : ${customers[0].vehicleCollection}" 
+                                th:value="${v.id}" 
+                                selected="${ticket.vehicle != null and v.id == ticket.vehicle.id}">
+                            [[${v.name}]] - Biển số xe: [[${v.plateLicense}]]
+                        </option>
+                    </select>
+                    <label for="vehicles">Phương tiện khách hàng:</label>
+                </div>
+
 
                 <div class="form-floating mb-3 mt-3">                 
                     <select class="form-select" th:field="*{userCreate}" id="security">
@@ -88,8 +124,11 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
 
                 <div class="form-floating mb-3 mt-3">
                     <button type="submit" class="btn btn-info">Thêm vé</button>
-                     <input type="hidden" th:field="*{id}"/>
+                    <input type="hidden" th:field="*{id}"/>
+                    <input type="hidden" th:field="*{totalPrice}"/>
+                    <input type="hidden" th:field="*{isPaid}"/>
                 </div>
+
 
 
             </form>
@@ -97,5 +136,88 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
 
         <!--         Include footer -->
         <div th:replace="fragments/footer :: footer"></div>
+
+        <script type="text/javascript">
+            function updateVehicles() {
+                const customerId = document.getElementById("customers").value;
+
+
+                fetch(`/getVehiclesByCustomerId/${customerId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const vehicleSelect = document.getElementById("vehicles");
+                            vehicleSelect.innerHTML = '';
+
+                            data.forEach(vehicle => {
+                                const option = document.createElement("option");
+                                option.value = vehicle.id;
+                                option.text = `${vehicle.name} - Biển số xe: ${vehicle.plateLicense}`;
+
+//                                if (selectedVehicleId && vehicle.id === selectedVehicleId) {
+//                                    option.selected = true;
+//                                }
+                                vehicleSelect.appendChild(option);
+                            });
+                        });
+            }
+            // Chọn tầng và load dãy tương ứng
+            document.getElementById("floor").addEventListener("change", function () {
+                const floor = this.value;
+                const lineSelect = document.getElementById("line");
+                const positionSelect = document.getElementById("position");
+
+                // Xóa các tùy chọn cũ
+                lineSelect.innerHTML = '<option value="" disabled selected>Chọn dãy</option>';
+                positionSelect.innerHTML = '<option value="" disabled selected>Chọn vị trí</option>';
+                positionSelect.disabled = true;
+
+                if (floor) {
+                    fetch(`/getLinesByFloorId/${floor}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                data.forEach(line => {
+                                    const option = document.createElement("option");
+                                    option.value = line.id;
+                                    option.text = line.line;
+
+                                    lineSelect.appendChild(option);
+                                });
+                            });
+
+                    lineSelect.disabled = false; // Bật dãy sau khi chọn tầng
+                } else {
+                    lineSelect.disabled = true;
+                    positionSelect.disabled = true;
+                }
+            });
+            // Chọn dãy và load vị trí tương ứng
+            document.getElementById("line").addEventListener("change", function () {
+                const line = this.value;
+                const positionSelect = document.getElementById("position");
+
+                // Xóa các tùy chọn vị trí cũ
+                positionSelect.innerHTML = '<option value="" disabled selected>Chọn vị trí</option>';
+
+                if (line) {
+                    fetch(`/getPositionsByLineId/${line}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                data.forEach(p => {
+                                    const option = document.createElement("option");
+                                    option.value = p.id;
+                                    option.text = p.position;
+
+                                    positionSelect.appendChild(option);
+                                });
+                            });
+
+                    positionSelect.disabled = false; // Bật chọn vị trí sau khi chọn dãy
+                } else {
+                    positionSelect.disabled = true;
+                }
+            });
+
+        </script>
+
     </body>
 </html>

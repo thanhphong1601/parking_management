@@ -17,6 +17,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  *
@@ -25,6 +26,7 @@ import lombok.Data;
 @Entity
 @Data
 @Table(name = "floor")
+@NoArgsConstructor
 public class Floor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

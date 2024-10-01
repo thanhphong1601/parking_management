@@ -23,4 +23,7 @@ public interface UserService {
     void deleteUser(User user);
     List<User> findAll();
     List<User> findAllExceptBlankUser();
+    User getUserByUsername(String username);
+    boolean authUser(String username, String password);
+    
 }

@@ -54,6 +54,10 @@ public class AdminUserController {
     @GetMapping("/users/{role_number}")
     public String userList(@RequestParam Map<String, String> params, @PathVariable("role_number") int roleNumber, Model model) {
 //       List<User> userList = this.userService.findUsersByRoleId(roleNumber);
+
+        //del blank vehicles
+        this.vehicleService.deleteVehiclesOfBlankUser();
+        
         String idNum = params.get("identityNumber");
         String name = params.get("name");
 
@@ -70,8 +74,7 @@ public class AdminUserController {
         model.addAttribute("roleNum", roleNumber);
         model.addAttribute("roles", this.roleService.findAll());
         
-        //del blank vehicles
-        this.vehicleService.deleteVehiclesOfBlankUser();
+        
         
         model.addAttribute("vehicles", this.vehicleService.findVehiclesOfBlankUser());
         
@@ -80,6 +83,9 @@ public class AdminUserController {
 
     @GetMapping("/users/{role_number}/{uid}/info")
     public String userInfo(@PathVariable Map<String, String> params, Model model) {
+        //del blank vehicles
+        this.vehicleService.deleteVehiclesOfBlankUser();
+        
         int uid = Integer.parseInt(params.get("uid"));
         int roleNum = Integer.parseInt(params.get("role_number"));
        
@@ -88,14 +94,13 @@ public class AdminUserController {
         model.addAttribute("roles", this.roleService.findAll());
         model.addAttribute("vehicles", this.vehicleService.findVehicleByUserId(uid));
         
-        //del blank vehicles
-        this.vehicleService.deleteVehiclesOfBlankUser();
+        
 
         return "addUser";
     }
 
     @PostMapping("/users/{role_number}/add")
-    public String addTicket(Model model, @ModelAttribute(value = "user") @Valid User u,
+    public String addUser(Model model, @ModelAttribute(value = "user") @Valid User u,
             BindingResult rs, @PathVariable("role_number") int roleNum) throws IOException {
         String url = "/users/" + String.valueOf(roleNum);
 
@@ -107,18 +112,9 @@ public class AdminUserController {
             try {
 
                 this.userService.saveUser(u);
+                
                 User userNew = this.userService.getUserByName(u.getName());
                 this.vehicleService.updateNewVehiclesOwner(userNew.getId());
-//                System.out.println("---------------------------------------");
-//                System.out.println(u.getFile().toString());
-//                System.out.println(u.getAvatar());
-//                System.out.println(u.getAddress());
-//                System.out.println(u.getBirthday());
-//                System.out.println(u.getIdentityNumber());
-//                System.out.println(u.getName());
-//                System.out.println(u.getUsername());
-//                System.out.println(u.getRole().getRole());
-//                System.out.println("---------------------------------------");
 
                 return "redirect:" + url;
             } catch (Exception e) {

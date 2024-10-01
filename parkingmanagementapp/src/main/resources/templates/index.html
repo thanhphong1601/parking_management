@@ -3,7 +3,8 @@
 Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
 Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
 -->
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <head>
         <title>Trang Chủ</title>
         <meta charset="UTF-8">
@@ -24,7 +25,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
 
     <!-- Main content -->
     <div class="container" th:fragment="content">
-        <h3>Xin chào <span th:text="${username}"></span>, chào mừng trở lại!</h3>
+        <h3>Xin chào <span th:text="${user.name}"></span>, chào mừng trở lại!</h3>
         Hãy tiến hành quản lý ngay!!
     </div>
 

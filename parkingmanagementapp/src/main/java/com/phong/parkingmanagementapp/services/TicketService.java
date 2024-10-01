@@ -5,7 +5,9 @@
 package com.phong.parkingmanagementapp.services;
 
 import com.phong.parkingmanagementapp.models.Ticket;
+import java.util.Date;
 import java.util.List;
+import org.springframework.data.repository.query.Param;
 
 /**
  *
@@ -19,4 +21,7 @@ public interface TicketService {
     Ticket getTicketById(int id);
     List<Ticket> findTicketByUserOwnedId(int id);
     boolean deleteTicketsByUserOwnedId(int id);
+    int totalPriceCal(Date startDay, Date endDay, int pricePerDay);
+    List<Ticket> findValidTicketsByVehicleIdAndDate(Long vehicleId, 
+                                                    Date currentDate);
 }

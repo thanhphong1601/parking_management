@@ -17,4 +17,6 @@ import org.springframework.stereotype.Repository;
 public interface FloorRepository extends JpaRepository<Floor, Long>{
     @Override
     public List<Floor> findAll();
+    
+    public Floor getFloorById(int id);
 }

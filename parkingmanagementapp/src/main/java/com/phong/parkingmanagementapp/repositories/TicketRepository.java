@@ -5,6 +5,7 @@
 package com.phong.parkingmanagementapp.repositories;
 
 import com.phong.parkingmanagementapp.models.Ticket;
+import java.util.Date;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -29,4 +30,13 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>{
     
     @Query(value = "SELECT t FROM Ticket t WHERE t.userOwned.id = :id")
     List<Ticket> findTicketByUserOwnedId(@Param("id") int id);
+    
+    @Query("SELECT t FROM Ticket t WHERE t.vehicle.id = :vehicleId " +
+           "AND :currentDate BETWEEN t.startDay AND t.endDay")
+    List<Ticket> findValidTicketsByVehicleIdAndDate(@Param("vehicleId") Long vehicleId, 
+                                                    @Param("currentDate") Date currentDate);
+    
+    @Query("SELECT CASE WHEN COUNT(t) > 0 THEN true ELSE false END FROM Ticket t WHERE :currentDate BETWEEN t.startDay AND t.endDay")
+    boolean existsByDay(@Param("currentDate") Date currentDate);
+
 }

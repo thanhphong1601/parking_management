@@ -6,6 +6,7 @@ package com.phong.parkingmanagementapp.services;
 
 import com.phong.parkingmanagementapp.models.Vehicle;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.repository.query.Param;
 
 /**
@@ -20,4 +21,6 @@ public interface VehicleService {
     void deleteVehiclesOfBlankUser();
     void updateNewVehiclesOwner(int uid);
     void saveVehicleForCreatedUser(int uid, Vehicle v);
+    Optional<Vehicle> findByLicensePlateNumberIgnoreCase(String plateLicense);
+    Vehicle getVehicleById(int id);
 }

@@ -1,10 +1,12 @@
 package com.phong.parkingmanagementapp.configurations;
 
+import com.phong.parkingmanagementapp.services.impl.JwtRequestFilter;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -27,51 +29,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class WebSecurityConfig {
 
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http.formLogin(form -> form
-//                .loginPage("/login")
-//                .usernameParameter("username")
-//                .passwordParameter("password")
-//                .defaultSuccessUrl("/")
-//                .failureUrl("/login?error")
-//        )
-//                .logout(logout -> logout
-//                .logoutUrl("/logout")
-//                .logoutSuccessUrl("/login")
-//                )
-//                //                .authorizeHttpRequests(auth -> auth
-//                //                .requestMatchers("/**").hasAuthority("ROLE_ADMIN")
-//                //                .requestMatchers("/", "/public/**").permitAll()
-//                //                .anyRequest().authenticated()
-//                .authorizeHttpRequests((requests) -> requests
-//                .requestMatchers("/", "/home").hasAnyAuthority("ROLE_ADMIN")
-//                .anyRequest().authenticated()
-//                );
-//
-//        return http.build();
-//    }
-//
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
-//
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        UserDetails user
-//                = User.withDefaultPasswordEncoder()
-//                        .username("username")
-//                        .password("password")
-//                        .roles("USER")
-//                        .build();
-//
-//        return new InMemoryUserDetailsManager(user);
-//    }
-
-//    @Autowired
-//    @Lazy
-//    private JwtRequestFilter jwtRequestFilter;
+    @Autowired
+    @Lazy
+    private JwtRequestFilter jwtRequestFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -82,6 +42,34 @@ public class WebSecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
+    private List<String> publicUrls = List.of("/",
+            "/api/auth/**",
+            "/api/auth/authenticate",
+            "/api/auth/register",
+            "/api/**",
+            "/login",
+            "/logout"
+    );
+
+    private List<String> securityUrls = List.of("/"
+    );
+
+    private List<String> customerUrls = List.of("/"
+    );
+
+    private List<String> adminUrls = List.of("/",
+            "/area",
+            "/addFloor",
+            "/addLine",
+            "/addPosition",
+            "/tickets/**",
+            "/tickets/add",
+            "/getLinesByFloorId/**",
+            "/getPositionsByLineId/**",
+            "/users",
+            "/getVehiclesByCustomerId/**"
+    );
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -96,20 +84,19 @@ public class WebSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login").permitAll()
-                        .requestMatchers("/home/**").hasAuthority("ROLE_ADMIN")     
-                        .requestMatchers("/api/**").permitAll()
-                        .anyRequest().authenticated())
-//                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                    .requestMatchers(publicUrls.toArray(new String[0])).permitAll()
+                    .requestMatchers("/successPayment").permitAll()
+                    .requestMatchers(adminUrls.toArray(new String[0])).hasRole("ADMIN")
+                    .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
-                        .permitAll());
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout")
+                .permitAll());
 
         return http.build();
     }
-
-
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -124,4 +111,3 @@ public class WebSecurityConfig {
     }
 
 }
-

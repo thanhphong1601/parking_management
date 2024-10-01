@@ -4,6 +4,9 @@
  */
 package com.phong.parkingmanagementapp.controllers;
 
+import com.phong.parkingmanagementapp.models.Floor;
+import com.phong.parkingmanagementapp.models.Line;
+import com.phong.parkingmanagementapp.models.Position;
 import com.phong.parkingmanagementapp.models.Ticket;
 import com.phong.parkingmanagementapp.repositories.TicketRepository;
 import com.phong.parkingmanagementapp.services.FloorService;
@@ -13,6 +16,8 @@ import com.phong.parkingmanagementapp.services.PriceService;
 import com.phong.parkingmanagementapp.services.TicketService;
 import com.phong.parkingmanagementapp.services.UserService;
 import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,6 +27,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  *
@@ -109,5 +115,19 @@ public class AdminTicketController {
             ticketService.delete(ticketService.getTicketById(id));
         }
         return "redirect:/tickets"; // Redirect to ticket list
+    }
+    
+    @GetMapping("/getLinesByFloorId/{floorId}")
+    @ResponseBody
+    public List<Line> getLinesByFloorId(@PathVariable("floorId") int floorId) {
+        Floor floor = this.floorService.getFloorById(floorId);
+        return new ArrayList<>(floor.getLineCollection());
+    }
+    
+    @GetMapping("/getPositionsByLineId/{lineId}")
+    @ResponseBody
+    public List<Position> getPositionsByLineId(@PathVariable("lineId") int lineId) {
+        Line line = this.lineService.getLineById(lineId);
+        return new ArrayList<>(line.getPositionCollection());
     }
 }

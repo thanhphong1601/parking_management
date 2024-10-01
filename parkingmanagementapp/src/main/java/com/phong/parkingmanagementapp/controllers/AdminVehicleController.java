@@ -11,6 +11,8 @@ import com.phong.parkingmanagementapp.services.VehicleService;
 import com.phong.parkingmanagementapp.services.VehicleTypeService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  *
@@ -98,5 +101,12 @@ public class AdminVehicleController {
         }
 
         return "redirect:" + urlFailed;
+    }
+    
+    @GetMapping("/getVehiclesByCustomerId/{customerId}")
+    @ResponseBody
+    public List<Vehicle> getVehiclesByCustomerId(@PathVariable("customerId") int customerId) {
+        User customer = userService.getUserById(customerId);
+        return new ArrayList<>(customer.getVehicleCollection());
     }
 }

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template-->
+
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Thêm Dãy</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        
+    </head>
+    <body>
+        <!--         Include header -->
+        <div th:replace="fragments/header :: header"></div>
+
+        <!--         Main content -->
+        <div class="container" th:fragment="content">
+            <h1 class="text-center mt-3 mb-1">Thông tin tầng:</h1>
+
+            <div class="alert alert-danger" th:if="${errMsg != null}" th:text="${errMsg}"></div>
+            
+            <form th:action="@{/addLine}" th:object="${line}" method="post">
+                <div class="form-floating mb-3 mt-3">         
+                    <input class="form-control" type="text" th:field="*{line}" id="line" placeholder="Dãy" name="line"/>
+                    <label class="form-label" for="line">Dãy:</label>
+                </div>
+                
+                <div class="form-floating mb-3 mt-3">                 
+                    <select class="form-select" th:field="*{floor}" id="floor">
+                        <option th:each="f : ${floors}" 
+                                th:value="${f.id}" 
+                                th:selected="${line.id != null and f.id == line.floor.id}"
+                                th:text="${f.floorNumber}"></option>
+                    </select>
+                    <label for="floor">Thuộc tầng</label>
+                </div>
+                
+                <div class="form-floating mb-3 mt-3">
+                    <button type="submit" th:if="*{id} != null" class="btn btn-info">Lưu thông tin</button>
+                    <button type="submit" th:if="*{id} == null" class="btn btn-info">Thêm dãy</button>
+
+                    <input type="hidden" th:field="*{id}"/>
+                </div>
+            </form>
+            
+        </div>
+
+        <!--         Include footer -->
+        <div th:replace="fragments/footer :: footer"></div>
+    </body>
+</html>

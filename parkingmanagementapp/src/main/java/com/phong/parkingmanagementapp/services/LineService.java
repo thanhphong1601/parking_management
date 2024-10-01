@@ -13,4 +13,7 @@ import java.util.List;
  */
 public interface LineService {
     public List<Line> findAll();
+    List<Line> findLinesByFloorId(int id);
+    Line getLineById(int id);
+    void saveLine(Line line);
 }

@@ -48,5 +48,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     @Query(value = "SELECT u FROM User u WHERE u.name != 'BlankUser'")
     List<User> findAllExceptBlankUser();
-
+    
+    User getUserByUsername(String username);
+    
 }

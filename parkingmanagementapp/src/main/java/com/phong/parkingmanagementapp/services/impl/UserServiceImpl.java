@@ -130,6 +130,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         u.setRole(user.getRole());
         u.setIdentityNumber(user.getIdentityNumber());
         
+        if (user.getFile() == null)
+             return userRepo.save(u);
+        
         if (!user.getFile().isEmpty() && user.getAvatar() == null)
             u.setAvatar(user.getAvatar());
 
@@ -153,6 +156,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public List<User> findAllExceptBlankUser() {
         return this.userRepo.findAllExceptBlankUser();
+    }
+
+    @Override
+    public User getUserByUsername(String username) {
+        return this.userRepo.getUserByUsername(username);
+    }
+
+    @Override
+    public boolean authUser(String username, String password) {
+        User u = this.userRepo.getUserByUsername(username);
+        
+        return this.passwordEncoder.matches(password, u.getPassword());
     }
 
 }

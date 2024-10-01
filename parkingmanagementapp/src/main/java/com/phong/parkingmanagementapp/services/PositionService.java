@@ -13,4 +13,7 @@ import java.util.List;
  */
 public interface PositionService {
     public List<Position> findAll();
+    List<Position> findPositionsByLineId(int id);
+    void savePosition(Position position);
+    Position getPositionById(int id);
 }

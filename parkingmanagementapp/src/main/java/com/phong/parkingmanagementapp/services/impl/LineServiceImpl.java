@@ -31,5 +31,20 @@ public class LineServiceImpl implements LineService{
     public List<Line> findAll() {
         return this.lineRepo.findAll();
     }
+
+    @Override
+    public List<Line> findLinesByFloorId(int id) {
+        return this.lineRepo.findLinesByFloorId(id);
+    }
+
+    @Override
+    public Line getLineById(int id) {
+        return this.lineRepo.getLineById(id);
+    }
+
+    @Override
+    public void saveLine(Line line) {
+        this.lineRepo.save(line);
+    }
     
 }

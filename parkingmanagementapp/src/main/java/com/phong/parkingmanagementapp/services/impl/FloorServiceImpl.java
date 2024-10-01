@@ -28,5 +28,15 @@ public class FloorServiceImpl implements FloorService{
     public List<Floor> findAll() {
         return this.floorRepo.findAll();
     }
+
+    @Override
+    public Floor getFloorById(int id) {
+        return this.floorRepo.getFloorById(id);
+    }
+
+    @Override
+    public void saveFloor(Floor floor) {
+        this.floorRepo.save(floor);
+    }
     
 }

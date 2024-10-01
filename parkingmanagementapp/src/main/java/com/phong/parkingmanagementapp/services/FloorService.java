@@ -13,4 +13,6 @@ import java.util.List;
  */
 public interface FloorService {
     public List<Floor> findAll();
+    Floor getFloorById(int id);
+    void saveFloor(Floor floor);
 }

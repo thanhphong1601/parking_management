@@ -7,6 +7,8 @@ package com.phong.parkingmanagementapp.repositories;
 import com.phong.parkingmanagementapp.models.Line;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -17,4 +19,9 @@ import org.springframework.stereotype.Repository;
 public interface LineRepository extends JpaRepository<Line, Long>{
     @Override
     public List<Line> findAll();
+    
+    @Query(value = "SELECT l FROM Line l WHERE l.floor.id = :id")
+    List<Line> findLinesByFloorId(@Param("id")int id);
+    
+    Line getLineById(int id);
 }

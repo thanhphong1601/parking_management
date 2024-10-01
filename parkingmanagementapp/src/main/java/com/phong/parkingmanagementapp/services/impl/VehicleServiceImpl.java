@@ -10,6 +10,7 @@ import com.phong.parkingmanagementapp.repositories.UserRepository;
 import com.phong.parkingmanagementapp.repositories.VehicleRepository;
 import com.phong.parkingmanagementapp.services.VehicleService;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -88,6 +89,16 @@ public class VehicleServiceImpl implements VehicleService{
         v.setUser(u);
         
         this.vehicleRepo.save(v);
+    }
+
+    @Override
+    public Optional<Vehicle> findByLicensePlateNumberIgnoreCase(String plateLicense) {
+        return this.vehicleRepo.findByLicensePlateNumberIgnoreCase(plateLicense);
+    }
+
+    @Override
+    public Vehicle getVehicleById(int id) {
+        return this.vehicleRepo.getVehicleById(id);
     }
     
 }
