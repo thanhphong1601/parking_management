@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import './CustomerList.css'
 import APIs, { authApi, endpoints } from "../../configs/APIs";
 import MySpinner from '../common/MySpinner';
-import { Button, Modal } from 'react-bootstrap';
+import { Button, Modal, Spinner } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 
 
@@ -57,29 +57,36 @@ const CustomerList = () => {
     const [users, setUsers] = useState([]);
     const [name, setName] = useState("");
     const [identityNum, setIdentityNum] = useState("");
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedUser, setSelectedUser] = useState({});
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showConfirmDelete, setShowConfirmDelete] = useState(false);
     const [editUser, setEditUser] = useState({});
     const [id, setId] = useState();
     const [updated, setUpdated] = useState(0);
     const nav = useNavigate();
 
+    const [isDeleting, setIsDeleting] = useState(true);
+    const [deleteSuccess, setDeleteSuccess] = useState(false);
+    const [showDeleteSpinner, setShowDeleteSpinner] = useState(false);
+    const [userInfo, setUserInfo] = useState(null);
+
     const fields = [{
         label: "Họ tên",
         type: "text",
         field: "name",
-        placeholder: "Họ tên của bạn"
+        placeholder: selectedUser ? selectedUser["name"] : "Họ tên"
     }, {
         label: "Email",
         type: "email",
         field: "email",
-        placeholder: "Email của bạn"
-    },{
+        placeholder: selectedUser ? selectedUser["email"] : "Email"
+    }, {
         label: "Địa chỉ nhà",
         type: "text",
         field: "address",
-        placeholder: "Địa chỉ nhà"
+        placeholder: selectedUser ? selectedUser["address"] : "Địa chỉ"
     }]
 
     const change = (e, field) => {
@@ -112,6 +119,177 @@ const CustomerList = () => {
         });
     };
 
+    const dataUserFetch =
+    {
+        "tickets": [
+            {
+                "id": 1,
+                "floor": {
+                    "id": 1,
+                    "floorNumber": 1
+                },
+                "line": {
+                    "id": 1,
+                    "line": "A",
+                    "floor": {
+                        "id": 1,
+                        "floorNumber": 1
+                    }
+                },
+                "position": {
+                    "id": 1,
+                    "position": 1,
+                    "line": {
+                        "id": 1,
+                        "line": "A",
+                        "floor": {
+                            "id": 1,
+                            "floorNumber": 1
+                        }
+                    }
+                },
+                "price": {
+                    "id": 1,
+                    "price": 15000
+                },
+                "userCreate": {
+                    "id": 2,
+                    "name": "Security",
+                    "identityNumber": "33333333",
+                    "phone": "1230",
+                    "address": "Security",
+                    "birthday": "2024-09-18T17:00:00.000+00:00",
+                    "email": "security@gmail.com",
+                    "username": "security",
+                    "password": "$2a$10$keZrZz7Tj4mIdrg0j5pkJeQ2EuH8QGLnT/tB12sQDrxn5nLGHvYhW",
+                    "role": {
+                        "id": 2,
+                        "role": "ROLE_SECURITY"
+                    },
+                    "avatar": "",
+                    "file": null,
+                    "active": true,
+                    "enabled": true,
+                    "accountNonExpired": true,
+                    "credentialsNonExpired": true,
+                    "accountNonLocked": true
+                },
+                "userOwned": {
+                    "id": 12,
+                    "name": "Phan Văn Hào",
+                    "identityNumber": "1",
+                    "phone": "1",
+                    "address": "testAdress",
+                    "birthday": "2024-09-16T17:00:00.000+00:00",
+                    "email": "pvh@gmail.com",
+                    "username": "khachhang1",
+                    "password": "$2a$10$YZHNakhZijoTopznKqusIeBnka5gMAhP0I/PE2lQ7ggJ7nIT4aTDm",
+                    "role": {
+                        "id": 3,
+                        "role": "ROLE_CUSTOMER"
+                    },
+                    "avatar": "",
+                    "file": null,
+                    "active": true,
+                    "enabled": true,
+                    "accountNonExpired": true,
+                    "credentialsNonExpired": true,
+                    "accountNonLocked": true
+                },
+                "vehicle": {
+                    "id": 11,
+                    "name": "Vision",
+                    "type": {
+                        "id": 2,
+                        "type": "Xe máy"
+                    },
+                    "plateLicense": "IT20BOM",
+                    "user": {
+                        "id": 12,
+                        "name": "Phan Văn Hào",
+                        "identityNumber": "1",
+                        "phone": "1",
+                        "address": "testAdress",
+                        "birthday": "2024-09-16T17:00:00.000+00:00",
+                        "email": "pvh@gmail.com",
+                        "username": "khachhang1",
+                        "password": "$2a$10$YZHNakhZijoTopznKqusIeBnka5gMAhP0I/PE2lQ7ggJ7nIT4aTDm",
+                        "role": {
+                            "id": 3,
+                            "role": "ROLE_CUSTOMER"
+                        },
+                        "avatar": "",
+                        "file": null,
+                        "active": true,
+                        "enabled": true,
+                        "accountNonExpired": true,
+                        "credentialsNonExpired": true,
+                        "accountNonLocked": true
+                    }
+                },
+                "startDay": "2024-09-23T17:00:00.000+00:00",
+                "endDay": "2024-10-24T17:00:00.000+00:00",
+                "totalPrice": 450000,
+                "isPaid": false
+            }
+        ],
+        "vehicles": [
+            {
+                "id": 11,
+                "name": "Vision",
+                "type": {
+                    "id": 2,
+                    "type": "Xe máy"
+                },
+                "plateLicense": "IT20BOM",
+                "user": {
+                    "id": 12,
+                    "name": "Phan Văn Hào",
+                    "identityNumber": "1",
+                    "phone": "1",
+                    "address": "testAdress",
+                    "birthday": "2024-09-16T17:00:00.000+00:00",
+                    "email": "pvh@gmail.com",
+                    "username": "khachhang1",
+                    "password": "$2a$10$YZHNakhZijoTopznKqusIeBnka5gMAhP0I/PE2lQ7ggJ7nIT4aTDm",
+                    "role": {
+                        "id": 3,
+                        "role": "ROLE_CUSTOMER"
+                    },
+                    "avatar": "",
+                    "file": null,
+                    "active": true,
+                    "enabled": true,
+                    "accountNonExpired": true,
+                    "credentialsNonExpired": true,
+                    "accountNonLocked": true
+                }
+            }
+        ],
+        "user": {
+            "id": 12,
+            "name": "Phan Văn Hào",
+            "identityNumber": "1",
+            "phone": "1",
+            "address": "testAdress",
+            "birthday": "2024-09-16T17:00:00.000+00:00",
+            "email": "pvh@gmail.com",
+            "username": "khachhang1",
+            "password": "$2a$10$YZHNakhZijoTopznKqusIeBnka5gMAhP0I/PE2lQ7ggJ7nIT4aTDm",
+            "role": {
+                "id": 3,
+                "role": "ROLE_CUSTOMER"
+            },
+            "avatar": "",
+            "file": null,
+            "active": true,
+            "enabled": true,
+            "accountNonExpired": true,
+            "credentialsNonExpired": true,
+            "accountNonLocked": true
+        }
+    };
+
     const navAddCustomer = (e) => {
         e.preventDefault();
         nav('/customer/add');
@@ -119,17 +297,16 @@ const CustomerList = () => {
 
     //modal interaction
     //info
-    const handleShowDetails = (e, user) => {
-        e.preventDefault();
+    const handleShowDetails = (user) => {
         setSelectedUser(user);
+        getUserInfo(user.id);
         setShowInfoModal(true);
     };
 
     const handleCloseInfo = () => setShowInfoModal(false);
 
     //edit
-    const handleShowEdit = (e, user) => {
-        e.preventDefault();
+    const handleShowEdit = (user) => {
         setSelectedUser(user);
         setId(user.id);
         setShowEditModal(true);
@@ -157,12 +334,76 @@ const CustomerList = () => {
         } catch (ex) {
             console.error(ex);
         }
-            
+
     }
 
+    //delete user
+    const handleShowDelete = (user) => {
+        setSelectedUser(user);
+        getUserInfo(user.id);
+        setShowDeleteModal(true);
+    };
+
+    const handleCloseDelete = () => {
+        setShowDeleteModal(false);
+    };
+
+    const confirmDelete = () => {
+        setShowConfirmDelete(true);
+    };
+
+    const cancelConfirmDelete = () => {
+        setShowConfirmDelete(false);
+    };
+
+    const getUserInfo = async (id) => {
+        try {
+            let res = await authApi().get(endpoints['customer-info'](id));
+
+            setUserInfo(res.data);
+        } catch (ex) {
+            console.info(ex);
+        }
+    };
+
+    const showDeleting = () => {
+        setShowDeleteSpinner(true);
+    };
+
+    const cancelDeleting = () => {
+        setShowDeleteSpinner(false);
+    };
+
+    const deleteUser = async () => {
+        cancelConfirmDelete();
+        showDeleting();
+        setIsDeleting(true);
+        setDeleteSuccess(false);
+
+        try {
+            let res = await authApi().post(endpoints['customer-deactivate'](selectedUser.id));
+
+            if (res.status === 204) {
+                setTimeout(() => {
+                    setIsDeleting(false);
+                    setDeleteSuccess(true);
+
+                    setUpdated(current => current + 1);
+                    handleCloseDelete();
+                }, 2000);
+            }
+
+
+        } catch (error) {
+            console.error("Lỗi khi xóa:", error);
+            setIsDeleting(false);
+            setDeleteSuccess(false); // Xóa thất bại, bạn có thể hiển thị thêm lỗi
+        }
+    };
 
     useEffect(() => {
         loadCustomers();
+        getUserInfo(12);
     }, [page, name, identityNum, updated]);
 
     return <>
@@ -207,13 +448,13 @@ const CustomerList = () => {
                         <td>{formatDate(u.birthday)}</td>
                         <td>{u.email}</td>
                         <td>
-                            <Button  onClick={(e) => handleShowEdit(e, u)}>Sửa</Button>
+                            <Button onClick={(e) => handleShowEdit(u)}>Sửa</Button>
                         </td>
                         <td>
-                            <Button>Xóa</Button>
+                            <Button onClick={(e) => handleShowDelete(u)}>Xóa</Button>
                         </td>
                         <td>
-                            <Button onClick={(e) => handleShowDetails(e, u)}>Chi tiết</Button>
+                            <Button onClick={(e) => handleShowDetails(u)}>Chi tiết</Button>
                         </td>
                     </tr>)}
 
@@ -239,6 +480,58 @@ const CustomerList = () => {
                         <p><strong>Địa chỉ:</strong> {selectedUser.address}</p>
                         <p><strong>Ngày sinh:</strong> {formatDate(selectedUser.birthday)}</p>
                         <p><strong>Email:</strong> {selectedUser.email}</p>
+
+                        <div className='mt-4'>
+                            <h4>Danh sách vé</h4>
+                            <table class="customer-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nơi đỗ</th>
+                                        <th>Hiệu lực</th>
+                                        <th>Giá vé</th>
+                                        <th>Thuộc xe</th>
+                                        <th>Biển số</th>
+                                        <th>Thanh toán</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {userInfo !== null ? <>{userInfo.tickets.map(t => <tr key={t.id}>
+                                        <td>{t.id}</td>
+                                        <td>Vị trí {t.position.position} dãy {t.line.line} tầng {t.floor.floorNumber}</td>
+                                        <td>{formatDate(t.startDay)} đến {formatDate(t.endDay)}</td>
+                                        <td>{t.totalPrice} VNĐ</td>
+                                        <td>{t.vehicle.name}</td>
+                                        <td>{t.vehicle.plateLicense}</td>
+                                        <td>{t.isPaid ? "Đã thanh toán" : "Chưa thanh toán"}</td>
+                                    </tr>)}</> : <></>}
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className='mt-2'>
+                            <h4>Danh sách phương tiện</h4>
+                            <table class="customer-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tên xe</th>
+                                        <th>Loại xe</th>
+                                        <th>Biển số</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {userInfo ? <>
+                                        {userInfo.vehicles.map(v => <tr key={v.id}>
+                                            <td>{v.name}</td>
+                                            <td>{v.type.type}</td>
+                                            <td>{v.plateLicense}</td>
+                                        </tr>)}
+                                    </> : <></>}
+                                </tbody>
+                            </table>
+                        </div>
+
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={handleCloseInfo}>
@@ -261,6 +554,7 @@ const CustomerList = () => {
                                 className="form-control"
                                 value={editUser[f.field]}
                                 onChange={(e) => change(e, f.field)}
+                                placeholder={f.placeholder}
                             />
                         </div>)}
                         <div className="form-group">
@@ -269,8 +563,9 @@ const CustomerList = () => {
                                 type="text"
                                 className="form-control"
                                 value={editUser["identityNumber"]}
-                                placeholder={selectedUser? selectedUser.identityNumber: 'Số CMND bạn muốn đổi'}
+                                placeholder={selectedUser ? selectedUser["identityNumber"] : 'Số CMND bạn muốn đổi'}
                                 onChange={(e) => change(e, "identityNumber")}
+                                maxLength="12"
                             />
                         </div>
                         <div className="form-group">
@@ -279,8 +574,9 @@ const CustomerList = () => {
                                 type="text"
                                 className="form-control"
                                 value={editUser["phone"]}
-                                placeholder={selectedUser? selectedUser.phone: 'Số điện thoại bạn muốn đổi'}
+                                placeholder={selectedUser ? selectedUser["phone"] : 'Số điện thoại bạn muốn đổi'}
                                 onChange={(e) => change(e, "phone")}
+                                maxLength="10"
                             />
                         </div>
                     </form>
@@ -294,7 +590,121 @@ const CustomerList = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
+
+            <Modal show={showDeleteModal} onHide={handleCloseDelete} size="lg" className="custom-modal">
+                <Modal.Header closeButton>
+                    <Modal.Title>Xác nhận xóa thông tin</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="modal-body-custom">
+                    <h4>Họ và Tên: {selectedUser.name}</h4>
+                    <p><strong>CMND:</strong> {selectedUser.identityNumber}</p>
+                    <p><strong>Số điện thoại:</strong> {selectedUser.phone}</p>
+                    <p><strong>Địa chỉ:</strong> {selectedUser.address}</p>
+                    <p><strong>Ngày sinh:</strong> {formatDate(selectedUser.birthday)}</p>
+                    <p><strong>Email:</strong> {selectedUser.email}</p>
+
+                    <h3 className='mt-2 mb-2 text-center text-danger'>CÁC THÔNG TIN SAU SẼ BỊ ẢNH HƯỞNG</h3>
+
+
+                    <div className='mt-4'>
+                        <h4>Danh sách vé</h4>
+                        <table class="customer-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nơi đỗ</th>
+                                    <th>Hiệu lực</th>
+                                    <th>Giá vé</th>
+                                    <th>Thuộc xe</th>
+                                    <th>Biển số</th>
+                                    <th>Thanh toán</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {userInfo !== null ? <>{userInfo.tickets.map(t => <tr key={t.id}>
+                                    <td>{t.id}</td>
+                                    <td>Vị trí {t.position.position} dãy {t.line.line} tầng {t.floor.floorNumber}</td>
+                                    <td>{formatDate(t.startDay)} đến {formatDate(t.endDay)}</td>
+                                    <td>{t.totalPrice} VNĐ</td>
+                                    <td>{t.vehicle.name}</td>
+                                    <td>{t.vehicle.plateLicense}</td>
+                                    <td>{t.isPaid ? "Đã thanh toán" : "Chưa thanh toán"}</td>
+                                </tr>)}</> : <></>}
+
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className='mt-2'>
+                        <h4>Danh sách phương tiện</h4>
+                        <table class="customer-table">
+                            <thead>
+                                <tr>
+                                    <th>Tên xe</th>
+                                    <th>Loại xe</th>
+                                    <th>Biển số</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {userInfo ? <>
+                                    {userInfo.vehicles.map(v => <tr key={v.id}>
+                                        <td>{v.name}</td>
+                                        <td>{v.type.type}</td>
+                                        <td>{v.plateLicense}</td>
+                                    </tr>)}
+                                </> : <></>}
+                            </tbody>
+                        </table>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="danger" onClick={confirmDelete}>
+                        Xóa
+                    </Button>
+                    <Button variant="secondary" onClick={handleCloseDelete}>
+                        Không
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showConfirmDelete} onHide={cancelConfirmDelete} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>Xác nhận xóa thông tin</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <h1 className='fw-bold text-center text-danger'>Bạn có chắc chắn xóa thông tin người dùng này?</h1>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="danger" onClick={deleteUser}>
+                        CHẮC CHẮN
+                    </Button>
+                    <Button variant="secondary" onClick={cancelConfirmDelete}>
+                        SUY NGHĨ THÊM
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
+
+        <Modal show={showDeleteSpinner} onHide={cancelDeleting}>
+            <Modal.Body className="text-center">
+                {isDeleting ? (
+                    <>
+                        <Spinner animation="border" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </Spinner>
+                        <p>Đang tiến hành xóa thông tin...</p>
+                    </>
+                ) : (
+                    <p>{deleteSuccess ? "Xóa thành công!" : "Có lỗi xảy ra khi xóa!"}</p>
+                )}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={cancelDeleting}>
+                    Đóng
+                </Button>
+            </Modal.Footer>
+        </Modal>
 
     </>
 }

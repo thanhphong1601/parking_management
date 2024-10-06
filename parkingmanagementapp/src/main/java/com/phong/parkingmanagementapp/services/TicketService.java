@@ -24,4 +24,5 @@ public interface TicketService {
     int totalPriceCal(Date startDay, Date endDay, int pricePerDay);
     List<Ticket> findValidTicketsByVehicleIdAndDate(Long vehicleId, 
                                                     Date currentDate);
+    List<Ticket> getTicketsByUserOwnedActive(String identityNumber, String name);
 }

@@ -170,4 +170,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return this.passwordEncoder.matches(password, u.getPassword());
     }
 
+    @Override
+    public void deactivateUser(int id) {
+        User u = this.userRepo.getUserById(id);
+        u.setActive(Boolean.FALSE);
+        
+        this.userRepo.save(u);
+    }
+
 }

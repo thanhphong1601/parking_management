@@ -18,12 +18,12 @@ const Header = () => {
             <Navbar.Collapse id="basic-navbar-nav">
                 <Nav className="ms-auto">              
                     <Link to="/customer/list" className="nav-link">Khách hàng</Link>
-                    <Link to="#" className="nav-link">Xe</Link>
-                    <Link to="#" className="nav-link">Vé xe</Link>
+                    <Link to="/ticket/list" className="nav-link">Vé xe</Link>
                     <NavDropdown title="Quản lý" id="basic-nav-dropdown">
-                        <Link to="#" className="nav-link">Xe vào</Link>
-                        <Link to="#" className="nav-link">Xe ra</Link>
+                        <Link to="/manage/in" className="nav-link">Xe vào</Link>
+                        <Link to="/manage/out" className="nav-link">Xe ra</Link>
                     </NavDropdown>
+                    <Link to="/stats" className="nav-link">Thống kê</Link>
 
                     {user === null ? <>
                         <Link to="/login" className="nav-link text-dark">Đăng Nhập</Link>

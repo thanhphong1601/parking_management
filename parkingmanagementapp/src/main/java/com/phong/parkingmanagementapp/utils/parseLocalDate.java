@@ -5,6 +5,7 @@
 package com.phong.parkingmanagementapp.utils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -15,10 +16,11 @@ import java.util.Date;
  * @author Admin
  */
 public class parseLocalDate {
-     // Định dạng ngày tháng dạng "yyyy-MM-dd"
+    // Định dạng ngày tháng dạng "yyyy-MM-dd"
+
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    // Hàm chuyển đổi chuỗi ngày sang LocalDate
+// Hàm chuyển đổi chuỗi ngày sang LocalDate
     public static LocalDate parseLocalDate(String dateString) {
         try {
             // Chuyển đổi chuỗi ngày sang LocalDate
@@ -29,12 +31,15 @@ public class parseLocalDate {
         }
     }
 
-    // Chuyển đổi LocalDate sang Date
+// Chuyển đổi LocalDate sang Date với thời gian bắt đầu của ngày (00:00:00)
     public static Date convertToDate(LocalDate localDate) {
-        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        // Chuyển LocalDate thành LocalDateTime tại thời điểm bắt đầu của ngày
+        LocalDateTime localDateTime = localDate.atStartOfDay();
+        // Chuyển đổi từ LocalDateTime sang Date
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 
-    // Hàm parse chính để chuyển từ chuỗi "yyyy-MM-dd" sang Date
+// Hàm parse chính để chuyển từ chuỗi "yyyy-MM-dd" sang Date với thời gian bắt đầu
     public static Date parseDate(String dateString) {
         LocalDate localDate = parseLocalDate(dateString);
         if (localDate != null) {
@@ -42,4 +47,13 @@ public class parseLocalDate {
         }
         return null;
     }
+    
+    public static Date parseStringToDate(String dateString){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDate = LocalDate.parse(dateString, formatter);
+        java.sql.Date date = java.sql.Date.valueOf(localDate);
+        
+        return date;
+    }
+
 }

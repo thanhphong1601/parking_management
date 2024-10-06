@@ -18,15 +18,22 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Admin
  */
 @RestController
-@RequestMapping("/successPayment")
+@RequestMapping("/api")
 public class ApiPaymentController {
     @Autowired
     private PaymentService paymentService;
     
-    @GetMapping
+    @GetMapping("/successPayment")
     public ResponseEntity<String> getPage(@RequestParam Map<String, String> params){
         String status = this.paymentService.handleVnpayReturn(params);
         return ResponseEntity.ok(status);
+    }
+    
+    @GetMapping("/payment/createPayment")
+    public ResponseEntity<String> test() throws Exception{
+        String url = this.paymentService.createPaymentUrl(100000, "Xin chào");
+        
+        return ResponseEntity.ok(url);
     }
     
     

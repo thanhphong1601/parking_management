@@ -7,6 +7,7 @@ package com.phong.parkingmanagementapp.repositories;
 import com.phong.parkingmanagementapp.models.TicketPrice;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -17,4 +18,5 @@ import org.springframework.stereotype.Repository;
 public interface PriceRepository extends JpaRepository<TicketPrice, Long>{
     @Override
     public List<TicketPrice> findAll();
+    public TicketPrice getTicketPriceById(int id);
 }

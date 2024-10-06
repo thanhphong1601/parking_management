@@ -28,5 +28,10 @@ public class PriceServiceImpl implements PriceService{
     public List<TicketPrice> findAll() {
         return this.priceRepo.findAll();
     }
+
+    @Override
+    public TicketPrice getTicketPriceById(int id) {
+        return this.priceRepo.getTicketPriceById(id);
+    }
     
 }

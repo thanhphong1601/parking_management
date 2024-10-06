@@ -23,4 +23,5 @@ public interface VehicleService {
     void saveVehicleForCreatedUser(int uid, Vehicle v);
     Optional<Vehicle> findByLicensePlateNumberIgnoreCase(String plateLicense);
     Vehicle getVehicleById(int id);
+    List<Vehicle> findAllByLicensePlate(String plateLicense);
 }

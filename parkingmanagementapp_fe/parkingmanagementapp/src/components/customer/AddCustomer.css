@@ -79,7 +79,7 @@
   }
   
   .modal-btn {
-    background-color: #6c757d;
+    background-color: #46a9ff;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -93,6 +93,7 @@
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
-    margin-left: auto;
+    margin: auto;
+    margin-bottom: 10px;
   }
   

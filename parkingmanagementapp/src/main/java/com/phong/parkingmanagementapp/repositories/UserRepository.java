@@ -26,12 +26,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     //find by id, find all, find by role, 
     public User getUserById(int id);
 
-    @Query("SELECT u FROM User u WHERE u.role.id = :role")
+    @Query("SELECT u FROM User u WHERE u.role.id = :role AND u.active = true")
     List<User> findUsersByRoleId(@Param("role") int role);
 
     public User getUserByName(String name);
 
-    @Query("SELECT u FROM User u WHERE (:idNum IS NULL OR u.identityNumber LIKE %:idNum%) AND (:name IS NULL OR u.name LIKE %:name%) AND (:role IS NULL OR u.role.id = :role)")
+    @Query("SELECT u FROM User u WHERE (:idNum IS NULL OR u.identityNumber LIKE %:idNum%) AND (:name IS NULL OR u.name LIKE %:name%) AND (:role IS NULL OR u.role.id = :role) AND u.active = true")
     public List<User> findUserByIdentityNumberOrNameOrRole(@Param("idNum") String identityNumber, @Param("name") String name, @Param("role") int role);
 
     Optional<User> findByUsername(String username);

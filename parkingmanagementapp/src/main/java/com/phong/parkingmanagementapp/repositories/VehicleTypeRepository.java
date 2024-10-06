@@ -18,4 +18,5 @@ import org.springframework.stereotype.Repository;
 public interface VehicleTypeRepository extends JpaRepository<VehicleType, Long>{
     @Override
     List<VehicleType> findAll();
+    VehicleType getVehicleTypeById(int id);
 }

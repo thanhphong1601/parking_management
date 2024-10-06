@@ -100,5 +100,10 @@ public class VehicleServiceImpl implements VehicleService{
     public Vehicle getVehicleById(int id) {
         return this.vehicleRepo.getVehicleById(id);
     }
+
+    @Override
+    public List<Vehicle> findAllByLicensePlate(String plateLicense) {
+        return this.vehicleRepo.findAllByLicensePlate(plateLicense);
+    }
     
 }

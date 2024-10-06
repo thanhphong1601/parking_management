@@ -13,6 +13,11 @@ import Login from './components/User/Login';
 import Register from './components/User/Register';
 import CustomerList from './components/customer/CustomerList';
 import AddCustomer from './components/customer/AddCustomer';
+import TicketList from './components/Ticket/TicketList';
+import TicketAdd from './components/Ticket/TicketAdd';
+import ManageIn from './components/ParkingManage/ManageIn';
+import ManageOut from './components/ParkingManage/ManageOut';
+import Stat from './components/Statistics/Stat';
 
 
 function App() {
@@ -29,6 +34,11 @@ function App() {
           <Route path='/register' element={<Register/>}></Route>
           <Route path='/customer/list' element={<CustomerList/>}></Route>
           <Route path='/customer/add' element={<AddCustomer/>}></Route>
+          <Route path='/ticket/list' element={<TicketList/>}></Route>
+          <Route path='/ticket/add' element={<TicketAdd/>}></Route>
+          <Route path='/manage/in' element={<ManageIn/>}></Route>
+          <Route path='/manage/out' element={<ManageOut/>}></Route>
+          <Route path='/stats' element={<Stat/>}></Route>
         </Routes>
         <Footer/>
         </MyDispatchContext.Provider>

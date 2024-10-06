@@ -41,4 +41,7 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     
     Vehicle getVehicleById(int id);
     
+    @Query("SELECT v FROM Vehicle v WHERE (:plateLicense IS NULL OR v.plateLicense LIKE %:plateLicense%)")
+    List<Vehicle> findAllByLicensePlate(@Param("plateLicense")String plateLicense);
+    
 }

@@ -10,6 +10,7 @@ import com.phong.parkingmanagementapp.services.AuthenticationService;
 import com.phong.parkingmanagementapp.services.JwtService;
 import com.phong.parkingmanagementapp.services.RoleService;
 import com.phong.parkingmanagementapp.services.UserService;
+import com.phong.parkingmanagementapp.services.VehicleService;
 import com.phong.parkingmanagementapp.utils.parseLocalDate;
 import java.security.Principal;
 import java.util.Date;
@@ -38,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 public class ApiUserController {
+
     @Autowired
     private UserService userService;
     @Autowired
@@ -48,8 +50,9 @@ public class ApiUserController {
     private BCryptPasswordEncoder passEncoder;
     @Autowired
     private RoleService roleService;
-    
-    
+    @Autowired
+    private VehicleService vehicleService;
+
     @PostMapping("/authenticate")
     @CrossOrigin
     public ResponseEntity<String> login(@RequestBody AuthenticationRequest r) {
@@ -61,7 +64,7 @@ public class ApiUserController {
 
         return new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED);
     }
-    
+
     @PostMapping("/register")
     @CrossOrigin
     public ResponseEntity<String> register(@RequestParam Map<String, String> params) {
@@ -76,24 +79,24 @@ public class ApiUserController {
         u.setIdentityNumber(params.get("identityNumber"));
         u.setPhone(params.get("phone"));
         u.setRole(this.roleService.getRoleById(Integer.parseInt(params.get("role"))));
-           
+
         this.userService.saveUser(u);
 
         return new ResponseEntity<>("Successfully create", HttpStatus.CREATED);
     }
-    
+
     @GetMapping(path = "/current-user", produces = MediaType.APPLICATION_JSON_VALUE)
     @CrossOrigin
     public ResponseEntity<User> getCurrentUser(Principal p) {
         User u = this.userService.getUserByUsername(p.getName());
         return new ResponseEntity<>(u, HttpStatus.OK);
     }
+
     
-   
-    
+
     @GetMapping("/test/")
     @CrossOrigin
-    public ResponseEntity<String> test(){
+    public ResponseEntity<String> test() {
         return new ResponseEntity<>("test", HttpStatus.OK);
     }
 }

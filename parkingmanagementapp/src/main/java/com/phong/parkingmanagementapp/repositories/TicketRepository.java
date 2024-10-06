@@ -38,5 +38,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>{
     
     @Query("SELECT CASE WHEN COUNT(t) > 0 THEN true ELSE false END FROM Ticket t WHERE :currentDate BETWEEN t.startDay AND t.endDay")
     boolean existsByDay(@Param("currentDate") Date currentDate);
+    
+    @Query("SELECT t FROM Ticket t WHERE t.userOwned.active = true AND (:idNum IS NULL OR t.userOwned.identityNumber LIKE %:idNum%) AND (:name IS NULL OR t.userOwned.name LIKE %:name%)")
+    List<Ticket> getTicketsByUserOwnedActive(@Param("idNum") String identityNumber, @Param("name") String name);
 
 }

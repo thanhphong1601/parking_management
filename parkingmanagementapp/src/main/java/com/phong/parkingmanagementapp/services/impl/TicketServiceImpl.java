@@ -96,5 +96,10 @@ public class TicketServiceImpl implements TicketService{
     public List<Ticket> findValidTicketsByVehicleIdAndDate(Long vehicleId, Date currentDate) {
         return this.ticketRepo.findValidTicketsByVehicleIdAndDate(vehicleId, currentDate);
     }
+
+    @Override
+    public List<Ticket> getTicketsByUserOwnedActive(String identityNumber, String name) {
+        return this.ticketRepo.getTicketsByUserOwnedActive(identityNumber, name);
+    }
     
 }

@@ -13,4 +13,5 @@ import java.util.List;
  */
 public interface PriceService {
     public List<TicketPrice> findAll();
+    public TicketPrice getTicketPriceById(int id);
 }

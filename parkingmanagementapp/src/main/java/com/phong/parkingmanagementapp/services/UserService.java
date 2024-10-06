@@ -25,5 +25,5 @@ public interface UserService {
     List<User> findAllExceptBlankUser();
     User getUserByUsername(String username);
     boolean authUser(String username, String password);
-    
+    void deactivateUser(int id);
 }
