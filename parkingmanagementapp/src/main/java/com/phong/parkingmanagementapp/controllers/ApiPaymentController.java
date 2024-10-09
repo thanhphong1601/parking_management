@@ -4,11 +4,14 @@
  */
 package com.phong.parkingmanagementapp.controllers;
 
+import com.phong.parkingmanagementapp.models.Ticket;
 import com.phong.parkingmanagementapp.services.PaymentService;
+import com.phong.parkingmanagementapp.services.TicketService;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,16 +25,25 @@ import org.springframework.web.bind.annotation.RestController;
 public class ApiPaymentController {
     @Autowired
     private PaymentService paymentService;
+    @Autowired
+    private TicketService ticketService;
     
-    @GetMapping("/successPayment")
+    @PostMapping("/successPayment")
     public ResponseEntity<String> getPage(@RequestParam Map<String, String> params){
-        String status = this.paymentService.handleVnpayReturn(params);
-        return ResponseEntity.ok(status);
+        int ticketId = Integer.parseInt(params.get("id"));
+        Ticket ticket = this.ticketService.getTicketById(ticketId);
+        ticket.setIsPaid(Boolean.TRUE);
+        this.ticketService.addOrUpdate(ticket);
+        
+        return ResponseEntity.ok("Done");
     }
     
-    @GetMapping("/payment/createPayment")
-    public ResponseEntity<String> test() throws Exception{
-        String url = this.paymentService.createPaymentUrl(100000, "Xin chào");
+    @PostMapping("/payment/createPayment")
+    public ResponseEntity<String> createPayment(@RequestParam Map<String, String> params) throws Exception{
+        String orderInfo = params.getOrDefault("orderInfo", "Thông tin giao dịch");
+        long price = Long.parseLong(params.get("price"));
+       
+        String url = this.paymentService.createPaymentUrl(price, orderInfo);
         
         return ResponseEntity.ok(url);
     }

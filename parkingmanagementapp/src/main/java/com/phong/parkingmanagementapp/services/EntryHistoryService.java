@@ -8,9 +8,12 @@ import com.phong.parkingmanagementapp.models.EntryHistory;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -42,5 +45,8 @@ public interface EntryHistoryService {
     long countByMonth(int month, int year);
 
     Double findAverageParkingDuration();
+    
+    Page<EntryHistory> findAllByName(Pageable pageable, String name);
 
+    Map<String, String> countEntriesByDay(LocalDate date);
 }

@@ -13,6 +13,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -42,7 +44,8 @@ public class TicketServiceImpl implements TicketService{
 
     @Override
     public void addOrUpdate(Ticket ticket) {
-        ticket.setIsPaid(Boolean.FALSE);
+        if (ticket.getIsPaid() == null)
+            ticket.setIsPaid(Boolean.FALSE);
         ticket.setTotalPrice(this.totalPriceCal(ticket.getStartDay(), ticket.getEndDay(), ticket.getPrice().getPrice()));
         
         ticketRepo.save(ticket);
@@ -100,6 +103,16 @@ public class TicketServiceImpl implements TicketService{
     @Override
     public List<Ticket> getTicketsByUserOwnedActive(String identityNumber, String name) {
         return this.ticketRepo.getTicketsByUserOwnedActive(identityNumber, name);
+    }
+
+    @Override
+    public Page<Ticket> findTicketByUserOwnedPageable(String name, Pageable pageable) {
+        return this.ticketRepo.findTicketByUserOwnedPageable(name, pageable);
+    }
+
+    @Override
+    public Page<Ticket> getTicketsByUserOwnedActivePageable(String identityNumber, String name, Pageable pageable) {
+        return this.ticketRepo.getTicketsByUserOwnedActivePageable(identityNumber, name, pageable);
     }
     
 }

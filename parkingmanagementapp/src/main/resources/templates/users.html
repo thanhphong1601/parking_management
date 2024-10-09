@@ -67,6 +67,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             <form class="searchBar" th:action="@{/users/{role_number}(role_number=${roleNum})}" method="get">
                 <label for="name">Tìm tên người dùng hoặc CMND:</label>
                 <input type="text" id="name" name="name" placeholder="Nhập tên người dùng" />
+                <input type="hidden" name="page" th:value="${currentPage}" /> 
                 <input type="text" id="identityNumber" name="identityNumber" placeholder="Nhập CMND (12 ký tự)" maxlength="12"/>
                 <button type="submit">Tìm</button>
             </form>
@@ -108,6 +109,19 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     </tr>
                 </tbody>
             </table>
+            <div>
+                <span th:if="${currentPage > 0}">
+                    <a th:href="@{/users/{role_number}?page={page}(page=${currentPage - 1}, role_number=${roleNum})}">&lt; <</a>
+                </span>
+                <span th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/users/{role_number}?page={page}(page=${pageNum}, role_number=${roleNum})}"
+                       th:text="${pageNum + 1}"
+                       th:classappend="${pageNum == currentPage} ? 'active' : ''">1</a>
+                </span>
+                <span th:if="${currentPage < totalPages - 1}">
+                    <a th:href="@{/users/{role_number}?page={page}(page=${currentPage + 1}, role_number=${roleNum})}">>&gt;</a>
+                </span>
+            </div>
             <a class="btn btn-info" th:href="@{/users/{role_number}/add(role_number=${roleNum})}">Thêm người dùng</a>
         </div>
 

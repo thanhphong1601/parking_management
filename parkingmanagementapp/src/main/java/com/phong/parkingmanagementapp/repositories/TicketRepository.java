@@ -7,6 +7,8 @@ package com.phong.parkingmanagementapp.repositories;
 import com.phong.parkingmanagementapp.models.Ticket;
 import java.util.Date;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -41,5 +43,10 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>{
     
     @Query("SELECT t FROM Ticket t WHERE t.userOwned.active = true AND (:idNum IS NULL OR t.userOwned.identityNumber LIKE %:idNum%) AND (:name IS NULL OR t.userOwned.name LIKE %:name%)")
     List<Ticket> getTicketsByUserOwnedActive(@Param("idNum") String identityNumber, @Param("name") String name);
-
+    
+    @Query(value = "SELECT t FROM Ticket t WHERE (:name IS NULL OR t.userOwned.name LIKE %:name%)")
+    Page<Ticket> findTicketByUserOwnedPageable(@Param("name") String name, Pageable pageable);
+    
+    @Query("SELECT t FROM Ticket t WHERE t.userOwned.active = true AND (:idNum IS NULL OR t.userOwned.identityNumber LIKE %:idNum%) AND (:name IS NULL OR t.userOwned.name LIKE %:name%)")
+    Page<Ticket> getTicketsByUserOwnedActivePageable(@Param("idNum") String identityNumber, @Param("name") String name, Pageable pageable);
 }

@@ -24,6 +24,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.logging.Logger;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  *
@@ -167,6 +169,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public boolean authUser(String username, String password) {
         User u = this.userRepo.getUserByUsername(username);
         
+        System.out.println(u.getPassword());
+        System.out.println(password);
+        System.out.println(this.passwordEncoder.encode(password));
+        System.out.println(this.passwordEncoder.matches(password, u.getPassword()));
+        
         return this.passwordEncoder.matches(password, u.getPassword());
     }
 
@@ -176,6 +183,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         u.setActive(Boolean.FALSE);
         
         this.userRepo.save(u);
+    }
+
+    @Override
+    public Page<User> findUserByIdentityNumberOrNameOrRolePageable(String identityNumber, String name, int role, Pageable pageable) {
+        return this.userRepo.findUserByIdentityNumberOrNameOrRolePageable(identityNumber, name, role, pageable);
     }
 
 }

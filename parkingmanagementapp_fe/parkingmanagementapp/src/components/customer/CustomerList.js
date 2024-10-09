@@ -52,7 +52,6 @@ const CustomerList = () => {
     //     "accountNonLocked": true
     // }];
 
-    const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState([]);
     const [name, setName] = useState("");
@@ -66,6 +65,10 @@ const CustomerList = () => {
     const [id, setId] = useState();
     const [updated, setUpdated] = useState(0);
     const nav = useNavigate();
+
+    //pagination
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
 
     const [isDeleting, setIsDeleting] = useState(true);
     const [deleteSuccess, setDeleteSuccess] = useState(false);
@@ -98,11 +101,13 @@ const CustomerList = () => {
     const loadCustomers = async () => {
         setLoading(true);
         try {
-            let url = `${endpoints['customer-list']}?name=${name}&identityNum=${identityNum}`
+            let url = `${endpoints['customer-list']}?name=${name}&identityNum=${identityNum}&page=${page}`
 
             let res = await authApi().get(url);
 
-            setUsers(res.data);
+            setUsers(res.data.content);
+            setTotalPages(res.data.totalPages);
+
         } catch (ex) {
             console.error(ex);
         } finally {
@@ -290,6 +295,19 @@ const CustomerList = () => {
         }
     };
 
+    //pagination funcs
+    const nextPage = () => {
+        if (page < totalPages - 1) setPage(page + 1);
+    };
+
+    const prevPage = () => {
+        if (page > 0) setPage(page - 1);
+    };
+
+    const goToPage = (pageNum) => {
+        setPage(pageNum);
+    };
+
     const navAddCustomer = (e) => {
         e.preventDefault();
         nav('/customer/add');
@@ -461,11 +479,18 @@ const CustomerList = () => {
                 </tbody>
             </table>
             <div class="pagination-container">
-                <button class="pagination-button">{"<"}</button>
-                <button class="pagination-button">1</button>
-                <button class="pagination-button">2</button>
-                <button class="pagination-button">3</button>
-                <button class="pagination-button">{">"}</button>
+                <button className="pagination-button" onClick={prevPage} disabled={page === 0}>{"<"}</button>
+                {[...Array(totalPages).keys()].map((pageNum) => (
+                    <button 
+                        className="pagination-button"
+                        key={pageNum} 
+                        onClick={() => goToPage(pageNum)}
+                        style={{ fontWeight: pageNum === page ? 'bold' : 'normal' }}
+                    >
+                        {pageNum + 1}
+                    </button>
+                ))}
+                <button className="pagination-button" onClick={nextPage} disabled={page === totalPages - 1}>{">"}</button>
             </div>
 
             {selectedUser && (

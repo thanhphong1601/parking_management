@@ -7,6 +7,8 @@ package com.phong.parkingmanagementapp.services;
 import com.phong.parkingmanagementapp.models.Ticket;
 import java.util.Date;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 
 /**
@@ -25,4 +27,6 @@ public interface TicketService {
     List<Ticket> findValidTicketsByVehicleIdAndDate(Long vehicleId, 
                                                     Date currentDate);
     List<Ticket> getTicketsByUserOwnedActive(String identityNumber, String name);
+    Page<Ticket> findTicketByUserOwnedPageable(String name, Pageable pageable);
+    Page<Ticket> getTicketsByUserOwnedActivePageable(String identityNumber,String name, Pageable pageable);
 }

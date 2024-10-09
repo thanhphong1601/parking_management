@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,6 +49,9 @@ public class TestController {
     private final TicketService ticketService;
     private final RoleService roleService;
     private final VehicleService vehicleService;
+    
+    @Value("${page_size}")
+    private int pageSize;
     
     @Autowired
     private PaymentService paymentService;
@@ -90,5 +97,26 @@ public class TestController {
             return ResponseEntity.ok("Success");
         else
             return ResponseEntity.ok("Success" + id);
+    }
+    
+    @GetMapping("/testPage")
+    public ResponseEntity<?> testPageable(@RequestParam Map<String, String> params){
+        int page = Integer.parseInt(params.get("page"));
+        
+        Pageable pageable = PageRequest.of(page, pageSize);
+        String name = params.get("name");
+        String identityNumber = params.get("identityNum");
+        Page<User> userList = this.userService.findUserByIdentityNumberOrNameOrRolePageable(identityNumber, name, 3, pageable);
+        
+        return ResponseEntity.ok(userList);
+    }
+    
+    @GetMapping("/tickets")
+    public ResponseEntity<?> ticketList(@RequestParam(value = "name", required = false) String name, @RequestParam(value = "page", defaultValue = "0") int page) {
+        
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<Ticket> ticketList = this.ticketService.findTicketByUserOwnedPageable(name, pageable);
+        
+        return ResponseEntity.ok(ticketList);
     }
 }

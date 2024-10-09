@@ -6,6 +6,8 @@ package com.phong.parkingmanagementapp.services;
 
 import com.phong.parkingmanagementapp.models.User;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -26,4 +28,6 @@ public interface UserService {
     User getUserByUsername(String username);
     boolean authUser(String username, String password);
     void deactivateUser(int id);
+    Page<User> findUserByIdentityNumberOrNameOrRolePageable(String identityNumber, String name, int role, Pageable pageable);
+
 }

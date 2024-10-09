@@ -18,6 +18,7 @@ import TicketAdd from './components/Ticket/TicketAdd';
 import ManageIn from './components/ParkingManage/ManageIn';
 import ManageOut from './components/ParkingManage/ManageOut';
 import Stat from './components/Statistics/Stat';
+import SuccessPayment from './components/Payment/SuccessPayment';
 
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
           <Route path='/manage/in' element={<ManageIn/>}></Route>
           <Route path='/manage/out' element={<ManageOut/>}></Route>
           <Route path='/stats' element={<Stat/>}></Route>
+          <Route path='/successPayment' element={<SuccessPayment/>}></Route>
         </Routes>
         <Footer/>
         </MyDispatchContext.Provider>

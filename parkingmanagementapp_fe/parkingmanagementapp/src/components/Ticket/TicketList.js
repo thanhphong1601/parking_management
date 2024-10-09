@@ -145,6 +145,9 @@ const TicketList = () => {
 
     const [updated, setUpdated] = useState(0);
 
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+
 
     //list resource
     const [floors, setFloors] = useState([]);
@@ -176,10 +179,12 @@ const TicketList = () => {
         setLoading(true);
 
         try {
-            let url = `${endpoints['ticket-list']}?name=${name}&identityNum=${identityNum}`;
+            let url = `${endpoints['ticket-list']}?name=${name}&identityNum=${identityNum}&page=${page}`;
+
 
             let res = await authApi().get(url);
-            setTickets(res.data);
+            setTickets(res.data.content);
+            setTotalPages(res.data.totalPages);
 
         } catch (ex) {
             console.error(ex);
@@ -214,6 +219,24 @@ const TicketList = () => {
             setDeleteSuccess(false); // Xóa thất bại, bạn có thể hiển thị thêm lỗi
         }
     };
+
+    const createPayment = async (e, t) => {
+        e.preventDefault();
+        let form = new FormData();
+
+        const info = `Người dùng: ${t.userOwned.name} thanh toán vé id: ${t.id}`;
+        form.append("orderInfo", info);
+        form.append("price", t.totalPrice);
+        try {
+            let res = await authApi().post(endpoints['create-payment'], form);
+            localStorage.setItem("ticketId", t.id);
+
+            window.location.href = res.data;
+
+        } catch (ex) {
+            console.error(ex);
+        }
+    }
 
     //modals interaction funcs
     const showInfo = (e, ticket) => {
@@ -256,69 +279,16 @@ const TicketList = () => {
     };
 
     //load resources func
-    const loadFloors = async () => {
-        try {
-            let res = await authApi().get(endpoints['floor-list']);
-
-            setFloors(res.data);
-        } catch (ex) {
-            console.error(ex);
-        }
+    const nextPage = () => {
+        if (page < totalPages - 1) setPage(page + 1);
     };
 
-    const loadLines = async (id) => {
-        try {
-            let url = `${endpoints['line-list']}?id=${id}`
-            let res = await authApi().get(url);
-
-            setLines(res.data);
-        } catch (ex) {
-            console.error(ex);
-        }
+    const prevPage = () => {
+        if (page > 0) setPage(page - 1);
     };
 
-    const loadPositions = async (id) => {
-        try {
-            let url = `${endpoints['position-list']}?id=${id}`
-            let res = await authApi().get(url);
-
-            setPositions(res.data);
-        } catch (ex) {
-            console.error(ex);
-        }
-    };
-
-    const changeFloor = async (e) => {
-        e.preventDefault();
-
-        setFloor(e.target.value);
-
-        try {
-            let url = `${endpoints['line-list']}?id=${e.target.value}`;
-
-            let res = await authApi().get(url);
-            setLines(res.data);
-
-
-        } catch (ex) {
-            console.error(ex);
-        }
-    };
-
-    const changeLine = async (e) => {
-        e.preventDefault();
-
-        setLine(e.target.value);
-
-        try {
-            let url = `${endpoints['position-list']}?id=${e.target.value}`;
-
-            let res = await authApi().get(url);
-            setPositions(res.data);
-
-        } catch (ex) {
-            console.error(ex);
-        }
+    const goToPage = (pageNum) => {
+        setPage(pageNum);
     };
 
 
@@ -326,7 +296,7 @@ const TicketList = () => {
     //useeffect funcs
     useEffect(() => {
         loadTicket();
-    }, [name, identityNum, updated]);
+    }, [name, identityNum, updated, page]);
 
 
     return <>
@@ -381,7 +351,7 @@ const TicketList = () => {
                         </td>
                         <td>
                             {t.isPaid === false ?
-                                <Button >Thanh toán</Button>
+                                <Button onClick={(e) => createPayment(e, t)} >Thanh toán</Button>
                                 :
                                 <Button className="btn-dark" disabled >Đã thanh toán</Button>
                             }
@@ -394,11 +364,20 @@ const TicketList = () => {
                 </tbody>
             </table>
             <div class="pagination-container">
-                <button class="pagination-button">{"<"}</button>
-                <button class="pagination-button">1</button>
-                <button class="pagination-button">2</button>
-                <button class="pagination-button">3</button>
-                <button class="pagination-button">{">"}</button>
+                <div>
+                    <button className="pagination-button" onClick={prevPage} disabled={page === 0}>{"<"}</button>
+                    {[...Array(totalPages).keys()].map((pageNum) => (
+                        <button
+                            className="pagination-button"
+                            key={pageNum}
+                            onClick={() => goToPage(pageNum)}
+                            style={{ fontWeight: pageNum === page ? 'bold' : 'normal' }}
+                        >
+                            {pageNum + 1}
+                        </button>
+                    ))}
+                    <button className="pagination-button" onClick={nextPage} disabled={page === totalPages - 1}>{">"}</button>
+                </div>
             </div>
         </div>
 

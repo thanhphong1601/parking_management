@@ -18,6 +18,10 @@ import java.util.List;
 import java.util.Map;
 import org.hibernate.annotations.Source;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -39,6 +43,9 @@ public class AdminUserController {
     private final RoleService roleService;
     private final TicketService ticketService;
     private final VehicleService vehicleService;
+    
+    @Value("${page_size}")
+    private int pageSize;
 
     @Autowired
     private CloudinaryService cloudinaryService;
@@ -54,17 +61,24 @@ public class AdminUserController {
     @GetMapping("/users/{role_number}")
     public String userList(@RequestParam Map<String, String> params, @PathVariable("role_number") int roleNumber, Model model) {
 //       List<User> userList = this.userService.findUsersByRoleId(roleNumber);
+        int page = Integer.parseInt(params.get("page"));
+        
+        Pageable pageable = PageRequest.of(page, pageSize);
 
         //del blank vehicles
         this.vehicleService.deleteVehiclesOfBlankUser();
         
+        
         String idNum = params.get("identityNumber");
         String name = params.get("name");
 
-        List<User> userList = this.userService.findUserByIdentityNumberOrNameOrRole(idNum, name, roleNumber);
+        Page<User> userList = this.userService.findUserByIdentityNumberOrNameOrRolePageable(idNum, name, roleNumber, pageable);
         model.addAttribute("users", userList);
         model.addAttribute("roleNum", roleNumber);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", userList.getTotalPages());
 
+        
         return "users";
     }
 
@@ -102,7 +116,7 @@ public class AdminUserController {
     @PostMapping("/users/{role_number}/add")
     public String addUser(Model model, @ModelAttribute(value = "user") @Valid User u,
             BindingResult rs, @PathVariable("role_number") int roleNum) throws IOException {
-        String url = "/users/" + String.valueOf(roleNum);
+        String url = "/users/" + String.valueOf(roleNum) + "?page=0";
 
         if (!u.getFile().isEmpty()) {
             String imageUrl = this.cloudinaryService.uploadImage(u.getFile());
@@ -146,7 +160,7 @@ public class AdminUserController {
     @PostMapping("/users/{id}/delete")
     public String deleteUser(@PathVariable("id") int id, @RequestParam("confirm") boolean confirm) {
         User u = this.userService.getUserById(id);
-        String url = "/users/" + String.valueOf(u.getRole().getId());
+        String url = "/users/" + String.valueOf(u.getRole().getId()) + "?page=0";
         if (confirm) {
             //del user's tickets
             this.ticketService.deleteTicketsByUserOwnedId(id);
@@ -157,4 +171,5 @@ public class AdminUserController {
         }
         return "redirect:" + url;
     }
+    
 }

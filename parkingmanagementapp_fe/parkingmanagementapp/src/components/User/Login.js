@@ -37,10 +37,10 @@ const Login = () => {
         try {
             let res = await APIs.post(endpoints['login'], { ...r })
             // console.log(res.data);
-            cookie.save("token", res.data);
+            //cookie.save("token", res.data);
+            localStorage.setItem("token", res.data);
 
             let u = await authApi().get(endpoints['current-user']);
-             console.info(u.data);
 
             dispatch({
                 "type": "login",

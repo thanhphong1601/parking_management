@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -47,12 +46,24 @@ public class WebSecurityConfig {
             "/api/auth/**",
             "/api/auth/authenticate",
             "/api/auth/register",
-            "/api/**",
             "/login",
-            "/logout"
+            "/logout",
+            "/api/payment/createPayment",
+            "/api/successPayment"
     );
 
-    private List<String> securityUrls = List.of("/"
+    private List<String> securityUrls = List.of("/",
+            "/api/customer/list",
+            "/api/security/list",
+            "/api/customer/**",
+            "/api/user/**",
+            "/api/vehicle/**",
+            "/api/ticket/**",
+            "/api/floor/list",
+            "/api/line/**",
+            "/api/position/**",
+            "/api/recognize/**",
+            "/api/receipt/**"
     );
 
     private List<String> customerUrls = List.of("/"
@@ -85,8 +96,8 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers(publicUrls.toArray(new String[0])).permitAll()
-                    .requestMatchers("/successPayment").permitAll()
                     .requestMatchers(adminUrls.toArray(new String[0])).hasRole("ADMIN")
+                    .requestMatchers(securityUrls.toArray(new String[0])).hasAnyRole("ADMIN", "SECURITY")
                     .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)

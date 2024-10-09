@@ -7,6 +7,8 @@ package com.phong.parkingmanagementapp.repositories;
 import com.phong.parkingmanagementapp.models.EntryHistory;
 import java.util.Date;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -40,4 +42,10 @@ public interface EntryHistoryRepository extends JpaRepository<EntryHistory, Long
 
     @Query("SELECT AVG(TIMESTAMPDIFF(MINUTE, e.timeIn, e.timeOut)) FROM EntryHistory e WHERE e.timeOut IS NOT NULL")
     Double findAverageParkingDuration();
+    
+    @Query("SELECT e FROM EntryHistory e WHERE (e.vehicle.user.name LIKE %:name% OR :name IS NULL)")
+    Page<EntryHistory> findAllByName(Pageable pageable, @Param("name") String name);
+    
+    Long countByTimeInBetween(Date start, Date end);
+    Long countByTimeOutBetween(Date start, Date end);
 }

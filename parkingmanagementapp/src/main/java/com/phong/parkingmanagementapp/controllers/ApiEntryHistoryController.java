@@ -17,6 +17,7 @@ import com.phong.parkingmanagementapp.services.VehicleService;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -304,13 +305,13 @@ public class ApiEntryHistoryController {
         return ResponseEntity.ok(this.entryService.convertToDate(timestamp).toString());
     }
 
-    @GetMapping("/count-by-date")
-    public Map<String, Long> countByDate(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
-        long count = this.entryService.countByDate(date);
-        Map<String, Long> response = new HashMap<>();
-        response.put("count", count);
-        return response;
-    }
+//    @GetMapping("/count-by-date")
+//    public Map<String, Long> countByDate(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
+//        long count = this.entryService.countByDate(date);
+//        Map<String, Long> response = new HashMap<>();
+//        response.put("count", count);
+//        return response;
+//    }
 
     @GetMapping("/count-by-month")
     public Map<String, Long> countByMonth(@RequestParam("month") int month, @RequestParam("year") int year) {
@@ -326,5 +327,10 @@ public class ApiEntryHistoryController {
         Map<String, Double> response = new HashMap<>();
         response.put("averageDuration", averageDuration);
         return response;
+    }
+    
+    @GetMapping("/day")
+    public ResponseEntity<Map<String, String>> getDailyStats(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ResponseEntity.ok(entryService.countEntriesByDay(date));
     }
 }

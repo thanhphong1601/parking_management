@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -37,6 +38,8 @@ import kong.unirest.core.Unirest;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -216,6 +219,28 @@ public class EntryHistoryServiceImpl implements EntryHistoryService {
     @Override
     public Double findAverageParkingDuration() {
         return this.entryRepo.findAverageParkingDuration();
+    }
+
+    @Override
+    public Page<EntryHistory> findAllByName(Pageable pageable, String name) {
+        return this.entryRepo.findAllByName(pageable, name);
+    }
+
+    @Override
+    public Map<String, String> countEntriesByDay(LocalDate date) {
+        Date startOfDay = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date endOfDay = Date.from(date.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+        
+        // Tính số lượt vào
+        Long countIn = this.entryRepo.countByTimeInBetween(startOfDay, endOfDay);
+
+        // Tính số lượt ra
+        Long countOut = this.entryRepo.countByTimeOutBetween(startOfDay, endOfDay);
+        
+        return new HashMap<>() {{
+            put("inCount", countIn.toString());
+            put("outCount", countOut.toString());
+        }};
     }
 
 }

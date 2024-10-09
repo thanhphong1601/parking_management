@@ -36,16 +36,29 @@ export const endpoints = {
     'recognize-out-save': '/api/recognize/out',
     'count-by-date': '/api/count-by-date',
     'count-by-month': '/api/count-by-month',
-    'avarage-parking-duration': '/api/average-parking-duration'
+    'avarage-parking-duration': '/api/average-parking-duration',
+    'create-payment': '/api/payment/createPayment',
+    'payment-success': '/api/successPayment',
+    'receipt-create': '/api/receipt/create',
+    'receipt-list': '/api/receipt/list'
 }
 
 // console.info(cookie.load('token'))
+
+// export const authApi = () => {
+//     return axios.create({
+//         baseURL: BASE_URL,
+//         headers: {
+//             'Authorization': `Bearer ${cookie.load('token')}`
+//         }
+//     })
+// }
 
 export const authApi = () => {
     return axios.create({
         baseURL: BASE_URL,
         headers: {
-            'Authorization': `Bearer ${cookie.load('token')}`
+            'Authorization': `Bearer ${localStorage.getItem("token")}`
         }
     })
 }

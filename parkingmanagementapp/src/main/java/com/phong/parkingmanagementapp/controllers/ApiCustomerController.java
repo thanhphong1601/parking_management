@@ -16,6 +16,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -44,11 +48,18 @@ public class ApiCustomerController {
     @Autowired
     private TicketService ticketService;
 
+    @Value("${page_size}")
+    private int pageSize;
+
     @GetMapping("/customer/list")
-    public ResponseEntity<List<User>> getCustomerList(@RequestParam Map<String, String> params) {
+    public ResponseEntity<Page<User>> getCustomerList(@RequestParam Map<String, String> params) {
         String name = params.get("name");
         String identityNumber = params.get("identityNum");
-        return ResponseEntity.ok(this.userService.findUserByIdentityNumberOrNameOrRole(identityNumber, name, 3));
+        int page = Integer.parseInt(params.get("page"));
+
+        Pageable pageable = PageRequest.of(page, pageSize);
+
+        return ResponseEntity.ok(this.userService.findUserByIdentityNumberOrNameOrRolePageable(identityNumber, name, 3, pageable));
     }
 
     @PostMapping("/customer/{id}")
@@ -91,7 +102,7 @@ public class ApiCustomerController {
             System.out.println(u.getBirthday());
             u.setIdentityNumber(params.get("identityNumber"));
             u.setPhone(params.get("phone"));
-            
+
             u.setRole(this.roleService.getRoleById(Integer.parseInt(params.get("role"))));
 
             this.userService.saveUser(u);
@@ -105,31 +116,31 @@ public class ApiCustomerController {
 
         return new ResponseEntity<>("Successfully created", HttpStatus.CREATED);
     }
-    
+
     @GetMapping("/customer/{id}")
     public ResponseEntity<?> getUserInfo(@PathVariable("id") int id) {
         User u = this.userService.getUserById(id);
         List<Vehicle> vehicleList = this.vehicleService.findVehicleByUserId(id);
         List<Ticket> ticketList = this.ticketService.findTicketByUserOwnedId(id);
-        
+
         Map<String, Object> result = new HashMap<>();
         result.put("user", u);
         result.put("vehicles", vehicleList);
         result.put("tickets", ticketList);
-        
+
         return ResponseEntity.ok(result);
     }
-    
+
     @PostMapping("/customer/{id}/deactivate")
     @CrossOrigin
-    public ResponseEntity<?> deactivateUserInfo(@PathVariable("id") int id){
+    public ResponseEntity<?> deactivateUserInfo(@PathVariable("id") int id) {
         this.userService.deactivateUser(id);
-        
+
         return new ResponseEntity<>("Successfully deleted", HttpStatus.NO_CONTENT);
     }
-    
+
     @GetMapping("/security/list")
-    public ResponseEntity<List<User>> getSecurityGuardList(){
+    public ResponseEntity<List<User>> getSecurityGuardList() {
         return ResponseEntity.ok(this.userService.findUsersByRoleId(2));
     }
 

@@ -17,6 +17,10 @@ import com.phong.parkingmanagementapp.utils.parseLocalDate;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -51,13 +55,19 @@ public class ApiTicketController {
     private VehicleService vehicleService;
     @Autowired
     private PriceService priceService;
+    
+    @Value("${page_size}")
+    private int pageSize;
 
     @GetMapping("/ticket/list")
-    public ResponseEntity<List<Ticket>> getActiveTicketList(@RequestParam Map<String, String> params) {
+    public ResponseEntity<Page<Ticket>> getActiveTicketList(@RequestParam Map<String, String> params) {
         String ownerIdentityNumber = params.get("identityNum");
         String ownerName = params.get("name");
-
-        return ResponseEntity.ok(this.ticketService.getTicketsByUserOwnedActive(ownerIdentityNumber, ownerName));
+        int page = Integer.parseInt(params.get("page"));
+                
+        Pageable pageable = PageRequest.of(page, pageSize);
+        
+        return ResponseEntity.ok(this.ticketService.getTicketsByUserOwnedActivePageable(ownerIdentityNumber, ownerName, pageable));
     }
 
     @PostMapping("/ticket/create")

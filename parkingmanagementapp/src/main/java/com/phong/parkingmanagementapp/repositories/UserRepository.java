@@ -8,6 +8,8 @@ import com.phong.parkingmanagementapp.models.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -51,4 +53,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     User getUserByUsername(String username);
     
+    @Query("SELECT u FROM User u WHERE (:idNum IS NULL OR u.identityNumber LIKE %:idNum%) AND (:name IS NULL OR u.name LIKE %:name%) AND (:role IS NULL OR u.role.id = :role) AND u.active = true")
+    public Page<User> findUserByIdentityNumberOrNameOrRolePageable(@Param("idNum") String identityNumber, @Param("name") String name, @Param("role") int role, Pageable pageable);
+
 }

@@ -19,6 +19,10 @@ import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -42,6 +46,9 @@ public class AdminTicketController {
     private final PositionService poService;
     private final UserService userService;
     private final PriceService priceService;
+    
+    @Value("${page_size}")
+    private int pageSize;
 
     @Autowired
     public AdminTicketController(TicketService ticketService, FloorService floorService, LineService lineService, PositionService poService, UserService userService, PriceService priceService) {
@@ -64,8 +71,13 @@ public class AdminTicketController {
     }
 
     @GetMapping("/tickets")
-    public String ticketList(@RequestParam(value = "name", required = false) String name, Model model) {
-        model.addAttribute("ticketList", this.ticketService.findTicketByUserOwned(name));
+    public String ticketList(@RequestParam(value = "name", required = false) String name, @RequestParam(value = "page", defaultValue = "0") int page, Model model) {
+        
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<Ticket> ticketList = this.ticketService.findTicketByUserOwnedPageable(name, pageable);
+        model.addAttribute("ticketList", ticketList);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", ticketList.getTotalPages());
         return "tickets";
     }
     
@@ -83,7 +95,7 @@ public class AdminTicketController {
             try {
                 this.ticketService.addOrUpdate(t);
                 
-                return "redirect:/tickets";
+                return "redirect:/tickets?page=0";
             } catch (Exception e) {
                 model.addAttribute("errMsg", e.toString());
             }
@@ -114,7 +126,7 @@ public class AdminTicketController {
         if (confirm) {
             ticketService.delete(ticketService.getTicketById(id));
         }
-        return "redirect:/tickets"; // Redirect to ticket list
+        return "redirect:/tickets/page=0"; // Redirect to ticket list
     }
     
     @GetMapping("/getLinesByFloorId/{floorId}")
