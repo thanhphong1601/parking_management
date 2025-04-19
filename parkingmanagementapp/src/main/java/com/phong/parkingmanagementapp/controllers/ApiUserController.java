@@ -170,7 +170,6 @@ public class ApiUserController {
 
     @PostMapping("/forgetPassword")
     public ResponseEntity<?> forgetPassword(@RequestParam Map<String, String> params) {
-        System.out.println("Changing passworddddddddddddddddddddddddd");
         String email = params.get("email");
         if (email == null) {
             return new ResponseEntity<>("Không tìm thấy email hợp lệ", HttpStatus.NOT_FOUND);

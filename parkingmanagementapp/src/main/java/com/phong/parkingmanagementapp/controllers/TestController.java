@@ -117,8 +117,11 @@ public class TestController {
 
     @GetMapping("/test3")
     public ResponseEntity<?> test3(@RequestParam Map<String, String> params) {
-        
-        return new ResponseEntity<>("OK", HttpStatus.OK);
+        System.out.println(System.getProperty("GOOGLE_CLIENT_ID"));
+System.out.println("System.getProperty(GOOGLE_CLIENT_ID) = " + System.getProperty("GOOGLE_CLIENT_ID"));
+
+
+        return new ResponseEntity<>("OKkk", HttpStatus.OK);
     }
 
     @GetMapping("/testRequestParams/")
