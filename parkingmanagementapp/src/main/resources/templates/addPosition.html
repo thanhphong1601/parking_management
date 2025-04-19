@@ -19,23 +19,31 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             <h1 class="text-center mt-3 mb-1">Thông tin vị trí:</h1>
 
             <div class="alert alert-danger" th:if="${errMsg != null}" th:text="${errMsg}"></div>
-            
-            <form th:action="@{/addPosition}" th:object="${position}" method="post">
+
+            <form th:action="@{/addPosition}" th:object="${positionNew}" method="post">
                 <div class="form-floating mb-3 mt-3">         
                     <input class="form-control" type="text" th:field="*{position}" id="position" placeholder="Vị trí" name="position"/>
                     <label class="form-label" for="position">Vị trí:</label>
                 </div>
-                
+
                 <div class="form-floating mb-3 mt-3">                 
                     <select class="form-select" th:field="*{line}" id="line">
                         <option th:each="l : ${lines}" 
                                 th:value="${l.id}" 
-                                th:selected="${position.id != null and l.id == position.line.id}"
+                                th:selected="${positionNew.id != null and l.id == positionNew.line.id}"
                                 th:text="${l.line}"></option>
                     </select>
                     <label for="floor">Thuộc dãy</label>
                 </div>
-                
+
+                <div class="form-floating mb-3 mt-3" th:if="${param.positionId}">
+                    <select class="form-select" id="isTaken" name="isTaken" th:field="*{take}">
+                        <option selected="${positionNew.take == true}" value="true">Đã lấy</option>
+                        <option selected="${positionNew.take == false}" value="false">Trống</option>
+                    </select>
+                    <label for="isTaken">Trạng thái</label>
+                </div>
+
                 <div class="form-floating mb-3 mt-3">
                     <button type="submit" th:if="*{id} != null" class="btn btn-info">Lưu thông tin</button>
                     <button type="submit" th:if="*{id} == null" class="btn btn-info">Thêm vị trí</button>
@@ -43,7 +51,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     <input type="hidden" th:field="*{id}"/>
                 </div>
             </form>
-            
+
         </div>
 
         <!--         Include footer -->

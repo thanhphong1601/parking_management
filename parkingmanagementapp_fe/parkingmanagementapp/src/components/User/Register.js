@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Alert, Button, Container, Form } from "react-bootstrap";
 import APIs, { endpoints } from "../../configs/APIs";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import MySpinner from "../common/MySpinner";
 import './Register.css'
 
@@ -59,9 +59,22 @@ const Register = () => {
         })
     }
 
-    const register = async (e) => {
+    const handleChange = (e, field) => {
+        change(e, field);
+        const value = e.target.value;
+    
+        // Validate email format
+        if (field === "email") {
+          const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+          setErrMsg((prev) => ({ ...prev, email: !isValidEmail }));
+        }
+      };
+
+      const register = async (e) => {
         e.preventDefault();
         setErrMsg("");
+        localStorage.removeItem("register_form");
+
 
         let form = new FormData();
 
@@ -74,62 +87,94 @@ const Register = () => {
         try {
             if (user.confirm === user.password) {
                 // console.log('User:', user);
-                let res = await APIs.post(endpoints['register'], form)
+                //let res = await APIs.post(endpoints['register'], form)
+                let res = await APIs.get(endpoints['check-mail-and-identity-number'](user.email, user.identityNumber, user.username));
 
-                if (res.status === 201)
-                    nav("/login");
+                if (res.status === 200) {
+                    //localStorage.setItem("register_user", user);
+                    nav(`/verify?email=${encodeURIComponent(user.email)}`, { state: { user } });        
+                }
             }
-
             else
                 setErrMsg("Mật khẩu xác nhận sai. Hãy nhập lại!");
 
         } catch (ex) {
             console.error(ex);
-            setErrMsg("Email không hợp lệ. Hãy kiểm tra lại email!");
+            if (ex.response && ex.status === 409)
+                setErrMsg(ex.response.data);
+            else
+                setErrMsg("Email không hợp lệ. Hãy kiểm tra lại email!");
+
         }
     }
 
 
     return <>
-        <div style={{ alignItems: "center", alignContent: "center", backgroundColor: "lightblue", borderRadius: 10, height: 60, marginLeft: 20, marginRight: 20, margin: 10 }}>
-            <h1 className="text-center mt-3 mb-3">Trang đăng ký</h1>
+        <div className="register-container">
+            <div className="register-box">
+                <Form className="register-form" onSubmit={register}>
+                    <div className="register-header">
+                        <h1>Đăng ký tài khoản</h1>
+                    </div>
+
+                    {errMsg && (
+                        <Alert variant="danger" className="alert-danger">
+                            <div>{errMsg}</div>
+                        </Alert>
+                    )}
+
+                    {fields.map((f) => (
+                        <Form.Group className="mb-3" controlId={f.field} key={f.field}>
+                            <Form.Label className="form-label">{f.label}</Form.Label>
+                            <Form.Control
+                                onChange={(e) => change(e, f.field)}
+                                value={user[f.field]}
+                                type={f.type}
+                                placeholder={f.placeholder}
+                                className="form-control"
+                                required
+                            />
+                        </Form.Group>
+                    ))}
+
+                    <Form.Group className="mb-3" controlId="identityNumber">
+                        <Form.Label className="form-label">Số CMND/CCCD</Form.Label>
+                        <Form.Control
+                            onChange={(e) => change(e, "identityNumber")}
+                            value={user["identityNumber"]}
+                            type="text"
+                            placeholder="Nhập số CMND/CCCD"
+                            maxLength={12}
+                            minLength={12}
+                            className="form-control"
+                        />
+                    </Form.Group>
+
+                    <Form.Group className="mb-4" controlId="phone">
+                        <Form.Label className="form-label">Số điện thoại</Form.Label>
+                        <Form.Control
+                            onChange={(e) => change(e, "phone")}
+                            value={user["phone"]}
+                            type="text"
+                            placeholder="Nhập số điện thoại"
+                            maxLength={10}
+                            minLength={8}
+                            className="form-control"
+                        />
+                    </Form.Group>
+
+                    <Form.Group className="text-center">
+                        <Button type="submit" variant="primary" className="btn-submit">
+                            Đăng ký
+                        </Button>
+                    </Form.Group>
+
+                    <div className="div-login-box">
+                        Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+                    </div>
+                </Form>
+            </div>
         </div>
-        {errMsg == "" ? <></> : <>
-            <Alert variant="danger">
-                <div>
-                    {errMsg}
-                </div>
-            </Alert>
-        </>}
-            <Form onSubmit={register}>
-                {fields.map(f => <Form.Group className="mb-3" controlId={f.field}>
-                    <Form.Label>{f.label}</Form.Label>
-                    <Form.Control onChange={e => change(e, f.field)} value={user[f.field]} type={f.type} placeholder={f.placeholder} />
-                </Form.Group>
-                )}
-
-                <Form.Group className="mb-3">
-                    <Form.Label>Số CNMD</Form.Label>
-                    <Form.Control onChange={e => change(e, "identityNumber")} 
-                    value={user["identityNumber"]} 
-                    type="text" 
-                    placeholder="Hãy nhập CMND"
-                    maxLength={12}/>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                    <Form.Label>Số điện thoại</Form.Label>
-                    <Form.Control onChange={e => change(e, "phone")} 
-                    value={user["phone"]} 
-                    type="text" 
-                    placeholder="Hãy nhập số điện thoại"
-                    maxLength={10}/>
-                </Form.Group>
-
-                <Form.Group className="mb-3 text-center">
-                    <Button type="submit" variant="success" style={{ fontSize: 20, fontWeight: "bold" }}>Đăng ký</Button>
-                </Form.Group>
-            </Form>
     </>
 }
 

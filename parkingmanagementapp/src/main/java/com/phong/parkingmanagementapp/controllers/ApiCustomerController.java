@@ -143,5 +143,13 @@ public class ApiCustomerController {
     public ResponseEntity<List<User>> getSecurityGuardList() {
         return ResponseEntity.ok(this.userService.findUsersByRoleId(2));
     }
+    
+    @GetMapping("/customer/list/all")
+    public ResponseEntity<?> getAllCustomers(@RequestParam Map<String, String> params){
+        String name = params.get("name");
+        String identityNumber = params.get("identityNum");
+        
+        return ResponseEntity.ok(this.userService.findUserByIdentityNumberOrNameOrRole(identityNumber, name, 3));
+    }
 
 }

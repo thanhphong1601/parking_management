@@ -105,5 +105,10 @@ public class VehicleServiceImpl implements VehicleService{
     public List<Vehicle> findAllByLicensePlate(String plateLicense) {
         return this.vehicleRepo.findAllByLicensePlate(plateLicense);
     }
-    
+
+    @Override
+    public Vehicle getAnonymousVehicle() {
+        return this.vehicleRepo.getAnonymousVehicle();
+    }
+
 }

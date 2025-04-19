@@ -49,4 +49,20 @@ public interface EntryHistoryService {
     Page<EntryHistory> findAllByName(Pageable pageable, String name);
 
     Map<String, String> countEntriesByDay(LocalDate date);
+    
+    Map<String, String> processPlateRecognize(Map<String, String> params, MultipartFile file) throws IOException, ParseException;
+
+    Map<String, Object> processTicketInput(Map<String, String> params);
+    
+    Map<String, ?> processComparingImg(MultipartFile file1, MultipartFile file2) throws IOException;
+    
+    void recordVehicleIn(Map<String, String> attributes);
+    
+    void recordVehicleOut(Map<String, String> attributes);
+    
+    Boolean processComparePlates(MultipartFile file1, MultipartFile file2) throws IOException;
+    
+    EntryHistory getEntryHistoryByTicketId(int ticketId);
+    
+    Page<EntryHistory> getEntryHistoryListByLicensePlateNumberPageable(String licensePlateNumber, Pageable pageable);
 }

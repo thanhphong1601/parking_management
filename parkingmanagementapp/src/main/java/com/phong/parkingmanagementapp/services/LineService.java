@@ -16,4 +16,8 @@ public interface LineService {
     List<Line> findLinesByFloorId(int id);
     Line getLineById(int id);
     void saveLine(Line line);
+    void checkLineStatus(int lineId);
+    boolean deleteLine(int lineId);
+    int countLineByFloorId(int floorId);
+
 }

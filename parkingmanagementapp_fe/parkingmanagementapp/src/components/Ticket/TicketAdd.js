@@ -1,12 +1,17 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import MySpinner from "../common/MySpinner";
 import { authApi, endpoints } from "../../configs/APIs";
 import './TicketAdd.css'
 import { useNavigate } from "react-router-dom";
+import { MyUserContext } from "../../configs/Contexts";
 
 const TicketAdd = () => {
     const nav = useNavigate();
+    const currentUser = useContext(MyUserContext);
+    if (currentUser === null){
+        nav('/login');
+    }
 
     //ticket properties
     const [floor, setFloor] = useState(null);
@@ -17,8 +22,13 @@ const TicketAdd = () => {
     const [vehicle, setVehicle] = useState(null);
     const [startDay, setStartDay] = useState("");
     const [endDay, setEndDay] = useState("");
-    const [ticketPrice, setTicketPrice] = useState(1);
-    const [totalPrice, setTotalPrice] = useState(0);
+    const [ticketPrice, setTicketPrice] = useState(0);
+    const [totalPrice, setTotalPrice] = useState(1);
+    const [numberOfDays, setNumberOfDays] = useState(1);
+    const [ticketType, setTicketType] = useState(1);
+
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
 
 
     //list
@@ -29,6 +39,8 @@ const TicketAdd = () => {
     const [customers, setCustomers] = useState([]);
     const [vehicles, setVehicles] = useState([]);
     const [ticketPrices, setTicketPrices] = useState([]);
+    const [ticketTypes, setTicketTypes] = useState([]);
+
 
     //modal
     const [showCustomerModal, setShowCustomerModal] = useState(false);
@@ -67,6 +79,21 @@ const TicketAdd = () => {
     //     }
     // ];
 
+    const types = [
+        {
+            "id": 1,
+            "type": "Normal"
+        },
+        {
+            "id": 2,
+            "type": "VIP"
+        },
+        {
+            "id": 3,
+            "type": "Month"
+        }
+    ]
+
     //loading resources functions
     const loadFloors = async () => {
         try {
@@ -91,11 +118,10 @@ const TicketAdd = () => {
 
     const loadCustomerList = async () => {
         try {
-            let url = `${endpoints['customer-list']}?name=${customerName}`
-
+            let url = `${endpoints['customer-list']}?name=${customerName}&page=${page}`
             let res = await authApi().get(url);
 
-            setCustomers(res.data);
+            setCustomers(res.data.content);
         } catch (ex) {
             console.error(ex);
         }
@@ -122,6 +148,16 @@ const TicketAdd = () => {
         }
     };
 
+    const loadTypes = async () => {
+        try {
+            let res = await authApi().get(endpoints['ticket-type-list']);
+
+            setTicketTypes(res.data);
+        } catch (ex) {
+            console.error(ex);
+        }
+    };
+
     const calTotalDays = (startDay, endDay) => {
         const startD = new Date(startDay);
         const endD = new Date(endDay);
@@ -132,16 +168,18 @@ const TicketAdd = () => {
 
     const calTotalPrice = async () => {
         try {
-            if (startDay != "" && endDay != ""){
-                let url = `${endpoints['ticket-price-getPrice']}?startDay=${startDay}&endDay=${endDay}&id=${ticketPrice}`;
+            if (startDay != "" && numberOfDays > -1) {
+                let url = `${endpoints['ticket-price-getPrice']}?startDay=${startDay}&numberOfDays=${numberOfDays}&id=${ticketType}`;
                 let res = await authApi().get(url);
                 setTotalPrice(res.data);
             }
         } catch (ex) {
             console.error(ex);
         }
-        
+
     };
+
+
 
     //change value functions
     const changeFloor = async (e) => {
@@ -158,6 +196,18 @@ const TicketAdd = () => {
         } catch (ex) {
             console.error(ex);
         }
+    };
+
+    const nextPage = () => {
+        if (page < totalPages - 1) setPage(page + 1);
+    };
+
+    const prevPage = () => {
+        if (page > 0) setPage(page - 1);
+    };
+
+    const goToPage = (pageNum) => {
+        setPage(pageNum);
     };
 
     const changeLine = async (e) => {
@@ -181,6 +231,18 @@ const TicketAdd = () => {
         closeModal();
     };
 
+    const changeNumberOfDays = (e) => {
+        e.preventDefault();
+        setNumberOfDays(e.target.value);
+        calTotalPrice();
+    };
+
+    const changeTicketPriceType = (e) => {
+        e.preventDefault();
+        setTicketType(e.target.value);
+        setTicketPrice(ticketType);
+    }
+
     //modal interaction
     const showModal = () => {
         setShowCustomerModal(true);
@@ -200,6 +262,7 @@ const TicketAdd = () => {
         loadSecurityList();
         loadCustomerList();
         loadPrice();
+        loadTypes();
     }, []);
 
     useEffect(() => {
@@ -212,7 +275,7 @@ const TicketAdd = () => {
 
     useEffect(() => {
         calTotalPrice();
-    }, [startDay, endDay, ticketPrice])
+    }, [startDay, ticketType, numberOfDays])
 
     const createTicket = async (e) => {
         e.preventDefault();
@@ -225,14 +288,17 @@ const TicketAdd = () => {
         form.append("userOwnedId", customer["id"]);
         form.append("vehicleId", vehicle);
         form.append("startDay", startDay);
-        form.append("endDay", endDay);
-        form.append("priceId", ticketPrice);
+        form.append("numberOfDays", numberOfDays);
+        form.append("typeId", ticketType);
 
 
         try {
+            // for (const [key, value] of form.entries()) {
+            //     console.log(`${key}: ${value}`);
+            // }
             let res = await authApi().post(endpoints['ticket-create'], form);
 
-            if (res.status == 201){
+            if (res.status == 201) {
                 showSuccess();
 
                 setTimeout(() => {
@@ -240,6 +306,7 @@ const TicketAdd = () => {
                     nav('/ticket/list');
                 }, 2000);
             }
+            
         } catch (ex) {
             console.error(ex);
         }
@@ -305,7 +372,7 @@ const TicketAdd = () => {
                                     {l.line}
                                 </option>)}
                             </> : <>
-                                <option disabled selected>
+                                <option disabled selecte value={null}>
                                     Hãy chọn tầng trước
                                 </option>
                             </>}
@@ -320,7 +387,7 @@ const TicketAdd = () => {
                                     {p.position}
                                 </option>)}
                             </> : <>
-                                <option disabled selected>
+                                <option disabled selected value={null}>
                                     Hãy chọn dãy trước
                                 </option>
                             </>}
@@ -334,16 +401,16 @@ const TicketAdd = () => {
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Chọn ngày kết thúc</Form.Label>
-                            <Form.Control disabled={startDay !== null? false: true} onChange={e => setEndDay(e.target.value)} value={endDay} type="date" />
+                            <Form.Control value={numberOfDays} onChange={e => {changeNumberOfDays(e)}} type="number" min={1}/>
                         </Form.Group>
                     </div>
                     <Form.Group className="mb-3">
-                        <Form.Label>Hãy chọn giá vé:</Form.Label>
-                        <Form.Select aria-label="Hãy chọn giá vé" onChange={e => setTicketPrice(e.target.value)} value={ticketPrice}>
-                            {ticketPrices === null ? <MySpinner /> :
+                        <Form.Label>Hãy chọn loại vé:</Form.Label>
+                        <Form.Select aria-label="Hãy chọn loại vé" onChange={e => changeTicketPriceType(e)} value={ticketType}>
+                            {types === null ? <MySpinner /> :
                                 <>
-                                    {ticketPrices.map(p => <option key={p.id} value={p.id} selected={p.id === 1? true: false}>
-                                        {p.price} VNĐ/ngày
+                                    {types.map(t => <option key={t.id} value={t.id} selected={t.id === 1 ? true : false}>
+                                        Loại {t.type}
                                     </option>)}
                                 </>
                             }
@@ -352,11 +419,16 @@ const TicketAdd = () => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Tổng giá vé:</Form.Label>
-                        <Form.Control disabled value={totalPrice? totalPrice + " VNĐ": totalPrice + " VNĐ"}></Form.Control>
+                        <Form.Label>Giá vé:</Form.Label>
+                        <Form.Control disabled value={ticketPrices[ticketType - 1]?.price + " VNĐ"}></Form.Control>
                     </Form.Group>
 
-                    <Button disabled={customer === null || floor === null || line === null || position === null || startDay === "" || endDay === "" ? true: false} type="submit">Tạo vé</Button>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Tổng giá vé:</Form.Label>
+                        <Form.Control disabled value={totalPrice ? totalPrice + " VNĐ" : totalPrice + " VNĐ"}></Form.Control>
+                    </Form.Group>
+
+                    <Button disabled={customer === null || startDay === "" ? true : false} type="submit">Tạo vé</Button>
                 </Form>
             </div>
         </div>
@@ -379,29 +451,48 @@ const TicketAdd = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {customers.map(c => <tr key={c.id}>
+                            {customers.length > 0 ? <>
+                                {customers.map(c => <tr key={c.id}>
                                 <td>{c.name}</td>
                                 <td>{c.identityNumber}</td>
                                 <td>
                                     <Button onClick={(e) => customerChoose(c)}>Chọn</Button>
                                 </td>
                             </tr>)}
+                            </>: <></>}
+                            
                         </tbody>
+                    </div>
+                    <div class="pagination-container">
+                        <div>
+                            <button className="pagination-button" onClick={prevPage} disabled={page === 0}>{"<"}</button>
+                            {[...Array(totalPages).keys()].map((pageNum) => (
+                                <button
+                                    className="pagination-button"
+                                    key={pageNum}
+                                    onClick={() => goToPage(pageNum)}
+                                    style={{ fontWeight: pageNum === page ? 'bold' : 'normal' }}
+                                >
+                                    {pageNum + 1}
+                                </button>
+                            ))}
+                            <button className="pagination-button" onClick={nextPage} disabled={page === totalPages - 1}>{">"}</button>
+                        </div>
                     </div>
                 </div>
             </Modal.Body>
         </Modal>
 
         <Modal show={showSuccessModal} onHide={closeSuccess}>
-                <Modal.Header closeButton>
-                    <Modal.Title><strong>Thông báo</strong></Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <h1>Tạo vé thành công!
-                        Đang chuyển về danh sách vé!
-                    </h1>
-                </Modal.Body>
-            </Modal>
+            <Modal.Header closeButton>
+                <Modal.Title><strong>Thông báo</strong></Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <h1>Tạo vé thành công!
+                    Đang chuyển về danh sách vé!
+                </h1>
+            </Modal.Body>
+        </Modal>
     </>
 };
 

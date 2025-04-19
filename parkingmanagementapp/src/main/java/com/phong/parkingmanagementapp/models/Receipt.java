@@ -51,4 +51,10 @@ public class Receipt {
     @Column(name = "total_amount")
     @NotNull()
     private int totalAmount;
+    
+    @Column(name = "transaction_date")
+    private Date transactionDate;
+    
+    @Column(name = "transaction_number")
+    private String transactionNumber;
 }

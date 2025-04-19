@@ -48,8 +48,18 @@ public class WebSecurityConfig {
             "/api/auth/register",
             "/login",
             "/logout",
+            "/oauth2/**",
             "/api/payment/createPayment",
-            "/api/successPayment"
+            "/api/successPayment",
+            "/api/verifyMail/**",
+            "/api/verifyOtp/**",
+            "/api/receipt/**",
+            "/api/floor/list",
+            "/api/line/**",
+            "/api/position/**",
+            "/api/ticket/**",
+            "/test/**",
+            "/api/forgetPassword/**"
     );
 
     private List<String> securityUrls = List.of("/",
@@ -58,15 +68,11 @@ public class WebSecurityConfig {
             "/api/customer/**",
             "/api/user/**",
             "/api/vehicle/**",
-            "/api/ticket/**",
-            "/api/floor/list",
-            "/api/line/**",
-            "/api/position/**",
-            "/api/recognize/**",
-            "/api/receipt/**"
+            "/api/recognize/**"
     );
 
-    private List<String> customerUrls = List.of("/"
+    private List<String> customerUrls = List.of("/",
+            "/api/customerr/**"
     );
 
     private List<String> adminUrls = List.of("/",
@@ -95,11 +101,13 @@ public class WebSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(publicUrls.toArray(new String[0])).permitAll()
-                    .requestMatchers(adminUrls.toArray(new String[0])).hasRole("ADMIN")
-                    .requestMatchers(securityUrls.toArray(new String[0])).hasAnyRole("ADMIN", "SECURITY")
-                    .anyRequest().authenticated()
-                )
+                .requestMatchers(publicUrls.toArray(new String[0])).permitAll()
+                .requestMatchers(adminUrls.toArray(new String[0])).hasRole("ADMIN")
+                .requestMatchers(securityUrls.toArray(new String[0])).hasAnyRole("ADMIN", "SECURITY", "CUSTOMER")
+                .requestMatchers(customerUrls.toArray(new String[0])).hasAnyRole("CUSTOMER", "ADMIN")
+                .anyRequest().authenticated()
+                ).oauth2Login(oauth -> oauth
+                .defaultSuccessUrl("http://localhost:3000/oauth2/success", true)) // Chuyển sang FE sau login
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
                 .logoutUrl("/logout")

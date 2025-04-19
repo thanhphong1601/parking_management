@@ -12,9 +12,12 @@ import com.phong.parkingmanagementapp.repositories.UserRepository;
 import com.phong.parkingmanagementapp.repositories.VehicleRepository;
 import com.phong.parkingmanagementapp.services.CloudinaryService;
 import com.phong.parkingmanagementapp.services.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -45,7 +48,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-    
 
     @Autowired
     public UserServiceImpl(UserRepository userRepo, VehicleRepository vehicleRepo) {
@@ -75,14 +77,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        User user = userRepo.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+//        User user = userRepo.getUserByUsernameOrEmail(username)
+//                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                user.getAuthorities()
-        );
+//        return new org.springframework.security.core.userdetails.User(
+//                user.getUsername(),
+//                user.getPassword(),
+//                user.getAuthorities()
+//        );
+        return userRepo.getUserByUsernameOrEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng với username/email: " + username));
     }
 
     @Override
@@ -105,10 +109,31 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 //        }
 
         if (user.getId() != null) {
-            String encodedPassword = passwordEncoder.encode(user.getPassword());
-            user.setPassword(encodedPassword);
-            user.setActive(Boolean.TRUE);
-            return this.userRepo.save(user);
+            User currentUser = userRepo.getUserById(user.getId());
+            if (currentUser == null) {
+                throw new EntityNotFoundException("User not found");
+            }
+
+            currentUser.setUsername(
+                    Objects.requireNonNullElse(user.getUsername(), currentUser.getUsername())
+            );
+            currentUser.setPhone(
+                    Objects.requireNonNullElse(user.getPhone(), currentUser.getPhone())
+            );
+            currentUser.setAddress(
+                    Objects.requireNonNullElse(user.getAddress(), currentUser.getAddress())
+            );
+
+            if (user.getBirthday() != null) {
+                currentUser.setBirthday(user.getBirthday());
+            }
+
+            if (user.getRole() != null && !user.getRole().equals(currentUser.getRole())) {
+                currentUser.setRole(user.getRole());
+            }
+
+            
+            return this.userRepo.save(currentUser);
         }
         if (userRepo.existsByEmail(user.getEmail())) {
             throw new RuntimeException("Email already exists");
@@ -116,8 +141,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (userRepo.existsByUsername(user.getUsername())) {
             throw new RuntimeException("Username already exists");
         }
-        
-        
 
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         User u = new User();
@@ -126,27 +149,29 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         u.setEmail(user.getEmail());
         u.setActive(Boolean.TRUE);
         u.setAddress(user.getAddress());
-        u.setBirthday(u.getBirthday());
+        u.setBirthday(user.getBirthday());
         u.setName(user.getName());
         u.setPhone(user.getPhone());
         u.setRole(user.getRole());
         u.setIdentityNumber(user.getIdentityNumber());
-        
-        if (user.getFile() == null)
-             return userRepo.save(u);
-        
-        if (!user.getFile().isEmpty() && user.getAvatar() == null)
-            u.setAvatar(user.getAvatar());
 
-        
+        if (user.getFile() == null) {
+            return userRepo.save(u);
+        }
+
+        if (!user.getFile().isEmpty() && user.getAvatar() == null) {
+            u.setAvatar(user.getAvatar());
+        }
+
         return userRepo.save(u);
     }
 
     @Override
     public void deleteUser(User user) {
-        if (user == null)
+        if (user == null) {
             return;
-        
+        }
+
         this.userRepo.delete(user);
     }
 
@@ -167,13 +192,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public boolean authUser(String username, String password) {
-        User u = this.userRepo.getUserByUsername(username);
-        
-        System.out.println(u.getPassword());
-        System.out.println(password);
-        System.out.println(this.passwordEncoder.encode(password));
-        System.out.println(this.passwordEncoder.matches(password, u.getPassword()));
-        
+        User u = this.userRepo.getUserByUsernameOrEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng"));
+
+        System.out.println(u);
+
+//        System.out.println(u.getPassword());
+//        System.out.println(password);
+//        System.out.println(this.passwordEncoder.encode(password));
+//        System.out.println(this.passwordEncoder.matches(password, u.getPassword()));
+//        
         return this.passwordEncoder.matches(password, u.getPassword());
     }
 
@@ -181,13 +209,48 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public void deactivateUser(int id) {
         User u = this.userRepo.getUserById(id);
         u.setActive(Boolean.FALSE);
-        
+
         this.userRepo.save(u);
     }
 
     @Override
     public Page<User> findUserByIdentityNumberOrNameOrRolePageable(String identityNumber, String name, int role, Pageable pageable) {
         return this.userRepo.findUserByIdentityNumberOrNameOrRolePageable(identityNumber, name, role, pageable);
+    }
+
+    @Override
+    public User getAnonymousUser() {
+        return this.userRepo.getAnonymousUser();
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        return this.userRepo.findByEmail(email);
+    }
+
+    @Override
+    public User findByIdentityNumber(String identityNumber) {
+        return this.userRepo.findByIdentityNumber(identityNumber);
+    }
+
+    @Override
+    public int getAdminId() {
+        return this.userRepo.getAdminId();
+    }
+
+    @Override
+    public Optional<User> getUserByUsernameOrEmail(String username) {
+        return this.userRepo.getUserByUsernameOrEmail(username);
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return this.userRepo.existsByUsername(username);
+    }
+
+    @Override
+    public void save(User u) {
+        this.userRepo.save(u);
     }
 
 }

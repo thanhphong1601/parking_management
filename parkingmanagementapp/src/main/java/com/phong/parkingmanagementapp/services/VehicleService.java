@@ -24,4 +24,6 @@ public interface VehicleService {
     Optional<Vehicle> findByLicensePlateNumberIgnoreCase(String plateLicense);
     Vehicle getVehicleById(int id);
     List<Vehicle> findAllByLicensePlate(String plateLicense);
+    Vehicle getAnonymousVehicle();
+    
 }

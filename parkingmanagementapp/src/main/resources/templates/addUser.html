@@ -5,7 +5,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
 
 <html xmlns:th="http://www.thymeleaf.org">
     <head>
-        <title>Trang Chủ</title>
+        <title>Thêm người dùng</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
@@ -69,7 +69,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             <form th:action="@{/users/{roleNumber}/add(roleNumber=${roleNum})}" th:object="${user}" method="post" enctype="multipart/form-data">
 
                 <div class="form-floating mb-3 mt-3">         
-                    <input class="form-control" type="text" th:field="*{username}" id="username" placeholder="Tài khoản" name="username"/>
+                    <input class="form-control" type="text" th:field="*{username}" id="username" placeholder="Tài khoản" name="username require="true""/>
                     <label class="form-label" for="username">Tài khoản</label>
                 </div>
 
@@ -79,22 +79,22 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 </div>
 
                 <div class="form-floating mb-3 mt-3">         
-                    <input class="form-control" type="text" th:field="*{name}" id="name" placeholder="Họ tên" name="name"/>
+                    <input class="form-control" type="text" th:field="*{name}" id="name" placeholder="Họ tên" name="name" require="true"/>
                     <label class="form-label" for="name">Họ tên:</label>
                 </div>
 
                 <div class="form-floating mb-3 mt-3">         
-                    <input class="form-control" type="email" th:field="*{email}" id="email" placeholder="Email" name="email"/>
+                    <input class="form-control" type="email" th:field="*{email}" id="email" placeholder="Email" name="email" require="true"/>
                     <label class="form-label" for="email">Email</label>
                 </div>
 
                 <div class="form-floating mb-3 mt-3">         
-                    <input class="form-control" type="text" th:field="*{phone}" id="phone" placeholder="Số điện thoại" name="phone" maxlength="10"/>
+                    <input class="form-control" type="text" th:field="*{phone}" id="phone" placeholder="Số điện thoại" name="phone" maxlength="10" require="true"/>
                     <label class="form-label" for="phone">Số điện thoại</label>
                 </div>
 
                 <div class="form-floating mb-3 mt-3">         
-                    <input class="form-control" type="text" th:field="*{identityNumber}" id="identityNumber" placeholder="CMND" name="identityNumber" maxlength="12"/>
+                    <input class="form-control" type="text" th:field="*{identityNumber}" id="identityNumber" placeholder="CMND" name="identityNumber" require="true" maxlength="12"/>
                     <label class="form-label" for="identityNumber">Số CMND</label>
                 </div>
 
@@ -123,7 +123,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 <div class="form-floating mb-3 mt-3">
                     <input type="file" accept=".png, .jpg" class="form-control" id="file" th:field="*{file}"/>
                     <label for="file">Ảnh đại diện</label>
-                    <img th:if="${user.avatar != null}" src="${user.avatar()}" width="200" />
+                    <img th:if="${user.avatar != null}" src="${user.avatar}" width="200px" />
                 </div>
 
 
@@ -146,7 +146,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     </table>
                 </div>
 
-
+                <a th:if="${user.id == null}" th:href="@{/users/{role_num}/vehicles/add(role_num=${roleNum})}" class="btn btn-info">Thêm phương tiện</a>
+                <a th:if="${user.id != null}" th:href="@{/users/{role_num}/{uid}/vehicles/add(role_num=${roleNum}, uid=${user.id})}" class="btn btn-info">Thêm phương tiện</a>
 
                 <div class="form-floating mb-3 mt-3">
                     <button type="submit" th:if="*{id} == null" th:text="#{user.security.add}" class="btn btn-info">Thêm nhân viên</button>
@@ -160,8 +161,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
 
 
             </form>
-            <a th:if="${user.id == null}" th:href="@{/users/{role_num}/vehicles/add(role_num=${roleNum})}" class="btn btn-info">Thêm phương tiện</a>
-            <a th:if="${user.id != null}" th:href="@{/users/{role_num}/{uid}/vehicles/add(role_num=${roleNum}, uid=${user.id})}" class="btn btn-info">Thêm phương tiện</a>
+            
         </div>
 
         <!--         Include footer -->

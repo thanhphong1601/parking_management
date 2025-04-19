@@ -48,4 +48,11 @@ public interface EntryHistoryRepository extends JpaRepository<EntryHistory, Long
     
     Long countByTimeInBetween(Date start, Date end);
     Long countByTimeOutBetween(Date start, Date end);
+    
+    @Query("SELECT e FROM EntryHistory e WHERE (e.ticket.id = :ticketId AND (e.personImgOut IS NULL AND e.plateImgOut IS NULL AND e.timeOut IS NULL))")
+    EntryHistory getEntryHistoryByTicketId(@Param("ticketId") int id);
+    
+    @Query("SELECT e FROM EntryHistory e WHERE (:licensePlateNumber IS NULL OR e.ticket.licenseNumber LIKE %:licensePlateNumber%) AND e.timeOut IS NULL AND e.plateImgOut IS NULL")
+    Page<EntryHistory> getEntryHistoryListByLicensePlateNumberPageable(@Param("licensePlateNumber") String licensePlateNumber, Pageable pageable);
+    
 }

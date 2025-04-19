@@ -5,6 +5,7 @@
 package com.phong.parkingmanagementapp.services;
 
 import com.phong.parkingmanagementapp.models.Receipt;
+import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,5 +15,8 @@ import org.springframework.data.domain.Pageable;
  */
 public interface ReceiptService {
     Page<Receipt> getReceipt(Pageable pageale, String userName);
-    boolean saveReceipt(int receiptId);
+    boolean saveReceipt(Receipt receipt);
+    Receipt getReceiptByTicketId(int id);
+    Page<Receipt> getCustomerReceipt(Pageable pageale, int userId,
+            Date startDay, Date endDay);
 }

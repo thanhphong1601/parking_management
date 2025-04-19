@@ -20,15 +20,41 @@
 
             <!-- Quản lý Tầng -->
             <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4>Tầng</h4>
-                    <a href="/addFloor" class="btn btn-primary">Thêm Tầng</a>
+                <div class="card-header d-flex align-items-center">
+                    <div class="flex-fill">
+                        <h4>Tầng</h4>
+                    </div>
+                    <div class="flex-fill text-center">
+                        <h4>Trạng thái</h4>
+                    </div>
+                    <div class="flex-fill text-center">
+                        <h4>Tình trạng</h4>
+                    </div>
+                    <div class="flex-fill text-end">
+                        <a href="/addFloor" class="btn btn-primary">Thêm Tầng</a>
+                    </div>
                 </div>
                 <div class="card-body">
                     <ul class="list-group">
                         <li class="list-group-item" th:each="floor : ${floors}">
-                            Tầng số: <span th:text="${floor.floorNumber}">1</span>
-                            <a th:href="@{/addFloor?floorId={floorId}(floorId=${floor.id})}" class="btn btn-sm btn-secondary float-end">Chỉnh sửa</a>
+                            <div class="d-flex align-items-center">
+                                <div class="flex-fill">
+                                    Tầng số: <span th:text="${floor.floorNumber}">1</span>
+                                </div>
+                                <div class="flex-fill text-center">
+                                    <span th:text="${floor.full} ? 'Đầy' : 'Trống'">Trạng thái</span>
+                                </div>
+                                <div class="flex-fill text-center">
+                                    <span th:text="${floor.isDeleted} ? 'Đã xóa' : 'Chưa xóa'"
+                                          th:classappend="${floor.isDeleted} ? ' text-danger' : ''">
+                                        Tình trạng
+                                    </span>
+                                </div>
+                                <div class="flex-fill text-end">
+                                    <a th:href="@{/addFloor?floorId={floorId}(floorId=${floor.id})}" class="btn btn-sm btn-secondary ml-3">Chỉnh sửa</a>
+                                    <a th:href="@{/area/floor/{id}/delete(id=${floor.id})}" class="btn btn-sm btn-danger">Xóa</a>
+                                </div>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -37,14 +63,40 @@
             <!-- Quản lý Dãy -->
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4>Dãy</h4>
-                    <a href="/addLine" class="btn btn-primary">Thêm Dãy</a>
+                    <div class="flex-fill">
+                        <h4>Dãy</h4>
+                    </div>
+                    <div class="flex-fill text-center">
+                        <h4>Trạng thái</h4>
+                    </div>
+                    <div class="flex-fill text-center">
+                        <h4>Tình trạng</h4>
+                    </div>
+                    <div class="flex-fill text-end">
+                        <a href="/addLine" class="btn btn-primary">Thêm Dãy</a>
+                    </div>
                 </div>
                 <div class="card-body">
                     <ul class="list-group">
                         <li class="list-group-item" th:each="line : ${lines}">
-                            Dãy: <span th:text="${line.line}">A</span> (Tầng: <span th:text="${line.floor.floorNumber}">1</span>)
-                            <a th:href="@{/addLine?lineId={id}(id=${line.id})}" class="btn btn-sm btn-secondary float-end">Chỉnh sửa</a>
+                            <div class="d-flex align-items-center">
+                                <div class="flex-fill">Dãy: <span th:text="${line.line}">A</span> (Tầng: <span th:text="${line.floor.floorNumber}">1</span>)
+                                </div>
+                                <div class="flex-fill text-center">
+                                    <span th:text="${line.full} ? 'Đầy' : 'Trống'">Trạng thái</span>
+                                </div>
+                                <div class="flex-fill text-center">
+                                    <span th:text="${line.isDeleted} ? 'Đã xóa' : 'Chưa xóa'"
+                                          th:classappend="${line.isDeleted} ? ' text-danger' : ''">
+                                        Tình trạng
+                                    </span>
+                                </div>
+                                <div class="flex-fill text-end">
+                                    <a th:href="@{/addLine?lineId={id}(id=${line.id})}" class="btn btn-sm btn-secondary ml-3">Chỉnh sửa</a>
+                                    <a th:href="@{/area/line/{id}/delete(id=${line.id})}" class="btn btn-sm btn-danger">Xóa</a>
+                                </div>
+                            </div>
+
                         </li>
                     </ul>
                 </div>
@@ -53,14 +105,38 @@
             <!-- Quản lý Vị trí -->
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4>Vị trí</h4>
-                    <a href="/addPosition" class="btn btn-primary">Thêm Vị trí</a>
+                    <div class="flex-fill">
+                        <h4>Vị trí</h4>
+                    </div>
+                    <div class="flex-fill text-center">
+                        <h4>Trạng thái</h4>
+                    </div>
+                    <div class="flex-fill text-center">
+                        <h4>Tình trạng</h4>
+                    </div>
+                    <div class="flex-fill text-end">
+                        <a href="/addPosition" class="btn btn-primary">Thêm Vị trí</a>
+                    </div>
                 </div>
                 <div class="card-body">
                     <ul class="list-group">
                         <li class="list-group-item" th:each="position : ${positions}">
-                            Vị trí số: <span th:text="${position.position}">1</span> (Dãy: <span th:text="${position.line.line}">A</span>)
-                            <a th:href="@{/addPosition?positionId={id}(id=${position.id})}" class="btn btn-sm btn-secondary float-end">Chỉnh sửa</a>
+                            <div class="d-flex align-items-center">
+                                <div class="flex-fill">Vị trí số: <span th:text="${position.position}">1</span> (Dãy: <span th:text="${position.line.line}">A</span>)</div>
+                                <div class="flex-fill text-center">
+                                    <span th:text="${position.take} ? 'Đã lấy' : 'Trống'">Trạng thái</span>
+                                </div>
+                                <div class="flex-fill text-center">
+                                    <span th:text="${position.isDeleted} ? 'Đã xóa' : 'Chưa xóa'"
+                                          th:classappend="${position.isDeleted} ? ' text-danger' : ''">
+                                        Tình trạng
+                                    </span>
+                                </div>
+                                <div class="flex-fill text-end">
+                                    <a th:href="@{/addPosition?positionId={id}(id=${position.id})}" class="btn btn-sm btn-secondary ml-3">Chỉnh sửa</a>
+                                    <a th:href="@{/area/position/{id}/delete(id=${position.id})}" class="btn btn-sm btn-danger">Xóa</a>
+                                </div>
+                            </div>
                         </li>
                     </ul>
                 </div>

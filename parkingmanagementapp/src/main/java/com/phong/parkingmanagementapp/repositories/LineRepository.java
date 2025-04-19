@@ -24,4 +24,11 @@ public interface LineRepository extends JpaRepository<Line, Long>{
     List<Line> findLinesByFloorId(@Param("id")int id);
     
     Line getLineById(int id);
+    
+    @Query("SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END FROM Line l WHERE l.floor.id = :floorId AND l.full = false AND l.isDeleted = false")
+    Boolean existsByStatus(@Param("floorId") int floorId);
+    
+    @Query("SELECT COUNT(l) FROM Line l WHERE l.floor.id = :floorId")
+    int countLineByFloorId(@Param("floorId") int floorId);
+
 }

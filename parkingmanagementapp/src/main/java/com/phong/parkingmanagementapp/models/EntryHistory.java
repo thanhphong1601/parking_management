@@ -49,12 +49,21 @@ public class EntryHistory {
     @Column(name = "plate_img_out")
     private String plateImgOut;
     
-    //nhân viên
+    @Basic(optional = true)
+    @Column(name = "person_img_in")
+    private String personImgIn;
+    
+    @Basic(optional = true)
+    @Column(name = "person_img_out")
+    private String personImgOut;
+    
+    //khach hang
     @JoinColumn(name = "vehicle_owner_id")
     @ManyToOne()
     @NotNull(message = "{entry.user.notNull}")
     private User owner;
     
+    //nhân viên
     @JoinColumn(name = "creator_id")
     @ManyToOne()
     @NotNull(message = "{entry.user.notNull}")
@@ -64,6 +73,10 @@ public class EntryHistory {
     @ManyToOne()
     @NotNull(message = "{entry.vehicle.notNull}")
     private Vehicle vehicle;
+    
+    @JoinColumn(name = "ticket_id")
+    @ManyToOne()
+    private Ticket ticket;
     
     @Transient
     private MultipartFile file;

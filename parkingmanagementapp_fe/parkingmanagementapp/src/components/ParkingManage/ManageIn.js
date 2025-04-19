@@ -1,190 +1,40 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import './ManageIn.css'
 import { Button, Form, Image, Modal, Spinner } from 'react-bootstrap';
 import { format, parse } from 'date-fns';
 import { authApi, endpoints } from '../../configs/APIs';
 import MySpinner from '../common/MySpinner';
 import { MyUserContext } from '../../configs/Contexts';
+import { useNavigate } from 'react-router-dom';
+import './ManageIn.css'
+
 
 const ManageIn = () => {
-    // const data = {
-    //     "owner": {
-    //         "id": 12,
-    //         "name": "Phan Văn Hào",
-    //         "identityNumber": "1",
-    //         "phone": "1",
-    //         "address": "testAdress",
-    //         "birthday": "2024-09-16T17:00:00.000+00:00",
-    //         "email": "pvh@gmail.com",
-    //         "username": "khachhang1",
-    //         "password": "$2a$10$YZHNakhZijoTopznKqusIeBnka5gMAhP0I/PE2lQ7ggJ7nIT4aTDm",
-    //         "role": {
-    //             "id": 3,
-    //             "role": "ROLE_CUSTOMER"
-    //         },
-    //         "avatar": "",
-    //         "file": null,
-    //         "active": true,
-    //         "enabled": true,
-    //         "accountNonExpired": true,
-    //         "credentialsNonExpired": true,
-    //         "accountNonLocked": true
-    //     },
-    //     "ticket": {
-    //         "id": 1,
-    //         "floor": {
-    //             "id": 1,
-    //             "floorNumber": 1
-    //         },
-    //         "line": {
-    //             "id": 1,
-    //             "line": "A",
-    //             "floor": {
-    //                 "id": 1,
-    //                 "floorNumber": 1
-    //             }
-    //         },
-    //         "position": {
-    //             "id": 1,
-    //             "position": 1,
-    //             "line": {
-    //                 "id": 1,
-    //                 "line": "A",
-    //                 "floor": {
-    //                     "id": 1,
-    //                     "floorNumber": 1
-    //                 }
-    //             }
-    //         },
-    //         "price": {
-    //             "id": 1,
-    //             "price": 15000
-    //         },
-    //         "userCreate": {
-    //             "id": 2,
-    //             "name": "Security",
-    //             "identityNumber": "33333333",
-    //             "phone": "1230",
-    //             "address": "Security",
-    //             "birthday": "2024-09-18T17:00:00.000+00:00",
-    //             "email": "security@gmail.com",
-    //             "username": "security",
-    //             "password": "$2a$10$keZrZz7Tj4mIdrg0j5pkJeQ2EuH8QGLnT/tB12sQDrxn5nLGHvYhW",
-    //             "role": {
-    //                 "id": 2,
-    //                 "role": "ROLE_SECURITY"
-    //             },
-    //             "avatar": "",
-    //             "file": null,
-    //             "active": true,
-    //             "enabled": true,
-    //             "accountNonExpired": true,
-    //             "credentialsNonExpired": true,
-    //             "accountNonLocked": true
-    //         },
-    //         "userOwned": {
-    //             "id": 12,
-    //             "name": "Phan Văn Hào",
-    //             "identityNumber": "1",
-    //             "phone": "1",
-    //             "address": "testAdress",
-    //             "birthday": "2024-09-16T17:00:00.000+00:00",
-    //             "email": "pvh@gmail.com",
-    //             "username": "khachhang1",
-    //             "password": "$2a$10$YZHNakhZijoTopznKqusIeBnka5gMAhP0I/PE2lQ7ggJ7nIT4aTDm",
-    //             "role": {
-    //                 "id": 3,
-    //                 "role": "ROLE_CUSTOMER"
-    //             },
-    //             "avatar": "",
-    //             "file": null,
-    //             "active": true,
-    //             "enabled": true,
-    //             "accountNonExpired": true,
-    //             "credentialsNonExpired": true,
-    //             "accountNonLocked": true
-    //         },
-    //         "vehicle": {
-    //             "id": 11,
-    //             "name": "Vision",
-    //             "type": {
-    //                 "id": 2,
-    //                 "type": "Xe máy"
-    //             },
-    //             "plateLicense": "IT20BOM",
-    //             "user": {
-    //                 "id": 12,
-    //                 "name": "Phan Văn Hào",
-    //                 "identityNumber": "1",
-    //                 "phone": "1",
-    //                 "address": "testAdress",
-    //                 "birthday": "2024-09-16T17:00:00.000+00:00",
-    //                 "email": "pvh@gmail.com",
-    //                 "username": "khachhang1",
-    //                 "password": "$2a$10$YZHNakhZijoTopznKqusIeBnka5gMAhP0I/PE2lQ7ggJ7nIT4aTDm",
-    //                 "role": {
-    //                     "id": 3,
-    //                     "role": "ROLE_CUSTOMER"
-    //                 },
-    //                 "avatar": "",
-    //                 "file": null,
-    //                 "active": true,
-    //                 "enabled": true,
-    //                 "accountNonExpired": true,
-    //                 "credentialsNonExpired": true,
-    //                 "accountNonLocked": true
-    //             }
-    //         },
-    //         "startDay": "2024-09-23T17:00:00.000+00:00",
-    //         "endDay": "2024-10-24T17:00:00.000+00:00",
-    //         "totalPrice": 450000,
-    //         "isPaid": false
-    //     },
-    //     "plate": "it20bom",
-    //     "timeIn": "Sat Oct 05 20:41:42 ICT 2024",
-    //     "vehicle": {
-    //         "id": 11,
-    //         "name": "Vision",
-    //         "type": {
-    //             "id": 2,
-    //             "type": "Xe máy"
-    //         },
-    //         "plateLicense": "IT20BOM",
-    //         "user": {
-    //             "id": 12,
-    //             "name": "Phan Văn Hào",
-    //             "identityNumber": "1",
-    //             "phone": "1",
-    //             "address": "testAdress",
-    //             "birthday": "2024-09-16T17:00:00.000+00:00",
-    //             "email": "pvh@gmail.com",
-    //             "username": "khachhang1",
-    //             "password": "$2a$10$YZHNakhZijoTopznKqusIeBnka5gMAhP0I/PE2lQ7ggJ7nIT4aTDm",
-    //             "role": {
-    //                 "id": 3,
-    //                 "role": "ROLE_CUSTOMER"
-    //             },
-    //             "avatar": "",
-    //             "file": null,
-    //             "active": true,
-    //             "enabled": true,
-    //             "accountNonExpired": true,
-    //             "credentialsNonExpired": true,
-    //             "accountNonLocked": true
-    //         }
-    //     }
-    // };
-
-    const [inImgUrl, setInImgUrl] = useState("https://via.placeholder.com/150");
-    const [outImgUrl, setOutImgUrl] = useState("https://via.placeholder.com/150");
+    // const data2 = {
+    //     "ticketStartDate": "2025-03-19T17:00:00.000+00:00",
+    //     "ownerUsername": "Anonymous",
+    //     "ticketStatus": "false",
+    //     "ticketTotalPrice": 900000,
+    //     "ticketType": "VIP",
+    //     "ticketPosition": "",
+    //     "ticketLicenseNumber": "",
+    //     "ticketExpiredDate": "2025-06-17T17:00:00.000+00:00"
+    // }
+    const nav = useNavigate();
+    const [inImgUrl, setInImgUrl] = useState("https://placehold.co/250x150/png");
+    const [outImgUrl, setOutImgUrl] = useState("https://placehold.co/250x150/png");
+    const [inPersonImgUrl, setInPersonImgUrl] = useState("https://placehold.co/250x150/png");
+    const [outPersonImgUrl, setOutPersonImgUrl] = useState("https://placehold.co/250x150/png");
     const [timeIn, setTimeIn] = useState(null);
     const [uid, setUid] = useState(null);
-    const [creatorId, setCreatorId] = useState(null);
-    const [vehicleId, setVehicleId] = useState(null);
-    const files = useRef();
+    const [ticketId, setTicketId] = useState("");
+    const [ticketStartDate, setTicketStartDate] = useState(null);
+    const [ticketEndDate, setTicketEndDate] = useState(null);
+    const files = useRef(); //license plate image
+    const files2 = useRef(); //person image
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState("");
     const [data, setData] = useState(null);
+    const [data2, setData2] = useState(null);
     const currentUser = useContext(MyUserContext);
     const [vehicleChoice, setVehicleChoice] = useState(null);
     const [plateLicense, setPlateLicense] = useState("");
@@ -223,6 +73,10 @@ const ManageIn = () => {
         setPlateLicense("");
     };
 
+    if (currentUser === null) {
+        nav('/login');
+    }
+
 
     //util func
     const formatDate = (isoDateString) => {
@@ -243,7 +97,7 @@ const ManageIn = () => {
         return format(date, 'dd/MM/yyyy HH:mm:ss');
     };
 
-    const handleFileChange = async (event) => {
+    const handleInImgChange = async (event) => {
         event.preventDefault();
         setMsg("");
 
@@ -252,133 +106,42 @@ const ManageIn = () => {
             const imageUrl = URL.createObjectURL(file); // Tạo URL tạm thời từ file
             setInImgUrl(imageUrl); // Cập nhật đường dẫn hình ảnh trong state
         }
+    };
 
-        setLoading(true);
-        showLoading();
-        let form = new FormData();
+    const handleInPersonImgChange = async (event) => {
+        event.preventDefault();
+        setMsg("");
 
-        if (files)
-            form.append('file', files.current.files[0]);
-
-        try {
-            let res = await authApi().post(endpoints['recognize-in'], form, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-
-            if (res.status == 201) {
-                setLoading(false);
-                setData(res.data);
-                setMsg("Đã phân tích thành công!");
-
-                setTimeout(() => {
-                    closeLoading();
-                }, 1000);
-            }
-            if (res.data == "Cannot get plate license from image!") {
-                setLoading(false);
-                setMsg("Phân tích thất bại");
-
-                setTimeout(() => {
-                    closeLoading();
-                }, 1000);
-            };
-            if (res.data == "User not found! Please check your infomation") {
-                setLoading(false);
-                setMsg("Không tìm thấy người dùng tương ứng");
-
-                setTimeout(() => {
-                    closeLoading();
-                }, 1000);
-            };
-
-            if (res.data == "No valid ticket found!") {
-                setLoading(false);
-                setMsg("Người dùng hiện chưa đăng ký vé");
-
-                setTimeout(() => {
-                    closeLoading();
-                }, 1000);
-            };
-
-            if (res.data == "Cannot get plate license from image!") {
-                setLoading(false);
-                setMsg("Phân tích thất bại");
-
-                setTimeout(() => {
-                    closeLoading();
-                }, 1000);
-            };
-
-        } catch (ex) {
-            setMsg("Đã có lỗi xảy ra");
-            console.info(ex);
+        const file = event.target.files[0]; // Lấy file đầu tiên từ input
+        if (file) {
+            const imageUrl = URL.createObjectURL(file); // Tạo URL tạm thời từ file
+            setInPersonImgUrl(imageUrl); // Cập nhật đường dẫn hình ảnh trong state
         }
     };
 
     const loadInfo = async () => {
+        // e.preventDefault();
         setMsg("");
 
         setLoading(true);
         showLoading();
-        let form = new FormData();
-
-        if (vehicleChoice != null) {
-            form.append('vehicleId', vehicleChoice.id);
-
+        if (ticketId != "") {
             try {
-                let res = await authApi().post(endpoints['recognize-in'], form);
-                
-                if (res.status == 201) { 
-                    setLoading(false);
-                    setData(res.data);
-                    setMsg("Đã phân tích thành công!");
+                let url = `${endpoints['entry-ticket-process']}?ticketId=${ticketId}`
+                let res = await authApi().get(url);
+
+                if (res.status == 200) {
+                    setData2(res.data);
 
                     setTimeout(() => {
                         closeLoading();
                     }, 1000);
-                };
-                if (res.data == "Cannot get plate license from image!") {
-                    setLoading(false);
-                    setMsg("Phân tích thất bại");
-
-                    setTimeout(() => {
-                        closeLoading();
-                    }, 1000);
-                };
-                if (res.data == "User not found! Please check your infomation") {
-                    setLoading(false);
-                    setMsg("Không tìm thấy người dùng tương ứng");
-
-                    setTimeout(() => {
-                        closeLoading();
-                    }, 1000);
-                };
-
-                if (res.data == "No valid ticket found!") {
-                    setLoading(false);
-                    setMsg("Người dùng hiện chưa đăng ký vé");
-
-                    setTimeout(() => {
-                        closeLoading();
-                    }, 1000);
-                };
-
-                if (res.data == "Cannot get plate license from image!") {
-                    setLoading(false);
-                    setMsg("Phân tích thất bại");
-
-                    setTimeout(() => {
-                        closeLoading();
-                    }, 1000);
-                };
-
-
-               
-
+                }
             } catch (ex) {
-                setMsg("Đã có lỗi xảy ra");
+                if (ex.response.status == 400 || ex.response.status == 404) {
+                    setMsg(ex.response.data["Ticket error: "]);
+                    setLoading(false);
+                }
                 console.info(ex);
             }
         } else {
@@ -387,39 +150,137 @@ const ManageIn = () => {
         }
     };
 
-    const uploadEntryInfo = async (e) => {
+    const recordEntry = async (e) => {
         e.preventDefault();
+        setMsg("");
+        setLoading(true);
+        showLoading();
 
         let form = new FormData();
-        if (files)
-            form.append('file', files.current.files[0]);
-        form.append("timeIn", data.timeIn);
-        form.append("userId", data.owner.id);
-        form.append("creatorId", currentUser.id);
-        form.append("vehicleId", data.vehicle.id);
+
+        if (files && files2) {
+            form.append('file1', files.current.files[0]);
+            form.append('file2', files2.current.files[0]);
+        }
+        if (ticketId != "") {
+            const now = new Date();
+            const timeIn = now.toISOString().replace('Z', '+00:00');
+            form.append("timeIn", timeIn);
+            form.append("ticketId", ticketId);
+            form.append("creatorId", currentUser.id);
+            form.append("userId", data2.ownerUserId);
+            form.append("vehicleId", data2.ticketVehicleId);
+        }
 
         try {
-            let res = await authApi().post(endpoints['recognize-in-save'], form, {
+            let res = await authApi().post(endpoints['entry-record-in'], form, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-
             if (res.status == 201) {
+                updatePositionState();
+                closeLoading();
+                setLoading(false);
                 showSuccess();
+
+                getPositionInfo();
+
                 setTimeout(() => {
                     closeSuccess();
+                    showLoading();
                 }, 2000);
-            };
+                setTimeout(() => {
+                    closeLoading();
+                }, 4000);
+            }
+        } catch (ex) {
+            setMsg("Đã có lỗi xảy ra");
+            console.info(ex);
+        }
+    };
+
+    const updatePositionState = async () => {
+        try {
+            let url = `${endpoints['position-info-find-by-ticketId'](ticketId)}`;
+            let res = await authApi().get(url);
+            if (res.status == 200) {
+                url = `${endpoints['position-state-update-vehicle-in'](res.data.position.id)}?ticketId=${ticketId}`;
+                res = await authApi().post(url);
+
+                if (res.status == 200) {
+                    console.info(res.status);
+                }
+            }
+
+
+        } catch (ex) {
+            if (ex.response.status == 404) {
+                console.error(ex.response.data);
+            }
+            console.error(ex);
+        }
+    };
+
+    const getPositionInfo = async () => {
+        setMsg("");
+
+        try {
+            let url = `${endpoints['position-info-find-by-ticketId'](ticketId)}`;
+            let res = await authApi().get(url);
+
+            if (res.status == 200) {
+                let info = `
+                Vị trí được xác định:
+                Vị trí ${res.data.position.position} dãy ${res.data.line.line} thuộc tầng ${res.data.floor.floorNumber}
+            `;
+                setMsg(info);
+            }
         } catch (ex) {
             console.error(ex);
-        } finally {
-            setData(null);
         }
+    };
 
+    const createAnonymousTicket = async (e) => {
+        e.preventDefault();
+        setMsg("");
+
+        setLoading(true);
+        showLoading();
+
+        try {
+            let url = `${endpoints['ticket-create-anonymous']}?userCreateId=${currentUser.id}`;
+            let res = await authApi().post(url);
+
+            if (res.status == 201) {
+                setLoading(false);
+                setMsg("Đã tạo vé mới thành công.");
+
+                res = await authApi().get(endpoints['ticket-get-newest']);
+                if (res.status == 200) {
+                    setTicketId(res.data);
+                    loadInfo();
+                    getPositionInfo();
+                }
+
+                setTimeout(() => {
+                    closeLoading();
+                }, 3000);
+            }
+        } catch (ex) {
+            setMsg("Đã có lỗi xảy ra");
+
+            console.error(ex);
+        }
+    };
+
+
+    const test = (e) => {
+        e.preventDefault();
+        setMsg("");
+        getPositionInfo();
+        console.info(msg);
     }
-
-
 
     //loading resource funcs
     const loadVehicles = async () => {
@@ -440,75 +301,83 @@ const ManageIn = () => {
     };
 
     useEffect(() => {
-        loadInfo();
-    }, [vehicleChoice]);
-
-    useEffect(() => {
         loadVehicles();
     }, [plateLicense]);
+
 
     return <>
         <div className="container">
             <h1>QUẢN LÝ XE VÀO</h1>
-            <div className='divBtn'>
-                <Button className='btn btn-info btnFind' onClick={showVehicle}>Tìm kiếm phương tiện</Button>
+            <div className='ticket-input'>
+                <label className='ticket-input-label' htmlFor="ticketInput">Mã vé</label>
+                <input className='' id="ticketInput" type='text' placeholder='Id vé' value={ticketId} onChange={e => setTicketId(e.target.value)}></input>
+                <div className=''>
+                    <Button onClick={e => loadInfo()} className='btn btn-success'>Xác nhận</Button>
+                </div>
+                <div className=''>
+                    <Button onClick={e => createAnonymousTicket(e)} className='btn btn-success'>Tạo vé mới</Button>
+                </div>
             </div>
 
             <div className="form-container">
                 <div className="input-container">
                     <div className='d-flex justify-content-between p-1'>
                         <div className="form-group">
-                            <label htmlFor="vehicleName">Tên xe</label>
-                            <input id="vehicleName" disabled className='me-2' type="text" placeholder="Tên phương tiện" value={data ? data.vehicle.name : ""} />
+                            <label htmlFor="ownerName">Tên khách hàng</label>
+                            <input disabled id="ownerName" className='me-3' type="text" placeholder="Tên khách hàng" value={data2 ? data2.ownerUsername : ""} />
+                        </div>
+                    </div>
+                    <div className='d-flex justify-content-between p-1'>
+                        <div className="form-group">
+                            <label htmlFor="vehicleName">Loại vé</label>
+                            <input id="vehicleName" disabled className='me-2' type="text" placeholder="Loại vé" value={data2 ? data2.ticketType : ""} />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="vehicleType">Loại xe</label>
-                            <input id="vehicleType" disabled className='me-2' type="text" placeholder="Loại phương tiện" value={data ? data.vehicle.type.type : ""} />
+                            <label htmlFor="vehicleType">Trạng thái vé</label>
+                            <input id="vehicleType" disabled className='me-2' type="text" placeholder="Trạng thái vé" value={data2 ? data2.ticketStatus === "true" ? "Đã thanh toán" : "Chưa thanh toán" : ""} />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="plateLicense">Biển số</label>
-                            <input id="plateLicense" disabled type="text" placeholder="Biển số" value={data ? data.vehicle.plateLicense : ""} />
+                            <label htmlFor="plateLicense">Tổng giá tiền</label>
+                            <input id="plateLicense" disabled type="text" placeholder="Tổng giá tiền" value={data2 ? data2.ticketTotalPrice + " VNĐ" : ""} />
                         </div>
                     </div>
 
                     <div className='d-flex justify-content-between p-1'>
                         <div className="form-group">
                             <label htmlFor="startDay">Ngày bắt đầu</label>
-                            <input id="startDay" disabled className='me-3' type="text" placeholder="Thời hạn vé từ" value={data ? formatDate(data.ticket.startDay) : ""} />
+                            <input id="startDay" disabled className='me-3' type="text" placeholder="Thời hạn vé từ" value={data2 ? formatDate(data2.ticketStartDate) : ""} />
                         </div>
                         <div className="form-group">
                             <label htmlFor="endDay">Ngày kết thúc</label>
-                            <input id="endDay" disabled type="text" placeholder="Đến" value={data ? formatDate(data.ticket.endDay) : ""} />
+                            <input id="endDay" disabled type="text" placeholder="Đến" value={data2 ? formatDate(data2.ticketExpiredDate) : ""} />
                         </div>
                         <div className="form-group">
                             <label htmlFor="position">Vị trí</label>
-                            <input id="position" disabled className='me-3' type="text" placeholder="Vị trí" value={data ? `Tầng ${data.ticket.floor.floorNumber} - dãy ${data.ticket.line.line} - vị trí ${data.ticket.position.position}` : ""} />
+                            <input id="position" disabled className='me-3' type="text" placeholder="Vị trí" value={data2 ? data2.ticketPosition === "" ? "Trống" : data2.ticketPosition : "Trống"} />
                         </div>
                     </div>
 
-                    <div className='d-flex justify-content-between p-1'>
-                        <div className="form-group">
-                            <label htmlFor="ownerName">Tên khách hàng</label>
-                            <input disabled id="ownerName" className='me-3' type="text" placeholder="Tên khách hàng" value={data ? data.owner.name : ""} />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="phone">Số điện thoại</label>
-                            <input disabled id="phone" className='me-3' type="text" placeholder="Số điện thoại" value={data ? data.owner.phone : ""} />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="identityNumber">CMND</label>
-                            <input disabled id="identityNumber" type="text" placeholder="CMND" value={data ? data.owner.identityNumber : ""} />
-                        </div>
-                    </div>
+
                 </div>
 
+                <h5>Biển số xe</h5>
                 <div className="image-container">
                     <Image src={inImgUrl} alt="Image 1" />
                     <Form.Group controlId="image" className="mb-3 me-1">
-                        <Form.Label>Chọn hình ảnh:</Form.Label>
-                        <Form.Control type="file" accept=".png,.jpg" ref={files} onChange={handleFileChange} />
+                        <Form.Label>Chọn hình ảnh biến số xe:</Form.Label>
+                        <Form.Control type="file" accept=".png,.jpg" ref={files} onChange={e => handleInImgChange(e)} />
                     </Form.Group>
                     <Image src={outImgUrl} alt="Image 2" />
+                </div>
+                <h5>Người dùng</h5>
+
+                <div className="image-container mt-3">
+                    <Image src={inPersonImgUrl} alt="Image 1" />
+                    <Form.Group controlId="image" className="mb-3 me-1">
+                        <Form.Label>Chọn hình ảnh người dùng:</Form.Label>
+                        <Form.Control type="file" accept=".png,.jpg" ref={files2} onChange={e => handleInPersonImgChange(e)} />
+                    </Form.Group>
+                    <Image src={outPersonImgUrl} alt="Image 2" />
                 </div>
 
                 <div className="time-container">
@@ -520,7 +389,7 @@ const ManageIn = () => {
                     </div>
                 </div>
 
-                <button className="submit-button" onClick={(e) => uploadEntryInfo(e)}>Lưu thông tin</button>
+                <button className="submit-button" onClick={e => recordEntry(e)} >Lưu thông tin</button>
             </div>
 
 
@@ -538,7 +407,7 @@ const ManageIn = () => {
                         <p>Đang tiến hành phân tích thông tin...</p>
                     </>
                 ) : (
-                    <p>{msg}</p>
+                    <h2>{msg}</h2>
                 )}
             </Modal.Body>
             <Modal.Footer>
@@ -550,7 +419,7 @@ const ManageIn = () => {
 
         <Modal show={showSuccessModal} onHide={closeSuccess}>
             <Modal.Body className="text-center">
-                <h1>Đã Upload thành công</h1>
+                <h2>Đã Upload thành công</h2>
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={closeSuccess}>

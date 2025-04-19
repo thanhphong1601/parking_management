@@ -124,10 +124,14 @@ public class AdminUserController {
         }
         if (!rs.hasErrors()) {
             try {
+                if (u.getId() != null){
+                    User currentUser = this.userService.getUserById(u.getId());
+                    u.setActive(currentUser.getActive());
+                }
 
                 this.userService.saveUser(u);
                 
-                User userNew = this.userService.getUserByName(u.getName());
+                User userNew = this.userService.findByEmail(u.getEmail());
                 this.vehicleService.updateNewVehiclesOwner(userNew.getId());
 
                 return "redirect:" + url;
@@ -135,7 +139,6 @@ public class AdminUserController {
                 model.addAttribute("errMsg", e.toString());
             }
         }
-        System.out.println(rs);
         return "addUser";
 
     }

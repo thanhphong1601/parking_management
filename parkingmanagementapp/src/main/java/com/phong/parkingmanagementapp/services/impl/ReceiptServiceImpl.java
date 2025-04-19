@@ -36,23 +36,30 @@ public class ReceiptServiceImpl implements ReceiptService{
     }
 
     @Override
-    public boolean saveReceipt(int receiptId) {
-        Ticket t = this.ticketRepo.getTicketById(receiptId);
-        User owner = t.getUserOwned();
+    public boolean saveReceipt(Receipt receipt) {
+        User owner = receipt.getTicket().getUserOwned();
         
         LocalDateTime now = LocalDateTime.now();
         Instant instant = now.atZone(ZoneId.systemDefault()).toInstant();
         Date date = Date.from(instant);
         
-        Receipt r = new Receipt();
-        r.setTicket(t);
-        r.setOwner(owner);
-        r.setCreateAt(date);
-        r.setTotalAmount(t.getTotalPrice());
+        receipt.setOwner(owner);
+        receipt.setCreateAt(date);
+        receipt.setTotalAmount(receipt.getTicket().getTotalPrice());
         
-        this.receiptRepo.save(r);
+        this.receiptRepo.save(receipt);
         
         return true;
+    }
+
+    @Override
+    public Receipt getReceiptByTicketId(int id) {
+        return this.receiptRepo.getReceiptByTicketId(id);
+    }
+
+    @Override
+    public Page<Receipt> getCustomerReceipt(Pageable pageale, int userId, Date startDay, Date endDay) {
+        return this.receiptRepo.getCustomerReceipt(pageale, userId, startDay, endDay);
     }
     
 }

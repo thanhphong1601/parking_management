@@ -11,6 +11,7 @@ import com.phong.parkingmanagementapp.utils.parseLocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import javax.sound.midi.SysexMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -42,16 +43,14 @@ public class ApiTicketPriceController {
     public ResponseEntity<?> calTotalPrice(@RequestParam Map<String, String> params){
         String startDayString = params.get("startDay");
         Date startDay = parseLocalDate.parseDate(startDayString);
-        String endDayString = params.get("endDay");
-        Date endDay = parseLocalDate.parseDate(endDayString);
+        String endDayString = params.get("numberOfDays");
+        int numberOfDays = Integer.parseInt(endDayString);
         String priceId = params.get("id");
         if (priceId.isBlank() || priceId.isEmpty())
             priceId = "1";
         
-        TicketPrice ticketPrice = this.priceService.getTicketPriceById(Integer.parseInt(priceId));
-        
-        int price = this.ticketService.totalPriceCal(startDay, endDay, ticketPrice.getPrice());
-        
+        int price = this.ticketService.totalPriceCal(numberOfDays, Integer.parseInt(priceId));
+ 
         return ResponseEntity.ok(price);
     }
 }

@@ -1,12 +1,19 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button, Modal, Spinner } from "react-bootstrap";
 import { authApi, endpoints } from "../../configs/APIs";
 import './TicketList.css'
 import { useNavigate } from "react-router-dom";
 import MySpinner from "../common/MySpinner";
+import { MyUserContext } from "../../configs/Contexts";
+import {QRCodeSVG} from 'qrcode.react';
+
 
 const TicketList = () => {
     const nav = useNavigate();
+    const currentUser = useContext(MyUserContext);
+    if (currentUser === null) {
+        nav('/login');
+    };
 
     const data = [
         {
@@ -119,7 +126,7 @@ const TicketList = () => {
             "totalPrice": 495000,
             "isPaid": false
         }
-    ]
+    ];
 
     const fields = [{
         label: "Ngày bắt đầu",
@@ -160,9 +167,12 @@ const TicketList = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
     const [showDeleteSpinner, setShowDeleteSpinner] = useState(false);
+    const [showQRCode, setShowQRCode] = useState(false);
 
     const [isDeleting, setIsDeleting] = useState(true);
     const [deleteSuccess, setDeleteSuccess] = useState(false);
+
+    const [qrCode, setQRCode] = useState("");
 
 
     // functions
@@ -202,6 +212,7 @@ const TicketList = () => {
         try {
             let res = await authApi().delete(endpoints['ticket-delete'](selectedTicket.id));
 
+
             if (res.status === 204) {
                 setTimeout(() => {
                     setIsDeleting(false);
@@ -233,6 +244,23 @@ const TicketList = () => {
 
             window.location.href = res.data;
 
+        } catch (ex) {
+            console.error(ex);
+        }
+    };
+
+    const createPaymentUrl = async (e, t) => {
+        e.preventDefault();
+        let form = new FormData();
+
+        const info = `Người dùng: ${t.userOwned.name} thanh toán vé id: ${t.id}`;
+        form.append("orderInfo", info);
+        form.append("price", t.totalPrice);
+        try {
+            let res = await authApi().post(endpoints['create-payment'], form);
+            setQRCode(res.data);
+
+            showQRCodeModal();
         } catch (ex) {
             console.error(ex);
         }
@@ -277,6 +305,14 @@ const TicketList = () => {
     const cancelDeleting = () => {
         setShowDeleteSpinner(false);
     };
+
+    const showQRCodeModal = () => {
+        setShowQRCode(true);
+    }
+
+    const cancelQRCodeModal = () => {
+        setShowQRCode(false);
+    }
 
     //load resources func
     const nextPage = () => {
@@ -331,13 +367,14 @@ const TicketList = () => {
                         <th></th>
                         <th></th>
                         <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
 
                     {tickets.map(t => <tr key={t.id}>
                         <td>{t.id}</td>
-                        <td>Vị trí {t.position.position} dãy {t.line.line} tầng {t.floor.floorNumber}</td>
+                        <td>Vị trí {t.position ? t.position.position : "-"} dãy {t.line ? t.line.line : "-"} tầng {t.floor ? t.floor.floorNumber : "-"}</td>
                         <td>{t.userOwned.name}</td>
                         <td>{t.userOwned.identityNumber}</td>
                         <td>{t.userCreate.name}</td>
@@ -358,6 +395,10 @@ const TicketList = () => {
                         </td>
                         <td>
                             <Button className="btn-danger" onClick={(e) => showDelete(e, t)} >Xóa</Button>
+                        </td>
+                        <td>
+                            <Button className="btn-info" onClick={(e) => createPaymentUrl(e, t)} >QR</Button>
+
                         </td>
                     </tr>)}
 
@@ -387,7 +428,8 @@ const TicketList = () => {
             </Modal.Header>
             <Modal.Body className="modal-body-custom">
                 <p><strong>Mã vé:</strong> {selectedTicket.id}</p>
-                <p><strong>Vị trí:</strong> Vị trí {selectedTicket.position.position} dãy {selectedTicket.line.line} tầng {selectedTicket.floor.floorNumber}</p>
+                <p>  <strong>Vị trí:</strong> Vị trí {selectedTicket?.position?.position || "-"} dãy {selectedTicket?.line?.line || "-"} tầng {selectedTicket?.floor?.floorNumber || "-"}
+                </p>
                 <p><strong>Người sở hữu:</strong> {selectedTicket.userOwned.name}</p>
                 <p><strong>Email:</strong> {selectedTicket.userOwned.email}</p>
                 <p><strong>CMND:</strong> {selectedTicket.userOwned.identityNumber}</p>
@@ -459,16 +501,16 @@ const TicketList = () => {
             </Modal.Footer>
         </Modal> */}
         {selectedTicket && <Modal show={showDeleteModal} onHide={closeDelete} size="lg" className="custom-modal">
-            <Modal.Header closeButton>
+            <Modal.Header closeButton className="modal-header-danger">
                 <Modal.Title>Xác nhận xóa thông tin</Modal.Title>
             </Modal.Header>
             <Modal.Body className="modal-body-custom">
                 <p><strong>Mã vé:</strong> {selectedTicket.id}</p>
-                <p><strong>Vị trí:</strong> Vị trí {selectedTicket.position.position} dãy {selectedTicket.line.line} tầng {selectedTicket.floor.floorNumber}</p>
+                <p><strong>Vị trí:</strong> Vị trí {selectedTicket?.position?.position || "-"} dãy {selectedTicket?.line?.line || "-"} tầng {selectedTicket?.floor?.floorNumber || "-"}</p>
                 <p><strong>Người sở hữu:</strong> {selectedTicket.userOwned.name}</p>
                 <p><strong>Email:</strong> {selectedTicket.userOwned.email}</p>
                 <p><strong>CMND:</strong> {selectedTicket.userOwned.identityNumber}</p>
-                <p><strong>Ngày sinh:</strong> {formatDate(selectedTicket.userOwned.birthday)}</p>
+                {/* <p><strong>Ngày sinh:</strong> {formatDate(selectedTicket.userOwned.birthday)}</p> */}
                 <p><strong>Nhân viên tạo vé:</strong> {selectedTicket.userCreate.name}</p>
                 <p><strong>Mã nhân viên:</strong> {selectedTicket.userCreate.name}</p>
                 <p><strong>CMND nhân viên:</strong> {selectedTicket.userCreate.identityNumber}</p>
@@ -487,8 +529,8 @@ const TicketList = () => {
             </Modal.Footer>
         </Modal>}
 
-        <Modal show={showConfirmDelete} onHide={cancelConfirmDelete} size="lg">
-            <Modal.Header closeButton>
+        <Modal show={showConfirmDelete} onHide={cancelConfirmDelete} size="lg" className="custom-modal">
+            <Modal.Header closeButton className="modal-header modal-header-danger">
                 <Modal.Title>Xác nhận xóa thông tin</Modal.Title>
             </Modal.Header>
             <Modal.Body>
@@ -519,6 +561,21 @@ const TicketList = () => {
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={cancelDeleting}>
+                    Đóng
+                </Button>
+            </Modal.Footer>
+        </Modal>
+
+        <Modal show={showQRCode} onHide={cancelQRCodeModal}>
+            <Modal.Header closeButton>
+                <Modal.Title>Quét QR Code để thanh toán</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="d-flex justify-content-center">
+                {/* <QRCode value={qrCode} size={256} /> */}
+                <QRCodeSVG value={qrCode} size={256} />
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={cancelQRCodeModal}>
                     Đóng
                 </Button>
             </Modal.Footer>

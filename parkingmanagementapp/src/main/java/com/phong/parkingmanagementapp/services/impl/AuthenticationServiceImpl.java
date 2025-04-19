@@ -43,9 +43,9 @@ public class AuthenticationServiceImpl implements AuthenticationService{
                     )
             );
 
-            User userDetails = userRepo.findByUsername(authenticationRequest.getUsername())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
+            User userDetails = userRepo.getUserByUsernameOrEmail(authenticationRequest.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng"));
+            
             String token = jwtService.generateToken(userDetails);
             return token;
 

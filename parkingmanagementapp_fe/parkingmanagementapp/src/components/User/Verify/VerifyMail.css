@@ -1,0 +1,78 @@
+/* Reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f7f9fb;
+}
+
+.verify-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #f7f9fb;
+}
+
+.verify-box {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.verify-header {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+.verify-instruction {
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 24px;
+}
+
+.verify-form {
+    width: 100%;
+}
+
+.form-control {
+    font-size: 16px;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+.btn-submit {
+    width: 100%;
+    font-size: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .verify-box {
+        padding: 30px 20px;
+    }
+
+    .verify-header {
+        font-size: 20px;
+    }
+
+    .verify-instruction,
+    .form-control,
+    .btn-submit {
+        font-size: 14px;
+    }
+}

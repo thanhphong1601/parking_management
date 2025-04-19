@@ -114,10 +114,22 @@ h1 {
     border-bottom: none;
 }
 
+
 .custom-modal .modal-header {
-    background-color: #007bff;
+    background-color: #0f4fff;
     color: white;
     border-bottom: none;
+}
+
+.custom-modal .modal-header-danger {
+    background-color: #ff000d;
+    color: rgb(0, 0, 0);
+    border-bottom: none;
+}
+
+#modelHeaderDelete {
+    background-color: red;
+    color: black;
 }
 
 .modal-title-custom {

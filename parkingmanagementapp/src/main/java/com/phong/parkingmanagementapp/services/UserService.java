@@ -6,6 +6,7 @@ package com.phong.parkingmanagementapp.services;
 
 import com.phong.parkingmanagementapp.models.User;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
@@ -22,6 +23,7 @@ public interface UserService {
     List<User> findUserByIdentityNumberOrNameOrRole(String identityNumber, String name, int role);
     UserDetails loadUserByUsername(String username);
     User saveUser(User user);
+    User findByEmail(String email);
     void deleteUser(User user);
     List<User> findAll();
     List<User> findAllExceptBlankUser();
@@ -29,5 +31,10 @@ public interface UserService {
     boolean authUser(String username, String password);
     void deactivateUser(int id);
     Page<User> findUserByIdentityNumberOrNameOrRolePageable(String identityNumber, String name, int role, Pageable pageable);
-
+    User getAnonymousUser();
+    User findByIdentityNumber(String identityNumber);
+    int getAdminId();
+    Optional<User> getUserByUsernameOrEmail(String username);
+    boolean existsByUsername(String username);
+    void save(User u);
 }

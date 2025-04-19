@@ -41,7 +41,21 @@ public class ApiVehicleController {
         v.setPlateLicense(params.get("plateLicense"));
         v.setType(this.veTypeService.getVehicleTypeById(Integer.parseInt(params.get("type"))));
         this.vehicleService.saveVehicle(v);
-        return ResponseEntity.ok("Successfully create");
+        return ResponseEntity.ok("Đã tạo thành công");
+    }
+
+    @PostMapping("/vehicle/{userId}/create")
+    public ResponseEntity<String> createVehicleWithUserId(@RequestParam Map<String, String> params,
+            @PathVariable(value = "userId") int uid) {
+        System.out.println(params.get("name"));
+        System.out.println(params.get("plateLicense"));
+        System.out.println(Integer.parseInt(params.get("type")));
+        Vehicle v = new Vehicle();
+        v.setName(params.get("name"));
+        v.setPlateLicense(params.get("plateLicense"));
+        v.setType(this.veTypeService.getVehicleTypeById(Integer.parseInt(params.get("type"))));
+        this.vehicleService.saveVehicleForCreatedUser(uid, v);
+        return ResponseEntity.ok("Đã tạo thành công");
     }
 
     @GetMapping("/vehicle/blank/clear")
@@ -54,14 +68,14 @@ public class ApiVehicleController {
     public ResponseEntity<List<Vehicle>> getBlankVehicleList() {
         return ResponseEntity.ok(this.vehicleService.findVehiclesOfBlankUser());
     }
-    
+
     @GetMapping("/user/{uid}/vehicle/list")
-    public ResponseEntity<List<Vehicle>> getVehicleByUserId(@PathVariable("uid") int uid){
+    public ResponseEntity<List<Vehicle>> getVehicleByUserId(@PathVariable("uid") int uid) {
         return ResponseEntity.ok(this.vehicleService.findVehicleByUserId(uid));
     }
-    
+
     @GetMapping("/vehicle/list")
-    public ResponseEntity<List<Vehicle>> getVehicle(@RequestParam Map<String, String> params){
+    public ResponseEntity<List<Vehicle>> getVehicle(@RequestParam Map<String, String> params) {
         return ResponseEntity.ok(this.vehicleService.findAllByLicensePlate(params.get("plateLicense")));
     }
 

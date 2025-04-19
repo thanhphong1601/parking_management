@@ -4,6 +4,7 @@
  */
 package com.phong.parkingmanagementapp.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
@@ -31,22 +32,33 @@ import lombok.ToString;
 @Table(name = "line")
 @NoArgsConstructor
 public class Line {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    
+
     @NotNull
     @Column(name = "line")
     private String line;
-    
+
     @ToString.Exclude
+    @JsonIgnore
     @JoinColumn(name = "floor_id")
     @ManyToOne(optional = true)
     private Floor floor;
-    
+
+    //tells if the lines r full
+    @Column(name = "full_status")
+    private Boolean full;
+
     @JsonIgnore
+    @ToString.Exclude
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "line")
     private Collection<Position> positionCollection;
+
+    @Column(name = "is_deleted")
+    @Basic(optional = true)
+    private Boolean isDeleted = false;
 }

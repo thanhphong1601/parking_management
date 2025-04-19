@@ -71,6 +71,14 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     <label class="form-label" for="floorNumber">Tầng:</label>
                 </div>
                 
+                <div class="form-floating mb-3 mt-3" th:if="${param.floorId}">
+                    <select class="form-select" id="isTaken" name="isTaken" th:field="*{full}">
+                        <option selected="${floor.full == true}" value="true">Đầy</option>
+                        <option selected="${floor.full == false}" value="false">Trống</option>
+                    </select>
+                    <label for="isTaken">Trạng thái</label>
+                </div>
+                
                 <div class="form-floating mb-3 mt-3">
                     <button type="submit" th:if="*{id} != null" class="btn btn-info">Lưu thông tin</button>
                     <button type="submit" th:if="*{id} == null" class="btn btn-info">Thêm tầng</button>

@@ -1,0 +1,26 @@
+.fullscreen-loading-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.35);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(2px);
+}
+
+.spinner-box {
+    text-align: center;
+    color: white;
+}
+
+.spinner-box .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 12px;
+}
+
+.loading-text {
+    font-size: 1.2rem;
+    font-weight: 500;
+}

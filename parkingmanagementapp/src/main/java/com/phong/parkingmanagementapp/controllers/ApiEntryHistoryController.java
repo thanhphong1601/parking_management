@@ -6,6 +6,7 @@ package com.phong.parkingmanagementapp.controllers;
 
 import com.phong.parkingmanagementapp.exceptions.VehicleNotFoundException;
 import com.phong.parkingmanagementapp.models.EntryHistory;
+import com.phong.parkingmanagementapp.models.Floor;
 import com.phong.parkingmanagementapp.models.Ticket;
 import com.phong.parkingmanagementapp.models.User;
 import com.phong.parkingmanagementapp.models.Vehicle;
@@ -14,6 +15,7 @@ import com.phong.parkingmanagementapp.services.EntryHistoryService;
 import com.phong.parkingmanagementapp.services.TicketService;
 import com.phong.parkingmanagementapp.services.UserService;
 import com.phong.parkingmanagementapp.services.VehicleService;
+import com.phong.parkingmanagementapp.utils.DownloadImageAsMultipartFile;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.Instant;
@@ -26,14 +28,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -59,6 +67,9 @@ public class ApiEntryHistoryController {
     private TicketService ticketService;
     @Autowired
     private CloudinaryService cloudService;
+
+    @Value("${page_size}")
+    private int pageSize;
 
     @PostMapping(path = "/recognize/in/get")
     @CrossOrigin
@@ -284,35 +295,6 @@ public class ApiEntryHistoryController {
         return ResponseEntity.ok(this.entryService.findEntryHistoriesByTimeOutAndPlateImgOut(params.get("plateLicense")));
     }
 
-    @GetMapping(path = "/recognize/test")
-    @CrossOrigin
-    public ResponseEntity<?> test(@RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
-        Map<String, String> resultsFromRecognizingPlate = new HashMap<>();
-        resultsFromRecognizingPlate = this.entryService.recognizePlate(file);
-        return ResponseEntity.ok(resultsFromRecognizingPlate);
-    }
-
-    @GetMapping(path = "/recognize/test2")
-    @CrossOrigin
-    public ResponseEntity<?> test2(@RequestParam(value = "file", required = false) MultipartFile file) throws IOException, ParseException {
-        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-
-        // Định dạng thời gian theo mẫu yêu cầu
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
-
-        // Tạo chuỗi thời gian với định dạng
-        String timestamp = now.format(formatter);
-        return ResponseEntity.ok(this.entryService.convertToDate(timestamp).toString());
-    }
-
-//    @GetMapping("/count-by-date")
-//    public Map<String, Long> countByDate(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
-//        long count = this.entryService.countByDate(date);
-//        Map<String, Long> response = new HashMap<>();
-//        response.put("count", count);
-//        return response;
-//    }
-
     @GetMapping("/count-by-month")
     public Map<String, Long> countByMonth(@RequestParam("month") int month, @RequestParam("year") int year) {
         long count = this.entryService.countByMonth(month, year);
@@ -328,9 +310,292 @@ public class ApiEntryHistoryController {
         response.put("averageDuration", averageDuration);
         return response;
     }
-    
+
     @GetMapping("/day")
     public ResponseEntity<Map<String, String>> getDailyStats(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(entryService.countEntriesByDay(date));
+    }
+
+    //-------------------------------------------------------------------------
+    @PostMapping(path = "/recognize/in/record")
+    @CrossOrigin
+    public ResponseEntity<?> recordVehicleIn(@RequestParam(value = "file1", required = false) MultipartFile plateImgFile,
+            @RequestParam(value = "file2", required = false) MultipartFile personImgFile,
+            @RequestParam() Map<String, String> params) throws IOException {
+        //check if entry already got recorded IN but no OUT
+        Ticket currentTicket = this.ticketService.findByTicketId(params.get("ticketId"));
+        if (currentTicket == null) {
+            return new ResponseEntity<>("Không tìm thấy thông số vé hợp lệ", HttpStatus.NOT_FOUND);
+        }
+
+        EntryHistory currentEntry = this.entryService.getEntryHistoryByTicketId(currentTicket.getId());
+        if (currentEntry != null) {
+            return new ResponseEntity<>("Phương tiện hiện đã trong bãi và chưa khỏi bãi xe",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        if (plateImgFile == null || personImgFile == null) {
+            return new ResponseEntity<>("Vui lòng cập nhật mục hình ảnh", HttpStatus.BAD_REQUEST);
+        }
+
+        //call cloudinary to upload the image and get back url to save
+        if (plateImgFile != null) {
+            Map<String, String> plateRecognizeResult = this.entryService.recognizePlate(plateImgFile);
+
+            //check if it's a riel plate img
+            if (plateRecognizeResult.get("plate") == null) {
+                return new ResponseEntity<>("Không thể phân tích được hình ảnh biển số xe",
+                        HttpStatus.NOT_FOUND);
+            }
+
+            String inImgUrl = this.cloudService.uploadImage(plateImgFile);
+            params.put("inImgUrl", inImgUrl);
+
+            if (!currentTicket.getLicenseNumber().equalsIgnoreCase("0")
+                    && !currentTicket.getLicenseNumber().equalsIgnoreCase(plateRecognizeResult.get("plate"))) {
+                return new ResponseEntity<>("Biển số không khớp với dữ liệu",
+                        HttpStatus.CONFLICT);
+            }
+            if (!plateRecognizeResult.isEmpty()) {
+                params.put("plateNumber", plateRecognizeResult.get("plate"));
+            }
+        }
+        if (personImgFile != null) {
+
+            //func to check if its a human face
+            String inImgUrl = this.cloudService.uploadImage(personImgFile);
+            params.put("personImgIn", inImgUrl);
+        }
+
+        this.entryService.recordVehicleIn(params);
+
+        return new ResponseEntity<>("Done", HttpStatus.CREATED);
+    }
+
+    @PostMapping(path = "/recognize/out/record")
+    @CrossOrigin
+    public ResponseEntity<?> recordVehicleOut(@RequestParam(value = "file1", required = false) MultipartFile plateImgFile,
+            @RequestParam(value = "file2", required = false) MultipartFile personImgFile,
+            @RequestParam() Map<String, String> params) throws IOException, Exception {
+        //check ticket valid
+        //compare 2 plates
+        //save the record
+        //attributes are entryId, personImgOut, vehicleImgOut, timeOut
+        Map<String, String> result = new HashMap<>();
+
+        //check ticket valid
+        Ticket currentTicket = this.ticketService.findByTicketId(params.get("ticketId"));
+        Date currentDate = new Date();
+        if (this.ticketService.checkTicketDate(currentTicket.getId(), currentDate) != null) {
+            if (!currentTicket.getIsPaid()) {
+                result.put("Error: ", "Vé chưa thanh toán");
+                return new ResponseEntity<>(result, HttpStatus.OK);
+            } else { //paid ticket
+                EntryHistory currentEntry = this.entryService.getEntryHistoryByTicketId(currentTicket.getId());
+
+                if (currentEntry == null) {
+                    result.put("Error: ", "Không có lịch sử ghi nhận xe vào");
+                    return new ResponseEntity<>(result, HttpStatus.OK);
+                } else {
+                    if (plateImgFile != null) {
+                        Map<String, String> plateRecognizeResult = this.entryService.recognizePlate(plateImgFile);
+                        String plateNumber = plateRecognizeResult.get("plate");
+
+                        if (plateNumber == null) {
+                            return new ResponseEntity<>("Không thể phân tích được hình ảnh biển số xe",
+                                    HttpStatus.NOT_FOUND);
+                        }
+
+                        //check if 2 plates have a similar number               
+                        if (plateNumber.equalsIgnoreCase(currentTicket.getLicenseNumber())) {
+                            String outImgUrl = this.cloudService.uploadImage(plateImgFile);
+                            params.put("outImgUrl", outImgUrl);
+                        } else {
+                            result.put("Plate Error: ", "Biển số không trùng");
+                        }
+
+                    } else {
+                        result.put("Plate Error: ", "Không tìm thấy ảnh biển số xe");
+
+                    }
+                    if (personImgFile != null) {
+                        DownloadImageAsMultipartFile downloadFile = new DownloadImageAsMultipartFile();
+                        String personImgInUrl = currentEntry.getPersonImgIn();
+                        MultipartFile personImgInFile = downloadFile.downloadImageAsMultipartFile(personImgInUrl);
+
+                        Map<String, ?> comparingResult = this.entryService.processComparingImg(personImgInFile, personImgFile);
+
+                        //System.out.println(comparingResult.get("isSamePerson").toString().equals("true"));
+                        //check if same person
+                        if (comparingResult.get("isSamePerson") == null) {
+                            return new ResponseEntity<>("Không thể phân tích được hình ảnh khách hàng",
+                                    HttpStatus.NOT_FOUND);
+                        }
+
+                        if (comparingResult.get("isSamePerson").toString().equals("true")) {
+                            String outImgUrl = this.cloudService.uploadImage(personImgFile);
+                            params.put("personImgOut", outImgUrl);
+                        } else {
+                            result.put("Person Error: ", "Không phải cùng một người");
+                        }
+                    } else {
+                        result.put("Person Error: ", "Không tìm thấy ảnh khách hàng");
+                    }
+
+                    if (result.containsKey("Person Error: ") || result.containsKey("Plate Error: ") || result.containsKey("Error: ")) {
+                        return new ResponseEntity<>(result, HttpStatus.OK);
+                    }
+
+                    if (params.containsKey("outImgUrl") && params.containsKey("personImgOut")) {
+                        this.entryService.recordVehicleOut(params);
+                    }
+
+                }
+
+            }
+        } else {
+            result.put("Error: ", "Vé đã hết hạn");
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.CREATED);
+    }
+
+    @GetMapping(path = "/entry/ticket/process")
+    @CrossOrigin
+    public ResponseEntity<?> processTicket(@RequestParam(required = true) Map<String, String> params) {
+        Map<String, Object> result = new HashMap<>();
+
+        Date currentDate = new Date();
+        String ticketIdString = params.get("ticketId");
+
+        if (ticketIdString == null) {
+            result.put("Ticket error: ", "Mã vé không hợp lệ.");
+            return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+        }
+
+        Ticket currentTicket = this.ticketService.findByTicketId(ticketIdString);
+
+        if (currentTicket == null) {
+            result.put("Ticket error: ", "Không thể tìm thấy vé.");
+            return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
+        }
+
+        if (this.ticketService.checkTicketDateValid(currentTicket.getId(), currentDate) == false) {
+            result.put("Ticket error: ", "Vé đã hết hạn.");
+            return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
+        }
+
+        result.put("ownerUsername", currentTicket.getUserOwned().getName());
+        result.put("ownerUserId", currentTicket.getUserOwned().getId());
+        result.put("ticketType", currentTicket.getTicketType().getType());
+        result.put("ticketStatus", String.valueOf(currentTicket.getIsPaid()));
+        result.put("ticketTotalPrice", currentTicket.getTotalPrice());
+        result.put("ticketStartDate", currentTicket.getStartDay());
+        result.put("ticketExpiredDate", currentTicket.getEndDay());
+        result.put("ticketVehicleId", currentTicket.getVehicle().getId());
+        result.put("ticketVehiclePlateNumber", currentTicket.getVehicle().getPlateLicense());
+
+        String ticketPosition = "";
+        if (currentTicket.getFloor() != null && currentTicket.getLine() != null && currentTicket.getPosition() != null) {
+            ticketPosition = "Tầng " + currentTicket.getFloor().getFloorNumber()
+                    + " dãy " + currentTicket.getLine().getLine()
+                    + " vị trí " + currentTicket.getPosition().getPosition();
+        }
+        result.put("ticketPosition", ticketPosition);
+
+        result.put("ticketLicenseNumber", Objects.toString(currentTicket.getLicenseNumber(), ""));
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/entry/ticket/get/all")
+    @CrossOrigin
+    public ResponseEntity<?> returnTicketAndEntryInInfo(@RequestParam(required = true) Map<String, String> params) {
+        Map<String, Object> result = new HashMap<>();
+        Date currentDate = new Date();
+
+        Ticket currentTicket = this.ticketService.findByTicketId(params.get("ticketId"));
+
+        if (currentTicket == null) {
+            result.put("Error: ", "Không thể tìm thấy vé");
+            return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
+        }
+        
+        if (this.ticketService.checkTicketDateValid(currentTicket.getId(), currentDate) == false) {
+            result.put("Error: ", "Vé đã hết hạn.");
+            return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
+        }
+
+        EntryHistory currentEntry = this.entryService.getEntryHistoryByTicketId(currentTicket.getId());
+        if (currentEntry == null) {
+            result.put("Error: ", "Không tìm thấy lịch sử tương ứng");
+            return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
+        }
+
+        result.put("ticketId", currentTicket.getId());
+        result.put("ownerUsername", currentTicket.getUserOwned().getName());
+        result.put("ownerUserId", currentTicket.getUserOwned().getId());
+        result.put("ticketType", currentTicket.getTicketType().getType());
+        result.put("ticketStatus", String.valueOf(currentTicket.getIsPaid()));
+        result.put("ticketTotalPrice", currentTicket.getTotalPrice());
+        result.put("ticketStartDate", currentTicket.getStartDay());
+        result.put("ticketExpiredDate", currentTicket.getEndDay());
+        result.put("ticketVehicleId", currentTicket.getVehicle().getId());
+        result.put("ticketVehiclePlateNumber", currentTicket.getVehicle().getPlateLicense());
+
+        String ticketPosition = "";
+        if (currentTicket.getFloor() != null && currentTicket.getLine() != null && currentTicket.getPosition() != null) {
+            ticketPosition = "Tầng " + currentTicket.getFloor().getFloorNumber()
+                    + " dãy " + currentTicket.getLine().getLine()
+                    + " vị trí " + currentTicket.getPosition().getPosition();
+        }
+        result.put("ticketPosition", ticketPosition);
+
+        result.put("ticketLicenseNumber", Objects.toString(currentTicket.getLicenseNumber(), ""));
+
+        //Entry: time in, img in url, person img in url       
+        result.put("timeIn", currentEntry.getTimeIn());
+        result.put("plateImgInUrl", currentEntry.getPlateImgIn());
+        result.put("personImgInUrl", currentEntry.getPersonImgIn());
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/analyzePlate")
+    @CrossOrigin
+    public ResponseEntity<?> analyzeLicensePlateFromImage(@RequestParam(value = "file", required = false) MultipartFile file)
+            throws IOException, ParseException {
+        Map<String, String> resultsFromRecognizingPlate = new HashMap<>();
+
+        if (file != null) {
+            resultsFromRecognizingPlate = this.entryService.recognizePlate(file);
+
+            if (resultsFromRecognizingPlate.get("plate") == null) {
+                return new ResponseEntity<>("Có lỗi xảy ra trong quá trình phân tích\n"
+                        + "Có thể là do biển số xe mờ hoặc hệ thống gặp lỗi!", HttpStatus.CONFLICT);
+            }
+        }
+        return new ResponseEntity<>(resultsFromRecognizingPlate, HttpStatus.OK);
+    }
+
+    @GetMapping("/entry/list")
+    public ResponseEntity<Page<EntryHistory>> getEntryHistoryByLicensePlateNumberPageable(@RequestParam Map<String, String> params) {
+        String licenseNumber = params.getOrDefault("licenseNumber", "");
+        int page = Integer.parseInt(params.getOrDefault("page", "0"));
+
+        Pageable pageable = PageRequest.of(page, pageSize);
+
+        return new ResponseEntity<>(this.entryService.getEntryHistoryListByLicensePlateNumberPageable(licenseNumber, pageable), HttpStatus.OK);
+    }
+
+    @GetMapping("/entry/{entryId}/ticket/getTicketId")
+    public ResponseEntity<String> getTicketIdFromEntry(@PathVariable("entryId") int entryId) {
+        EntryHistory currentEntry = this.entryService.getEntryHistoryById(entryId);
+        if (currentEntry == null) {
+            return new ResponseEntity<>("Không tìm thấy lịch sử cụ thể", HttpStatus.NOT_FOUND);
+        }
+
+        String ticketId = currentEntry.getTicket().getTicketId();
+        return new ResponseEntity<>(ticketId, HttpStatus.OK);
     }
 }

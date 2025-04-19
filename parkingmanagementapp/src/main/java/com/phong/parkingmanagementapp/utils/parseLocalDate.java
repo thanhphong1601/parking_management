@@ -19,6 +19,7 @@ public class parseLocalDate {
     // Định dạng ngày tháng dạng "yyyy-MM-dd"
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
 // Hàm chuyển đổi chuỗi ngày sang LocalDate
     public static LocalDate parseLocalDate(String dateString) {
@@ -54,6 +55,13 @@ public class parseLocalDate {
         java.sql.Date date = java.sql.Date.valueOf(localDate);
         
         return date;
+    }
+    
+    public static Date parseStringToLocalDateToDate(String dateStr){
+        LocalDateTime dateTime = LocalDateTime.parse(dateStr, formatter2);
+        
+        Date currentDate = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
+        return currentDate;
     }
 
 }

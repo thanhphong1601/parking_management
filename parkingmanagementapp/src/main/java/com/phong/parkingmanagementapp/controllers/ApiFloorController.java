@@ -8,6 +8,7 @@ import com.phong.parkingmanagementapp.models.Floor;
 import com.phong.parkingmanagementapp.services.FloorService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,5 +29,10 @@ public class ApiFloorController {
     @GetMapping("/floor/list")
     public ResponseEntity<List<Floor>> getFloorList(){
         return ResponseEntity.ok(floorService.findAll());
+    }
+    
+    @GetMapping("/floorDTO/list")
+    public ResponseEntity<?> getFloorDTOList(){
+        return new ResponseEntity<>(this.floorService.getAllFloorDTOs(), HttpStatus.OK);
     }
 }

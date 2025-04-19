@@ -1,0 +1,76 @@
+/* Reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f7f9fb;
+  }
+  
+  .redirect-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  
+  .redirect-box {
+    padding: 30px 40px;
+    border-radius: 10px;
+    border: 2px solid;
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+  }
+  
+  /* Thành công */
+  .success {
+    background-color: #e6f9f0;
+    border-color: #2ecc71;
+    color: #2c3e50;
+  }
+  
+  /* Thất bại */
+  .failure {
+    background-color: #ffe6e6;
+    border-color: #e74c3c;
+    color: #2c3e50;
+  }
+  
+  .redirect-box h2 {
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+  
+  .redirect-box p {
+    font-size: 16px;
+    margin: 8px 0;
+  }
+  
+  .redirect-countdown {
+    margin-top: 16px;
+    font-weight: 500;
+    color: #555;
+  }
+  
+  /* Responsive */
+  @media (max-width: 576px) {
+    .redirect-box {
+      padding: 24px;
+    }
+  
+    .redirect-box h2 {
+      font-size: 20px;
+    }
+  
+    .redirect-box p {
+      font-size: 14px;
+    }
+  }
+  

@@ -30,5 +30,5 @@ public class TicketType {
     
     @NotNull
     @Column(name = "type")
-    private int type;
+    private String type;
 }

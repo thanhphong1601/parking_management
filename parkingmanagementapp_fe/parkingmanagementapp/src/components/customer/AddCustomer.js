@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import './AddCustomer.css'
 import { Button, Form, Modal } from 'react-bootstrap';
 import { authApi, endpoints } from '../../configs/APIs';
 import { useNavigate } from 'react-router-dom';
+import { MyUserContext } from '../../configs/Contexts';
 
 const AddCustomer = () => {
 
@@ -17,6 +18,11 @@ const AddCustomer = () => {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     
     const nav = useNavigate();
+
+    const currentUser = useContext(MyUserContext);
+    if (currentUser === null){
+        nav('/login');
+    }
 
     
 
@@ -78,9 +84,7 @@ const AddCustomer = () => {
         }
     };
 
-    const clearVehicle = async (e) => {
-        e.preventDefault();
-
+    const clearVehicle = async () => {
         try {
             let res = await authApi().get(endpoints['vehicle-clear']);
             setVehicles([]);
@@ -265,11 +269,16 @@ const AddCustomer = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {vehicles.map(v => <tr key={v.id}>
+                                {vehicles.length !== 0? <>
+                                    {vehicles.map(v => <tr key={v.id}>
                                     <th>{v.name}</th>
                                     <th>{v.type.type}</th>
                                     <th>{v.plateLicense}</th>
                                 </tr>)}
+                                </>: <>
+                                    
+                                </>}
+                                
                             </tbody>
                         </table>
                     </div>

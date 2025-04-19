@@ -43,6 +43,7 @@
     width: 350px;
     height: 250px;
     margin-right: 10px;
+    margin-left: 10px;
     border-radius: 10px;
   }
   
@@ -102,4 +103,42 @@
   .btnFind {
     margin-left: auto;
     margin-right: 100px;
+  }
+
+  .ticket-input {
+    margin-left: 0px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 10px 20px;
+    max-width: 100%;
+    gap: 10px;
+    align-self: flex-start;
+  }
+
+  .ticket-input-label {
+    font-size: 16px;
+    font-weight: bold;
+    width: 30%;
+  }
+
+  .ticket-input input[type="text"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .ticket-input button {
+    width: 120px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    background-color: #28a745;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .ticket-input button:hover {
+    background-color: #218838;
   }

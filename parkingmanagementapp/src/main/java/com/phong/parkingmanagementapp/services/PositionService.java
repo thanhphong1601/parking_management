@@ -16,4 +16,11 @@ public interface PositionService {
     List<Position> findPositionsByLineId(int id);
     void savePosition(Position position);
     Position getPositionById(int id);
+    void UpdateStatus(int positionId, Boolean status);
+    boolean deletePosition(int positionId);
+    int countPositionByLineId(int lineId);
+    Boolean existsByStatus(int lineId);
+    List<Position> findFirstAvailablePositionOrdered();
+    void assignPositionToTicket(int ticketId, int positionId);
+    void emptyTakenPosition(int positionId);
 }

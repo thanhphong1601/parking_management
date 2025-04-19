@@ -21,7 +21,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
 
             <div class="alert alert-danger" th:if="${errMsg != null}" th:text="${errMsg}"></div>
             
-            <form th:action="@{/addLine}" th:object="${line}" method="post">
+            <form th:action="@{/addLine}" th:object="${lineNew}" method="post">
                 <div class="form-floating mb-3 mt-3">         
                     <input class="form-control" type="text" th:field="*{line}" id="line" placeholder="Dãy" name="line"/>
                     <label class="form-label" for="line">Dãy:</label>
@@ -31,10 +31,18 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     <select class="form-select" th:field="*{floor}" id="floor">
                         <option th:each="f : ${floors}" 
                                 th:value="${f.id}" 
-                                th:selected="${line.id != null and f.id == line.floor.id}"
+                                th:selected="${lineNew.id != null and f.id == lineNew.floor.id}"
                                 th:text="${f.floorNumber}"></option>
                     </select>
                     <label for="floor">Thuộc tầng</label>
+                </div>
+                
+                <div class="form-floating mb-3 mt-3" th:if="${param.lineId}">
+                    <select class="form-select" id="isTaken" name="isTaken" th:field="*{full}">
+                        <option selected="${lineNew.full == true}" value="true">Đầy</option>
+                        <option selected="${lineNew.full == false}" value="false">Trống</option>
+                    </select>
+                    <label for="isTaken">Trạng thái</label>
                 </div>
                 
                 <div class="form-floating mb-3 mt-3">
@@ -50,4 +58,5 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
         <!--         Include footer -->
         <div th:replace="fragments/footer :: footer"></div>
     </body>
+    
 </html>

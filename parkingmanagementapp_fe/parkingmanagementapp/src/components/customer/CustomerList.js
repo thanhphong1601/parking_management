@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import './CustomerList.css'
 import APIs, { authApi, endpoints } from "../../configs/APIs";
 import MySpinner from '../common/MySpinner';
 import { Button, Modal, Spinner } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
+import { MyUserContext } from '../../configs/Contexts';
 
 
 const CustomerList = () => {
@@ -74,6 +75,11 @@ const CustomerList = () => {
     const [deleteSuccess, setDeleteSuccess] = useState(false);
     const [showDeleteSpinner, setShowDeleteSpinner] = useState(false);
     const [userInfo, setUserInfo] = useState(null);
+
+    const currentUser = useContext(MyUserContext);
+    if (currentUser === null){
+        nav('/login');
+    }
 
     const fields = [{
         label: "Họ tên",

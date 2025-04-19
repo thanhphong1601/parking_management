@@ -15,10 +15,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -58,6 +60,7 @@ public class User implements UserDetails{
     @Column(name = "phone")
     private String phone;
     @Column(name = "address")
+    @Basic(optional = true)
     private String address;
     @Column(name = "birthday")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -68,7 +71,7 @@ public class User implements UserDetails{
     private String email;
 
     @NotNull
-    @Column(name = "username")
+    @Column(name = "username", unique = true)
     private String username;
     @Basic(optional = false)
     @NotNull(message = "{user.pass.nullErr}")
@@ -89,7 +92,11 @@ public class User implements UserDetails{
     private MultipartFile file;
 
     @Column(name = "active")
-    private Boolean active;
+    private Boolean active = false;
+    
+    @OneToOne(mappedBy = "user")
+    @JsonIgnore
+    private Otp otp;
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "userCreate")

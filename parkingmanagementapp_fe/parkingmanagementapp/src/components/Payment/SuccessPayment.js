@@ -1,31 +1,35 @@
 import { useContext, useEffect, useState } from "react";
 import { FaCheck } from "react-icons/fa";
 import { VscError } from "react-icons/vsc";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { authApi, endpoints } from "../../configs/APIs";
-import { MyDispatchContext } from "../../configs/Contexts";
+import { MyDispatchContext, MyUserContext } from "../../configs/Contexts";
+import "./SuccessPayment.css"
 
 const SuccessPayment = () => {
     const [searchParams] = useSearchParams();
     const dispatch = useContext(MyDispatchContext);
     const [ticketId, setTicketId] = useState(null);
+    const currentUser = useContext(MyUserContext);
 
+    const navigate = useNavigate();
 
-    const resultCode = searchParams.get('vnp_ResponseCode');
-    const content = {
-        title: 'Thất bại',
-        icon: () => <VscError color={'#E74033'} size={180} />,
-        message: 'Đã có lỗi xãy ra! Vui lòng thử lại',
+    const status = searchParams.get("vnp_ResponseCode");
+    const success = status === "00";
+
+    const info = {
+        amount: Number(searchParams.get("vnp_Amount") || 0) / 100,
+        bankCode: searchParams.get("vnp_BankCode"),
+        bankTranNo: searchParams.get("vnp_BankTranNo"),
+        cardType: searchParams.get("vnp_CardType"),
+        orderInfo: decodeURIComponent(searchParams.get("vnp_OrderInfo") || "").replace(/\+/g, " "),
+        payDate: searchParams.get("vnp_PayDate"),
+        transactionNo: searchParams.get("vnp_TransactionNo"),
     };
-    if (resultCode === '00') {
-        content['title'] = 'Thành công';
-        content['icon'] = () => <FaCheck size={180} color="#34A853" />;
-        content['message'] = 'Thanh toán của bạn đã hoàn tất';
-    }
 
     const reloadUser = async () => {
         try {
-            let u = await authApi().get(endpoints['current-user']);        
+            let u = await authApi().get(endpoints['current-user']);
 
             dispatch({
                 "type": "login",
@@ -33,6 +37,7 @@ const SuccessPayment = () => {
             });
 
             setTicketId(localStorage.getItem("ticketId"));
+            console.log(ticketId);
 
         } catch (ex) {
             console.error(ex);
@@ -42,6 +47,8 @@ const SuccessPayment = () => {
     const updateTicketState = async () => {
         let form = new FormData();
         form.append("id", ticketId);
+        form.append("transactionDate", formatPayDate(info.payDate));
+        form.append("transactionNumber", info.transactionNo);
         try {
             let res = await authApi().post(endpoints['payment-success'], form);
             let resReceiptCreate = await authApi().post(endpoints['receipt-create'], form);
@@ -50,27 +57,43 @@ const SuccessPayment = () => {
         }
     };
 
+    const formatPayDate = (raw) => {
+        if (!raw || raw.length !== 14) return raw;
+        return `${raw.slice(6, 8)}/${raw.slice(4, 6)}/${raw.slice(0, 4)} ${raw.slice(8, 10)}:${raw.slice(10, 12)}:${raw.slice(12, 14)}`;
+    };
+
+    if (success) {
+        updateTicketState();
+    };
+
     useEffect(() => {
         reloadUser();
-    }, [])
-
-    useEffect(() => {
-        updateTicketState();
-    }, [ticketId])
+    }, []);
 
     return (
-        <div className="container d-flex flex-column align-items-center my-5">
-            <div className="">
-                <h1 className="title text-uppercase fw-bold ">{content['title']}</h1>
+        <div className="payment-container">
+            <div className={`payment-status ${success ? "success" : "failed"}`}>
+                <h2>{success ? "🎉 Thanh toán thành công!" : "❌ Thanh toán thất bại!"}</h2>
+                <p>
+                    {success
+                        ? "Cảm ơn bạn đã sử dụng dịch vụ. Thông tin thanh toán của bạn được hiển thị bên dưới."
+                        : "Giao dịch không thành công. Vui lòng thử lại hoặc liên hệ hỗ trợ nếu cần thiết."}
+                </p>
             </div>
-            <div className="my-5">{content['icon']()}</div>
-            <div>
-                <p className="fs-1">{content['message']}</p>
+
+            <div className="payment-bill">
+                <h3>Chi tiết giao dịch</h3>
+                <div className="bill-item"><span>💳 Số tiền:</span> <strong>{info.amount.toLocaleString()} VNĐ</strong></div>
+                <div className="bill-item"><span>🏦 Ngân hàng:</span> {info.bankCode}</div>
+                <div className="bill-item"><span>🔐 Loại thẻ:</span> {info.cardType}</div>
+                <div className="bill-item"><span>🧾 Mã giao dịch:</span> {info.transactionNo}</div>
+                <div className="bill-item"><span>📄 Mã ngân hàng:</span> {info.bankTranNo}</div>
+                <div className="bill-item"><span>🕓 Thời gian:</span> {formatPayDate(info.payDate)}</div>
+                <div className="bill-item"><span>📝 Nội dung:</span> {info.orderInfo}</div>
             </div>
-            <div className="row">
-                <Link to={'/ticket/list'} className="btn btn-primary my-2">
-                    Quay về trang vé
-                </Link>
+
+            <div className="payment-action">
+                <button onClick={() => navigate(`/customer/${currentUser.id}/ticket/list`)}>Quay lại trang chính</button>
             </div>
         </div>
     );

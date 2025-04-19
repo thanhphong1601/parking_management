@@ -4,10 +4,22 @@
  */
 package com.phong.parkingmanagementapp.services.impl;
 
+import com.phong.parkingmanagementapp.dtos.TicketDTO;
+import com.phong.parkingmanagementapp.models.Receipt;
 import com.phong.parkingmanagementapp.models.Ticket;
+import com.phong.parkingmanagementapp.models.TicketPrice;
+import com.phong.parkingmanagementapp.repositories.PriceRepository;
+import com.phong.parkingmanagementapp.repositories.ReceiptRepository;
+import com.phong.parkingmanagementapp.repositories.TicketPriceRepository;
 import com.phong.parkingmanagementapp.repositories.TicketRepository;
 import com.phong.parkingmanagementapp.repositories.UserRepository;
+import com.phong.parkingmanagementapp.services.EntryHistoryService;
 import com.phong.parkingmanagementapp.services.TicketService;
+import com.phong.parkingmanagementapp.utils.parseLocalDate;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -25,11 +38,19 @@ import org.springframework.stereotype.Service;
 public class TicketServiceImpl implements TicketService{
     private final TicketRepository ticketRepo;
     private final UserRepository userRepo;
+    private final ReceiptRepository receiptRepo;
+    private final TicketPriceRepository ticketPriceRepo;
+    private final PriceRepository priceRepo;
 
     @Autowired
-    public TicketServiceImpl(TicketRepository ticketRepository, UserRepository userRepo) {
+    public TicketServiceImpl(TicketRepository ticketRepository, UserRepository userRepo,
+            ReceiptRepository receiptRepo, TicketPriceRepository ticketPriceRepo,
+            PriceRepository priceRepo) {
         this.ticketRepo = ticketRepository;
         this.userRepo = userRepo;
+        this.receiptRepo = receiptRepo;
+        this.ticketPriceRepo = ticketPriceRepo;
+        this.priceRepo = priceRepo;
     }
 
     @Override
@@ -46,7 +67,9 @@ public class TicketServiceImpl implements TicketService{
     public void addOrUpdate(Ticket ticket) {
         if (ticket.getIsPaid() == null)
             ticket.setIsPaid(Boolean.FALSE);
-        ticket.setTotalPrice(this.totalPriceCal(ticket.getStartDay(), ticket.getEndDay(), ticket.getPrice().getPrice()));
+        if (ticket.getTotalPrice() == null){
+            ticket.setTotalPrice(this.totalPriceCal(ticket.getStartDay(), ticket.getEndDay(), ticket.getPrice().getPrice()));
+        }
         
         ticketRepo.save(ticket);
     }
@@ -60,6 +83,10 @@ public class TicketServiceImpl implements TicketService{
     public boolean delete(Ticket ticket) {
         if (ticket == null)
             return false;
+        
+        Receipt r = this.receiptRepo.getReceiptByTicketId(ticket.getId());
+        if (r != null)
+            this.receiptRepo.delete(r);
         
         ticketRepo.delete(ticket);
         return true;
@@ -94,6 +121,14 @@ public class TicketServiceImpl implements TicketService{
         
         return (int) daysBetween * pricePerDay;
     }
+    
+    @Override
+    public int totalPriceCal(int numberOfDays, int priceId) {
+        TicketPrice priceInstance = this.priceRepo.getTicketPriceById(priceId);
+        int ticketPrice = priceInstance.getPrice();
+        
+        return (int) numberOfDays * ticketPrice;     
+    }
 
     @Override
     public List<Ticket> findValidTicketsByVehicleIdAndDate(Long vehicleId, Date currentDate) {
@@ -114,5 +149,79 @@ public class TicketServiceImpl implements TicketService{
     public Page<Ticket> getTicketsByUserOwnedActivePageable(String identityNumber, String name, Pageable pageable) {
         return this.ticketRepo.getTicketsByUserOwnedActivePageable(identityNumber, name, pageable);
     }
+
+    @Override
+    public Ticket checkTicketDate(int ticketId, Date currentDate) {
+        Ticket t = this.ticketRepo.checkTicketDate(ticketId, currentDate);
+        
+        return t;
+    }
+
+    @Override
+    public void updateLicenseField(int ticketId, String plateNumber){
+        Ticket t = this.ticketRepo.getTicketById(ticketId);
+        t.setLicenseNumber(plateNumber);
+        
+        this.ticketRepo.save(t);
+    }
+
+    @Override
+    public Date calculateStartAndEndDate(int numberOfDays, Date startDate) {              
+        // Chuyển đổi từ Date sang LocalDate
+        LocalDate startLocalDate = startDate.toInstant()
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate();
+        
+        
+        LocalDate endLocalDate = startLocalDate.plusDays(numberOfDays);
+
+        // Chuyển đổi LocalDate về Date (lúc bắt đầu của ngày)
+        Date endDate = Date.from(endLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                
+        
+        return endDate;
+    }
+
+    @Override
+    public int updateTicketTotalPrice(int typeId, int numberOfDays) {
+        
+        int totalPrice = 0;
+        
+        if (typeId == 1) { //normal type, 15k/day
+            totalPrice = numberOfDays * this.ticketPriceRepo.getNormalPrice().getPrice();
+        }
+        
+        if (typeId == 2) { //month, 7k/day
+            totalPrice = numberOfDays * this.ticketPriceRepo.getMonthPrice().getPrice();
+        }
+        
+        if (typeId == 3) { //discount type, 10k/day
+            totalPrice = numberOfDays * this.ticketPriceRepo.getDiscountPrice().getPrice();
+        }
+                
+        return totalPrice;
+    }
+
+    @Override
+    public Page<TicketDTO> getTicketsInfoByUserId(int userId, Pageable pageable, Date startDay, Date endDay, Boolean isPaid) {
+        return this.ticketRepo.getTicketsInfoByUserId(userId, pageable, startDay, endDay, isPaid);
+    }
+
+    @Override
+    public Ticket findTopByOrderByIdDesc() {
+        return this.ticketRepo.findTopByOrderByIdDesc();
+    }
+
+    @Override
+    public Ticket findByTicketId(String ticketId) {
+        return this.ticketRepo.findByTicketId(ticketId);
+    }
+
+    @Override
+    public boolean checkTicketDateValid(int ticketId, Date currentDate) {
+        return this.ticketRepo.checkTicketDateValid(ticketId, currentDate);
+    }
+
+    
     
 }

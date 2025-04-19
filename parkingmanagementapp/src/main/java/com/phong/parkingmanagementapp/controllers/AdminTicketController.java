@@ -46,7 +46,7 @@ public class AdminTicketController {
     private final PositionService poService;
     private final UserService userService;
     private final PriceService priceService;
-    
+
     @Value("${page_size}")
     private int pageSize;
 
@@ -72,7 +72,7 @@ public class AdminTicketController {
 
     @GetMapping("/tickets")
     public String ticketList(@RequestParam(value = "name", required = false) String name, @RequestParam(value = "page", defaultValue = "0") int page, Model model) {
-        
+
         Pageable pageable = PageRequest.of(page, pageSize);
         Page<Ticket> ticketList = this.ticketService.findTicketByUserOwnedPageable(name, pageable);
         model.addAttribute("ticketList", ticketList);
@@ -80,21 +80,25 @@ public class AdminTicketController {
         model.addAttribute("totalPages", ticketList.getTotalPages());
         return "tickets";
     }
-    
+
     @GetMapping("/tickets/add")
-    public String ticketAddSite(Model model){
+    public String ticketAddSite(Model model) {
         model.addAttribute("ticket", new Ticket());
         return "addTicket";
     }
-    
+
     @PostMapping("/tickets/add")
     public String addTicket(Model model, @ModelAttribute(value = "ticket") @Valid Ticket t,
             BindingResult rs) {
-        
+
         if (!rs.hasErrors()) {
             try {
                 this.ticketService.addOrUpdate(t);
                 
+                this.poService.UpdateStatus(t.getPosition().getId(), Boolean.TRUE);
+                this.lineService.checkLineStatus(t.getLine().getId());
+                this.floorService.checkStatus(t.getFloor().getId());
+
                 return "redirect:/tickets?page=0";
             } catch (Exception e) {
                 model.addAttribute("errMsg", e.toString());
@@ -103,13 +107,13 @@ public class AdminTicketController {
         return "addTicket";
 
     }
-    
+
     @GetMapping("/tickets/{id}")
-    public String ticketInfo(@PathVariable(value = "id") int id, Model model){
+    public String ticketInfo(@PathVariable(value = "id") int id, Model model) {
         model.addAttribute("ticket", this.ticketService.getTicketById(id));
         return "addTicket";
     }
-    
+
     @GetMapping("/tickets/{id}/delete")
     public String confirmDelete(@PathVariable("id") int id, Model model) {
         Ticket ticket = ticketService.getTicketById(id);
@@ -117,10 +121,10 @@ public class AdminTicketController {
             return "redirect:/tickets"; // Redirect if ticket not found
         }
 
-        model.addAttribute("ticket", ticket);    
+        model.addAttribute("ticket", ticket);
         return "confirmDelete"; // Return to confirmation page
     }
-    
+
     @PostMapping("/tickets/{id}/delete")
     public String deleteTicket(@PathVariable("id") int id, @RequestParam("confirm") boolean confirm) {
         if (confirm) {
@@ -128,14 +132,14 @@ public class AdminTicketController {
         }
         return "redirect:/tickets/page=0"; // Redirect to ticket list
     }
-    
+
     @GetMapping("/getLinesByFloorId/{floorId}")
     @ResponseBody
     public List<Line> getLinesByFloorId(@PathVariable("floorId") int floorId) {
         Floor floor = this.floorService.getFloorById(floorId);
         return new ArrayList<>(floor.getLineCollection());
     }
-    
+
     @GetMapping("/getPositionsByLineId/{lineId}")
     @ResponseBody
     public List<Position> getPositionsByLineId(@PathVariable("lineId") int lineId) {
