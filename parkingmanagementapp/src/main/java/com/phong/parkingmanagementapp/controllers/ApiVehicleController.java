@@ -47,9 +47,6 @@ public class ApiVehicleController {
     @PostMapping("/vehicle/{userId}/create")
     public ResponseEntity<String> createVehicleWithUserId(@RequestParam Map<String, String> params,
             @PathVariable(value = "userId") int uid) {
-        System.out.println(params.get("name"));
-        System.out.println(params.get("plateLicense"));
-        System.out.println(Integer.parseInt(params.get("type")));
         Vehicle v = new Vehicle();
         v.setName(params.get("name"));
         v.setPlateLicense(params.get("plateLicense"));

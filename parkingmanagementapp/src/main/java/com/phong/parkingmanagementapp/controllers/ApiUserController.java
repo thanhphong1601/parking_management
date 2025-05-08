@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -104,7 +105,7 @@ public class ApiUserController {
     public ResponseEntity<User> getCurrentUser(Principal p) {
         User u = this.userService.getUserByUsernameOrEmail(p.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng"));
-        
+
         return new ResponseEntity<>(u, HttpStatus.OK);
     }
 
@@ -195,11 +196,11 @@ public class ApiUserController {
         User user = userService.findByEmail(email);
 
         if (user == null) {
-            if (this.userService.existsByUsername(email)){
+            if (this.userService.existsByUsername(email)) {
                 return new ResponseEntity<>("Đã tồn tại tài khoản này", HttpStatus.CONFLICT);
             }
             User newUser = new User();
-            newUser.setEmail(email);      
+            newUser.setEmail(email);
             newUser.setUsername(email); // dùng email làm username
             newUser.setName(name);
             newUser.setPassword(passEncoder.encode(UUID.randomUUID().toString())); // dummy password
@@ -217,17 +218,59 @@ public class ApiUserController {
         String jwt = jwtService.generateToken(user);
         return ResponseEntity.ok(Map.of("token", jwt));
     }
-    
+
     @GetMapping("/account/active/check")
     public ResponseEntity<?> checkAccountActive(@RequestParam(value = "username") String username) {
-        if (username.isEmpty() || username.isBlank())
+        if (username.isEmpty() || username.isBlank()) {
             return new ResponseEntity<>("Email không xác định", HttpStatus.BAD_REQUEST);
-        
+        }
+
         User currentUser = this.userService.getUserByUsername(username);
-        
-        if (currentUser.getActive() == true)
+
+        if (currentUser.getActive() == true) {
             return new ResponseEntity<>("Activated", HttpStatus.OK);
-        
+        }
+
         return new ResponseEntity<>(currentUser.getEmail(), HttpStatus.OK);
+    }
+
+    @PostMapping("/account/{userId}/password/check")
+    public ResponseEntity<?> checkPassword(@RequestParam Map<String, String> params,
+            @PathVariable("userId") int userId) {
+        String password = params.get("password");
+        User currentUser = this.userService.getUserById(userId);
+
+        if (this.passEncoder.matches(password, currentUser.getPassword())) {
+            return new ResponseEntity<>("OK", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("Mật khẩu không đúng", HttpStatus.UNAUTHORIZED);
+    }
+
+    //address, phone, identityNumber, name
+    @PutMapping("/account/{userId}/info/change")
+    public ResponseEntity<?> updateInfo(@RequestParam Map<String, String> params,
+            @PathVariable("userId") int userId) {
+        String name = params.getOrDefault("name", "");
+        String address = params.getOrDefault("address", "");
+        String phone = params.getOrDefault("phone", "");
+        String identityNumber = params.getOrDefault("identityNumber", "");
+        User currentUser = this.userService.getUserById(userId);
+        if (!name.isBlank() || !name.isEmpty()) {
+            currentUser.setName(name);
+        }
+        if (!address.isBlank() || !address.isEmpty()) {
+            currentUser.setAddress(address);
+        }
+        if (!phone.isBlank() || !phone.isEmpty()) {
+            currentUser.setPhone(phone);
+        }
+        if (!identityNumber.isBlank() || !identityNumber.isEmpty()) {
+            currentUser.setIdentityNumber(identityNumber);
+
+        }
+
+        this.userService.save(currentUser);
+        return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 }

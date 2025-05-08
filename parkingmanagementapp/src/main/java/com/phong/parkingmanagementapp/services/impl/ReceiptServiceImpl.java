@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,8 +32,8 @@ public class ReceiptServiceImpl implements ReceiptService{
     private TicketRepository ticketRepo;
 
     @Override
-    public Page<Receipt> getReceipt(Pageable pageale, String userName) {
-        return this.receiptRepo.getReceipt(pageale, userName);
+    public Page<Receipt> getReceipt(Pageable pageale, String userName, String ticketId) {
+        return this.receiptRepo.getReceipt(pageale, userName, ticketId);
     }
 
     @Override
@@ -60,6 +61,16 @@ public class ReceiptServiceImpl implements ReceiptService{
     @Override
     public Page<Receipt> getCustomerReceipt(Pageable pageale, int userId, Date startDay, Date endDay) {
         return this.receiptRepo.getCustomerReceipt(pageale, userId, startDay, endDay);
+    }
+
+    @Override
+    public long sumTotalRevenue() {
+        return this.receiptRepo.sumTotalRevenue();
+    }
+
+    @Override
+    public List<Object[]> getMonthlyRevenue() {
+        return this.receiptRepo.getMonthlyRevenue();
     }
     
 }

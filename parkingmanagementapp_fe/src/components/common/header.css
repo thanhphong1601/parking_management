@@ -1,0 +1,39 @@
+.navbar {
+    background-color: #4f45e2 !important;
+    box-shadow: 3px 3px 5px rgb(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    color: rgb(0, 0, 0) !important;
+    margin-left: 20px;
+}
+
+.nav-link {
+    color: rgb(0, 0, 0) !important;
+    font-weight: bold;
+}
+
+.nav-link:first-child {
+    margin-left: auto;
+}
+
+.nav-link:hover {
+    color: #ffc107 !important;
+    background-color: aliceblue;
+}
+
+.nav-link img {
+    margin-right: 8px;
+}
+
+.nav-dropdown {
+    background-color: rgb(110, 110, 110);
+}
+
+.navItem {
+    width: 100%;
+    list-style: none;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}

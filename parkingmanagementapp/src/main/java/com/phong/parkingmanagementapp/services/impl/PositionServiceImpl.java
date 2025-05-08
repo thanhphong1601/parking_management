@@ -9,6 +9,7 @@ import com.phong.parkingmanagementapp.models.Line;
 import com.phong.parkingmanagementapp.models.Position;
 import com.phong.parkingmanagementapp.models.PositionStatusEnum;
 import com.phong.parkingmanagementapp.models.Ticket;
+import com.phong.parkingmanagementapp.models.User;
 import com.phong.parkingmanagementapp.repositories.FloorRepository;
 import com.phong.parkingmanagementapp.repositories.LineRepository;
 import com.phong.parkingmanagementapp.repositories.PositionRepository;
@@ -16,6 +17,7 @@ import com.phong.parkingmanagementapp.services.FloorService;
 import com.phong.parkingmanagementapp.services.LineService;
 import com.phong.parkingmanagementapp.services.PositionService;
 import com.phong.parkingmanagementapp.services.TicketService;
+import com.phong.parkingmanagementapp.services.UserService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,15 +33,17 @@ public class PositionServiceImpl implements PositionService {
     private final LineService lineService;
     private final FloorService floorService;
     private final TicketService ticketService;
+    private final UserService userService;
 
     @Autowired
     public PositionServiceImpl(PositionRepository positionRepo,
             LineService lineService, FloorService floorService,
-            TicketService ticketService) {
+            TicketService ticketService, UserService userService) {
         this.positionRepo = positionRepo;
         this.lineService = lineService;
         this.floorService = floorService;
         this.ticketService = ticketService;
+        this.userService = userService;
     }
 
     @Override
@@ -108,7 +112,7 @@ public class PositionServiceImpl implements PositionService {
     public void assignPositionToTicket(int ticketId, int positionId) {
         Position currentPosition = this.positionRepo.getPositionById(positionId);
         if (currentPosition != null) {
-            currentPosition.setStatus(PositionStatusEnum.OCCUPIED);
+            currentPosition.setStatus(PositionStatusEnum.RESERVED);
             currentPosition.setCurrentTicketId((long) ticketId);
             currentPosition.setTake(true); // đồng bộ trạng thái vé đã đăng ký
 
@@ -126,32 +130,67 @@ public class PositionServiceImpl implements PositionService {
 
         this.ticketService.addOrUpdate(currentTicket);
     }
-    
+
     //xử lý chức năng gán vị trí vào vé, xử lý mô hình bãi xe ở frontend
     //bấm vào 1 vị trí và nhập id vé => gửi id vé và id position dùng hàm assignPositionToTicket()
     //kiểm tra full trc khi gọi hàm trên
-
     @Override
     public void emptyTakenPosition(int positionId) {
         Position currentPosition = this.positionRepo.getPositionById(positionId);
-        if (currentPosition != null){
+        if (currentPosition != null) {
             //update ticket's license field for further uses
             Ticket currentTicket = this.ticketService.getTicketById(Integer.parseInt(
                     currentPosition.getCurrentTicketId().toString()));
-            currentTicket.setLicenseNumber("0");
-            this.ticketService.addOrUpdate(currentTicket);
-            
-            currentPosition.setStatus(PositionStatusEnum.AVAILABLE);
-            currentPosition.setCurrentTicketId(null);
-            currentPosition.setTake(Boolean.FALSE);
-            currentPosition.setPlateImgUrl(null);
-            
+
+            //if anonymous ticket -> set position free (take = false, status = available, img null, ticketid null
+            if (currentTicket.getUserOwned() == this.userService.getAnonymousUser()) {
+                currentTicket.setLicenseNumber("0");
+
+                currentPosition.setStatus(PositionStatusEnum.AVAILABLE);
+                currentPosition.setCurrentTicketId(null);
+                currentPosition.setTake(Boolean.FALSE);
+                currentPosition.setPlateImgUrl(null);
+
+                this.ticketService.addOrUpdate(currentTicket);
+
+            } else { //user ticket -> set position status reserved, img null 
+                currentPosition.setStatus(PositionStatusEnum.RESERVED);
+                currentPosition.setPlateImgUrl(null);
+            }
+
             this.positionRepo.save(currentPosition);
 
             this.lineService.checkLineStatus(currentPosition.getLine().getId());
 
             this.floorService.checkStatus(currentPosition.getLine().getFloor().getId());
         }
+    }
+
+    @Override
+    public long countAvailablePositions() {
+        return this.positionRepo.countAvailablePositions();
+    }
+
+    @Override
+    public long countTakenPositions() {
+        return this.positionRepo.countTakenPositions();
+    }
+
+    @Override
+    public void emptyTakenPositionOfDeactiveTicket(int ticketId) {
+        Ticket currentTicket = this.ticketService.getTicketById(ticketId);
+        Position currentPosition = currentTicket.getPosition();
+
+        currentPosition.setStatus(PositionStatusEnum.AVAILABLE);
+        currentPosition.setCurrentTicketId(null);
+        currentPosition.setTake(Boolean.FALSE);
+        currentPosition.setPlateImgUrl(null);
+
+        this.positionRepo.save(currentPosition);
+
+        this.lineService.checkLineStatus(currentPosition.getLine().getId());
+
+        this.floorService.checkStatus(currentPosition.getLine().getFloor().getId());
     }
 
 }

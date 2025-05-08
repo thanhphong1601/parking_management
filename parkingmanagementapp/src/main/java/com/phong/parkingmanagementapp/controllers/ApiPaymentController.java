@@ -42,8 +42,9 @@ public class ApiPaymentController {
     public ResponseEntity<String> createPayment(@RequestParam Map<String, String> params) throws Exception{
         String orderInfo = params.getOrDefault("orderInfo", "Thông tin giao dịch");
         long price = Long.parseLong(params.get("price"));
+        int ticketId = Integer.parseInt(params.get("ticketId"));
        
-        String url = this.paymentService.createPaymentUrl(price, orderInfo);
+        String url = this.paymentService.createPaymentUrl(price, orderInfo, ticketId);
         
         return ResponseEntity.ok(url);
     }

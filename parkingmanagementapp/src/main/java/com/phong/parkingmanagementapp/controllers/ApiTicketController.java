@@ -161,7 +161,7 @@ public class ApiTicketController {
         t.setTicketType(this.ticketTypeService.getTicketTypeById(typeId));
 
         int numberOfDays = Integer.parseInt(params.get("numberOfDays"));
-        numberOfDays = (typeId != 1 ? numberOfDays * 30 : numberOfDays);
+        numberOfDays = (typeId == 3 ? numberOfDays * 30 : numberOfDays);
 
         Date endDate = this.ticketService.calculateStartAndEndDate(numberOfDays, t.getStartDay());
         t.setEndDay(endDate);
@@ -197,8 +197,10 @@ public class ApiTicketController {
     @DeleteMapping("/ticket/{id}/delete")
     public ResponseEntity<?> deleteTicket(@PathVariable("id") int id) {
         Ticket t = this.ticketService.getTicketById(id);
+        t.setActive(Boolean.FALSE);
+        this.poService.emptyTakenPositionOfDeactiveTicket(t.getId());
 
-        this.ticketService.delete(t);
+        this.ticketService.addOrUpdate(t);
         return new ResponseEntity<>("", HttpStatus.NO_CONTENT);
     }
 
@@ -296,10 +298,14 @@ public class ApiTicketController {
 
         if (!l.isEmpty()) {
             for (Ticket t : l) {
-                if (this.ticketService.checkTicketDateValid(t.getId(), currentDate)) {
+                if (t.getUserOwned() != this.userService.getAnonymousUser() && 
+                        this.ticketService.checkTicketDateValid(t.getId(), currentDate)) {
                     t.setActive(Boolean.TRUE);
-                } else {
+                } else if (t.getUserOwned() != this.userService.getAnonymousUser() && 
+                        !this.ticketService.checkTicketDateValid(t.getId(), currentDate)) {
                     t.setActive(Boolean.FALSE);
+                    this.poService.emptyTakenPositionOfDeactiveTicket(t.getId());
+
                 }
 
                 this.ticketService.addOrUpdate(t);
@@ -316,10 +322,11 @@ public class ApiTicketController {
 
         if (!l.isEmpty()) {
             for (Ticket t : l) {
-                if (this.ticketService.checkTicketDateValid(t.getId(), currentDate)) {
-                    t.setActive(Boolean.TRUE);
-                } else {
+                if (this.ticketService.checkTicketDateValid(t.getId(), currentDate))
+                     t.setActive(Boolean.TRUE);
+                else {
                     t.setActive(Boolean.FALSE);
+                    this.poService.emptyTakenPositionOfDeactiveTicket(t.getId());
                 }
 
                 this.ticketService.addOrUpdate(t);
@@ -328,18 +335,34 @@ public class ApiTicketController {
 
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
-    
+
     @PutMapping("/security/ticket/paid")
-    public ResponseEntity<?> payTicketQuick(@RequestParam("ticketId") String ticketId){
+    public ResponseEntity<?> payTicketQuick(@RequestParam("ticketId") String ticketId) {
         Ticket currentTicket = this.ticketService.findByTicketId(ticketId);
-        
-        if (currentTicket == null)
+
+        if (currentTicket == null) {
             return new ResponseEntity<>("Không tìm thấy vé", HttpStatus.NOT_FOUND);
-        
+        }
+
         currentTicket.setIsPaid(Boolean.TRUE);
         this.ticketService.addOrUpdate(currentTicket);
-        
+
         return new ResponseEntity<>("Đã thanh toán vé", HttpStatus.OK);
+    }
+    
+    @GetMapping("/pay/fast-payment")
+    public ResponseEntity<?> checkTicketIdForFastPayment(@RequestParam("ticketId") String ticketId){
+        Ticket currentTicket = this.ticketService.findByTicketId(ticketId);
+        
+        if (currentTicket == null){
+            return new ResponseEntity<>("Không tìm thấy vé", HttpStatus.NOT_FOUND);
+        }
+        
+        if (currentTicket.getIsPaid()){
+            return new ResponseEntity<>("Vé đã thanh toán, hãy kiểm tra lại", HttpStatus.CONFLICT);
+        }
+          
+        return new ResponseEntity<>(currentTicket, HttpStatus.OK);
     }
 
 }

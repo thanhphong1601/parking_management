@@ -1,0 +1,138 @@
+/* Reset tổng quát */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f7f9fb;
+}
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #f7f9fb;
+}
+
+.login-box {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.login-header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    text-align: center;
+    color: #333;
+}
+
+.login-form {
+    width: 100%;
+}
+
+.form-label {
+    font-weight: 500;
+    font-size: 16px;
+    color: #333;
+}
+
+.form-control {
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 15px;
+}
+
+.btn-submit {
+    width: 100%;
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.alert-danger {
+    margin-bottom: 20px;
+}
+
+.div-forget-password {
+    text-align: right;
+    margin-top: -10px;
+    margin-bottom: 20px;
+}
+
+.forget-password-link {
+    font-size: 14px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.forget-password-link:hover {
+    text-decoration: underline;
+}
+
+.div-register-box {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 15px;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 24px 0;
+}
+
+.divider-bar {
+    flex: 1;
+    height: 1px;
+    background-color: #ddd;
+}
+
+.divider-text {
+    margin: 0 10px;
+    font-size: 14px;
+    color: #888;
+}
+
+.alt-login-box {
+    display: flex;
+    justify-content: center;
+}
+
+.btn-login-google {
+    width: 100%;
+    padding: 10px;
+    font-size: 15px;
+    color: rgb(241, 131, 52);
+    border-radius: 8px;
+    border-color: rgb(241, 131, 52);
+}
+
+/* Responsive cho mobile */
+@media (max-width: 480px) {
+    .login-box {
+        padding: 30px 20px;
+    }
+
+    .login-header h1 {
+        font-size: 20px;
+    }
+
+    .form-label, .form-control, .btn-submit {
+        font-size: 14px;
+    }
+
+    .btn-login-google {
+        font-size: 14px;
+    }
+}

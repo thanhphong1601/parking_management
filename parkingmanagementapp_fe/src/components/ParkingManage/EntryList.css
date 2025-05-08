@@ -1,0 +1,163 @@
+/* Container tổng */
+.customer-list-container {
+    max-width: 100%;
+    min-height: 800px;
+    margin: 30px;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Style cho tiêu đề */
+h1 {
+    font-family: 'Arial', sans-serif;
+    font-size: 40px;
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Tìm kiếm */
+.search-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.search-input {
+    padding: 10px;
+    font-size: 16px;
+    width: 80%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Style cho bảng */
+.customer-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-family: 'Arial', sans-serif;
+    background-color: #fff;
+    text-align: center;
+}
+
+.customer-table th,
+.customer-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Style cho cột tiêu đề */
+.customer-table th {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Style cho các hàng dữ liệu */
+.customer-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.customer-table tbody tr:hover {
+    background-color: #e0e0e0;
+    cursor: pointer;
+}
+
+/* Style cho nút thêm khách hàng */
+.add-button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: 5px;
+}
+
+.add-button:hover {
+    background-color: #218838;
+}
+
+/* Phân trang */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin: 0 5px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.pagination-button:hover {
+    background-color: #0056b3;
+}
+
+.model-header-danger .custom-modal-danger {
+    background-color: #ff0000;
+    color: rgb(255, 0, 0);
+    border-bottom: none;
+}
+
+
+.custom-modal .modal-header {
+    background-color: #0f4fff;
+    color: white;
+    border-bottom: none;
+}
+
+.custom-modal .modal-header-danger {
+    background-color: #ff000d;
+    color: rgb(0, 0, 0);
+    border-bottom: none;
+}
+
+#modelHeaderDelete {
+    background-color: red;
+    color: black;
+}
+
+.modal-title-custom {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+
+}
+
+
+.modal-body-custom {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.5rem;
+    line-height: 1.6;
+}
+
+.modal-body-custom p {
+    margin-bottom: 10px;
+}
+
+.modal-footer {
+    border-top: none;
+}
+
+.custom-modal .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    font-weight: bold;
+
+}

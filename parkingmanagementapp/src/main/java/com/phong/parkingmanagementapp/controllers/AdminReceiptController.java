@@ -40,7 +40,8 @@ public class AdminReceiptController {
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("id").descending());
         
         String name = params.get("name");
-        Page<Receipt> receiptList = this.receiptService.getReceipt(pageable, name);
+        String ticketId = params.get("ticketId");
+        Page<Receipt> receiptList = this.receiptService.getReceipt(pageable, name, ticketId);
         model.addAttribute("receipts", receiptList.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", receiptList.getTotalPages());

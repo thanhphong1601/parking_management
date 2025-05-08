@@ -11,7 +11,7 @@ import java.util.Map;
  * @author Admin
  */
 public interface PaymentService {
-    public String createPaymentUrl(long amount, String orderInfo) throws Exception;
+    public String createPaymentUrl(long amount, String orderInfo, int ticketId) throws Exception;
     public String handleVnpayReturn(Map<String, String> params);
     public boolean validateSignature(Map<String, String> params, String secureHash);
 }

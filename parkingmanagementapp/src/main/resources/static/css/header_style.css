@@ -1,0 +1,29 @@
+.navbar-gradient {
+    background: linear-gradient(90deg, #0f2027, #203a43, #2c5364) !important;
+}
+
+.navbar-gradient .navbar-brand,
+.navbar-gradient .nav-link {
+    color: white !important;
+}
+
+.navbar-gradient .nav-link:hover {
+    color: #ffc107 !important;
+}
+
+.footer-custom {
+    background: linear-gradient(90deg, #203a43, #2c5364);
+    color: white;
+    width: 100%;
+}
+
+.footer-custom p,
+.footer-custom h5 {
+    margin: 0;
+    color: #f1f1f1;
+}
+
+.footer-custom i {
+    color: #ffc107;
+}
+

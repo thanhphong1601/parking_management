@@ -9,16 +9,19 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <link rel="stylesheet" th:href="@{/css/header_style.css}" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
         <style>
 
         </style>
     </head>
-    <body>
+    <body class="d-flex flex-column min-vh-100">
         <!--         Include header -->
         <div th:replace="fragments/header :: header"></div>
 
         <!--         Main content -->
-        <div class="container" th:fragment="content">
+        <div class="flex-grow-1 container py-4" th:fragment="content">
             <h1 class="text-center mt-3 mb-1">Vé xe</h1>
 
             <div class="alert alert-danger" th:if="${errMsg != null}" th:text="${errMsg}"></div>
@@ -70,12 +73,20 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     <label class="form-label" for="position">Chọn ví trí:</label>
                 </div>
 
-
                 <div class="form-floating mb-3 mt-3">                    
-                    <select class="form-select" th:field="*{price}" id="price">
+                    <select class="form-select" th:field="*{ticketType}" id="ticketType">
+                        <option th:each="type : ${types}" 
+                                th:value="${type.id}"
+                                th:selected="${ticket.ticketType != null and type.id == ticket.ticketType.id}">[[${type.type}]]</option>
+                    </select>
+                    <label class="form-label" for="ticketType">Chọn loại vé</label>
+                </div>
+                
+                <div class="form-floating mb-3 mt-3">                    
+                    <select class="form-select" th:field="*{price}" id="price" disabled="true">
                         <option th:each="price : ${prices}" 
                                 th:value="${price.id}"
-                                th:selected="${ticket.price != null and price.id == ticket.price.id}">[[${price.price}]] VNĐ</option>
+                                th:selected="${ticket.price != null and price.id == ticket.ticketType.id}">[[${price.price}]] VNĐ</option>
                     </select>
                     <label class="form-label" for="price">Chọn giá vé:</label>
                 </div>
@@ -84,11 +95,12 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     <input type="date" class="form-control" th:field="*{startDay}" id="startDay" name="startDay" />
                     <label for="startDay">Ngày bắt đầu:</label>
                 </div>
-
+                
                 <div class="form-floating mb-3 mt-3">
-                    <input type="date" class="form-control" th:field="*{endDay}" id="endDay" name="endDay" />
-                    <label for="endDay">Ngày kết thúc:</label>
+                    <input type="number" min="1" class="form-control" id="numberOfDays" name="numberOfDays" />
+                    <label for="numberOfDays">Số lượng</label>
                 </div>
+
 
                 <div class="form-floating mb-3 mt-3">   
                     <select class="form-select" th:field="*{userOwned}" id="customers" onchange="updateVehicles()">
@@ -205,7 +217,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                                 data.forEach(p => {
                                     const option = document.createElement("option");
                                     option.value = p.id;
-                                    option.text = p.position;
+                                    option.text = `${p.position} (${p.take == true ? "Đã lấy" : "Trống"})`;
 
                                     positionSelect.appendChild(option);
                                 });
@@ -218,6 +230,41 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             });
 
         </script>
+        <script th:inline="javascript">
+    let priceMap = /*[[${prices}]]*/ [];
+
+    // Chuyển về object dạng: {id: ..., price: ...}
+    priceMap = priceMap.map(p => ({ id: p.id, price: p.price }));
+
+    const ticketTypeSelect = document.getElementById("ticketType");
+    const priceSelect = document.getElementById("price");
+
+    function updatePrice() {
+        const selectedId = ticketTypeSelect.value;
+
+        // Xóa hết các option cũ
+        priceSelect.innerHTML = "";
+
+        // Tìm giá vé tương ứng
+        const matchedPrice = priceMap.find(p => p.id == selectedId);
+        if (matchedPrice) {
+            const option = document.createElement("option");
+            option.value = matchedPrice.id;
+            option.text = matchedPrice.price + " VNĐ";
+            priceSelect.appendChild(option);
+            priceSelect.disabled = false;
+        } else {
+            priceSelect.disabled = true;
+        }
+    }
+
+    // Gọi khi người dùng chọn lại loại vé
+    ticketTypeSelect.addEventListener("change", updatePrice);
+
+    // Gọi khi trang load nếu đã có sẵn giá trị
+    document.addEventListener("DOMContentLoaded", updatePrice);
+</script>
+
 
     </body>
 </html>

@@ -7,21 +7,26 @@ package com.phong.parkingmanagementapp.controllers;
 import com.phong.parkingmanagementapp.exceptions.VehicleNotFoundException;
 import com.phong.parkingmanagementapp.models.EntryHistory;
 import com.phong.parkingmanagementapp.models.Floor;
+import com.phong.parkingmanagementapp.models.Position;
 import com.phong.parkingmanagementapp.models.Ticket;
 import com.phong.parkingmanagementapp.models.User;
 import com.phong.parkingmanagementapp.models.Vehicle;
 import com.phong.parkingmanagementapp.services.CloudinaryService;
 import com.phong.parkingmanagementapp.services.EntryHistoryService;
+import com.phong.parkingmanagementapp.services.PositionService;
+import com.phong.parkingmanagementapp.services.TextExtractorService;
 import com.phong.parkingmanagementapp.services.TicketService;
 import com.phong.parkingmanagementapp.services.UserService;
 import com.phong.parkingmanagementapp.services.VehicleService;
 import com.phong.parkingmanagementapp.utils.DownloadImageAsMultipartFile;
+import com.phong.parkingmanagementapp.utils.parseLocalDate;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -67,6 +72,10 @@ public class ApiEntryHistoryController {
     private TicketService ticketService;
     @Autowired
     private CloudinaryService cloudService;
+    @Autowired
+    private PositionService posService;
+    @Autowired
+    private TextExtractorService textExtractor;
 
     @Value("${page_size}")
     private int pageSize;
@@ -322,10 +331,19 @@ public class ApiEntryHistoryController {
     public ResponseEntity<?> recordVehicleIn(@RequestParam(value = "file1", required = false) MultipartFile plateImgFile,
             @RequestParam(value = "file2", required = false) MultipartFile personImgFile,
             @RequestParam() Map<String, String> params) throws IOException {
+
         //check if entry already got recorded IN but no OUT
         Ticket currentTicket = this.ticketService.findByTicketId(params.get("ticketId"));
         if (currentTicket == null) {
             return new ResponseEntity<>("Không tìm thấy thông số vé hợp lệ", HttpStatus.NOT_FOUND);
+        }
+
+        //check if not anonymous ticket and date's expired
+        Date currentDate = new Date();
+        boolean isExpired = this.ticketService.checkTicketDate(currentTicket.getId(), currentDate) == null;
+        if (currentTicket.getUserOwned() != this.userService.getAnonymousUser()
+                && isExpired) {
+            return new ResponseEntity<>("Vé đã hết hạn", HttpStatus.NOT_FOUND);
         }
 
         EntryHistory currentEntry = this.entryService.getEntryHistoryByTicketId(currentTicket.getId());
@@ -336,6 +354,18 @@ public class ApiEntryHistoryController {
 
         if (plateImgFile == null || personImgFile == null) {
             return new ResponseEntity<>("Vui lòng cập nhật mục hình ảnh", HttpStatus.BAD_REQUEST);
+        }
+        
+        //if anonymous ticket -> assign new position to the ticket
+        if (currentTicket.getUserOwned() == this.userService.getAnonymousUser()) {
+            Position availablePosition = this.posService.findFirstAvailablePositionOrdered().get(0);
+            if (availablePosition == null) {
+                return new ResponseEntity<>("Hiện bãi đã hết vị trí trống", HttpStatus.NOT_FOUND);
+            }
+
+            this.posService.assignPositionToTicket(currentTicket.getId(),
+                    availablePosition.getId());
+
         }
 
         //call cloudinary to upload the image and get back url to save
@@ -351,20 +381,31 @@ public class ApiEntryHistoryController {
             String inImgUrl = this.cloudService.uploadImage(plateImgFile);
             params.put("inImgUrl", inImgUrl);
 
-            if (!currentTicket.getLicenseNumber().equalsIgnoreCase("0")
+            if (currentTicket.getUserOwned() == this.userService.getAnonymousUser()) { //if this ticket is for anonymous user
+                if (!plateRecognizeResult.isEmpty()) {
+                    params.put("plateNumber", plateRecognizeResult.get("plate"));
+                }
+            } else if (!currentTicket.getLicenseNumber().equalsIgnoreCase("0")
                     && !currentTicket.getLicenseNumber().equalsIgnoreCase(plateRecognizeResult.get("plate"))) {
                 return new ResponseEntity<>("Biển số không khớp với dữ liệu",
                         HttpStatus.CONFLICT);
-            }
-            if (!plateRecognizeResult.isEmpty()) {
-                params.put("plateNumber", plateRecognizeResult.get("plate"));
+            } else {
+                if (!plateRecognizeResult.isEmpty()) {
+                    params.put("plateNumber", plateRecognizeResult.get("plate"));
+                }
             }
         }
         if (personImgFile != null) {
 
             //func to check if its a human face
-            String inImgUrl = this.cloudService.uploadImage(personImgFile);
-            params.put("personImgIn", inImgUrl);
+            Map<String, String> detectingResult = this.entryService.processDetectFace(personImgFile);
+            if (Integer.parseInt(detectingResult.get("face_num")) == 1) { //chỉ tồn tại 1 người 1 ảnh
+                String inImgUrl = this.cloudService.uploadImage(personImgFile);
+                params.put("personImgIn", inImgUrl);
+            } else {
+                return new ResponseEntity<>("Không nhận diện được khuôn mặt. Hãy thử lại", HttpStatus.CONFLICT);
+            }
+
         }
 
         this.entryService.recordVehicleIn(params);
@@ -479,8 +520,14 @@ public class ApiEntryHistoryController {
             result.put("Ticket error: ", "Không thể tìm thấy vé.");
             return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
         }
+        if (currentTicket.getUserOwned() != this.userService.getAnonymousUser()
+                && !currentTicket.getActive()) {
+            result.put("Ticket error: ", "Vé đã hết hiệu lực. Vui lòng đăng ký vé mới");
+            return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
+        }
 
-        if (this.ticketService.checkTicketDateValid(currentTicket.getId(), currentDate) == false) {
+        if (this.ticketService.checkTicketDateValid(currentTicket.getId(), currentDate) == false
+                && currentTicket.getUserOwned() != this.userService.getAnonymousUser()) {
             result.put("Ticket error: ", "Vé đã hết hạn.");
             return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
         }
@@ -520,7 +567,7 @@ public class ApiEntryHistoryController {
             result.put("Error: ", "Không thể tìm thấy vé");
             return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
         }
-        
+
         if (this.ticketService.checkTicketDateValid(currentTicket.getId(), currentDate) == false) {
             result.put("Error: ", "Vé đã hết hạn.");
             return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
@@ -597,5 +644,25 @@ public class ApiEntryHistoryController {
 
         String ticketId = currentEntry.getTicket().getTicketId();
         return new ResponseEntity<>(ticketId, HttpStatus.OK);
+    }
+
+    @GetMapping("/entry/all/list")
+    public ResponseEntity<Page<EntryHistory>> getAllEntryHistoryByLicensePlateNumberPageable(@RequestParam Map<String, String> params) {
+        String licenseNumber = params.getOrDefault("licenseNumber", "");
+        int page = Integer.parseInt(params.getOrDefault("page", "0"));
+
+        Pageable pageable = PageRequest.of(page, pageSize);
+
+        return new ResponseEntity<>(this.entryService.getAllEntryHistoryListByLicensePlateNumberPageable(licenseNumber, pageable), HttpStatus.OK);
+    }
+    
+    
+    @PostMapping("/entry/image/ticket/get")
+    public ResponseEntity<?> getTicketIdFromTicketImage(@RequestParam(value = "file", required = false) MultipartFile file) throws IOException{
+        Map<String,?> result = this.textExtractor.extractTextFromImg(file);
+        String ticketId = result.get("text").toString();
+        if (ticketId.isBlank() || ticketId.isEmpty())
+            return new ResponseEntity<>("Không tìm thấy chuỗi ký tự, hãy thử lại!", HttpStatus.CONFLICT);
+        return new ResponseEntity<>(ticketId.trim(), HttpStatus.OK);
     }
 }

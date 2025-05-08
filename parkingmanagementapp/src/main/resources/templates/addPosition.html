@@ -9,13 +9,16 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <link rel="stylesheet" th:href="@{/css/header_style.css}" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
     </head>
-    <body>
+    <body class="d-flex flex-column min-vh-100">
         <!--         Include header -->
         <div th:replace="fragments/header :: header"></div>
 
         <!--         Main content -->
-        <div class="container" th:fragment="content">
+        <div class="flex-grow-1 container py-4" th:fragment="content">
             <h1 class="text-center mt-3 mb-1">Thông tin vị trí:</h1>
 
             <div class="alert alert-danger" th:if="${errMsg != null}" th:text="${errMsg}"></div>
@@ -31,7 +34,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                         <option th:each="l : ${lines}" 
                                 th:value="${l.id}" 
                                 th:selected="${positionNew.id != null and l.id == positionNew.line.id}"
-                                th:text="${l.line}"></option>
+                                >[[${l.line}]] (Tầng [[${l.floor.floorNumber}]])</option>
                     </select>
                     <label for="floor">Thuộc dãy</label>
                 </div>

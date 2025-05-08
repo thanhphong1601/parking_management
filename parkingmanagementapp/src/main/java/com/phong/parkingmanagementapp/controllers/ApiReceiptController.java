@@ -51,10 +51,11 @@ public class ApiReceiptController {
     @GetMapping("/receipt/list")
     public ResponseEntity<?> getReceipts(@RequestParam Map<String, String> params) {
         String name = params.getOrDefault("name", "");
+        String ticketId = params.getOrDefault("ticketId", "");
         int page = Integer.parseInt(params.getOrDefault("page", "0"));
 
         Pageable pageable = PageRequest.of(page, pageSize);
-        return ResponseEntity.ok(this.receiptService.getReceipt(pageable, name));
+        return ResponseEntity.ok(this.receiptService.getReceipt(pageable, name, ticketId));
     }
 
     @PostMapping("/receipt/create")
@@ -65,8 +66,15 @@ public class ApiReceiptController {
         currentReceipt.setTicket(currentTicket);
         String transactionDate = params.get("transactionDate");
         String transactionNumber = params.get("transactionNumber");
+        String orderInfo = params.getOrDefault("content", "");
+        System.out.println(transactionDate);
+                System.out.println(transactionNumber);
+
+                        System.out.println(orderInfo);
+
         currentReceipt.setTransactionDate(parseLocalDate.parseStringToLocalDateToDate(transactionDate));
         currentReceipt.setTransactionNumber(transactionNumber);
+        currentReceipt.setContent(orderInfo);
 
         this.receiptService.saveReceipt(currentReceipt);
 

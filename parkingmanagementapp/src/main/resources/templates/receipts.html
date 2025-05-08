@@ -8,96 +8,98 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
         <title>Hóa đơn</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <link rel="stylesheet" th:href="@{/css/header_style.css}" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
         <style>
-            .container {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                height: 100%;
-                align-items: center;
-            }
-            .searchBar {
-                margin-top: 30px;
-            }
             .styled-table {
                 border-collapse: collapse;
-                margin: 25px 0;
-                font-size: 0.9em;
-                font-family: sans-serif;
-                min-width: 400px;
-                box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+                font-size: 0.95em;
+                background-color: white;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
             }
+
             .styled-table thead tr {
-                background-color: #009879;
-                color: #ffffff;
-                text-align: left;
-            }
-            .styled-table th,
-            .styled-table td {
-                padding: 12px 15px;
-            }
-            .styled-table tbody tr {
-                border-bottom: 1px solid #dddddd;
-            }
-
-
-            .styled-table tbody tr:last-of-type {
-                border-bottom: 2px solid #009879;
-            }
-            .styled-table tbody tr.active-row {
+                background-color: #0d6efd;
+                color: white;
                 font-weight: bold;
-                color: #009879;
             }
+
+            .styled-table tbody tr:hover {
+                background-color: #f1f1f1;
+            }
+
         </style>
     </head>
-    <body>
+    <body class="d-flex flex-column min-vh-100">
         <div th:replace="fragments/header :: header"></div>
-        
-        <div class="container" th:fragment="content">
-            <form class="searchBar" th:action="@{/history}" method="get">
-                <label for="name">Tìm tên người dùng:</label>
-                <input type="text" id="name" name="name" placeholder="Nhập tên khách hàng" />
-                <input type="hidden" name="page" th:value="${currentPage}" /> 
 
-                <button type="submit">Tìm</button>
-            </form>
-            <table class="styled-table">
-                <thead>
-                    <tr>
-                        <th>Mã hóa đơn</th>
-                        <th>Mã vé</th>
-                        <th>Tên chủ thanh toán</th>
-                        <th>Tổng cộng</th>
-                        <th>Thời gian thanh toán</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="r : ${receipts}">
-                        <td>[[${r.id}]]</td>
-                        <td>[[${r.ticket.id}]]</td>
-                        <td>[[${r.owner.name}]]</td>
-                        <td>[[${r.totalAmount}]]</td>
-                        <td>[[${#dates.format(r.createAt, 'dd/MM/yyyy HH:mm:ss')}]]</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div>
-                <span th:if="${currentPage > 0}">
-                    <a th:href="@{/receipt?page={page}(page=${currentPage - 1})}">&lt; <</a>
-                </span>
-                <span th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}">
-                    <a th:href="@{/receipt?page={page}(page=${pageNum})}"
-                       th:text="${pageNum + 1}"
-                       th:classappend="${pageNum == currentPage} ? 'active' : ''">1</a>
-                </span>
-                <span th:if="${currentPage < totalPages - 1}">
-                    <a th:href="@{/receipt?page={page}(page=${currentPage + 1})}">>&gt;</a>
-                </span>
+        <div class="flex-grow-1 container py-4" th:fragment="content">
+            <div class="container mt-4">
+                <!-- Form tìm kiếm -->
+                <form class="row g-3 align-items-end mb-4" th:action="@{/receipt}" method="get">
+                    <div class="col-md-10">
+                        <label for="ticketId" class="form-label">Tìm mã vé thanh toán:</label>
+                        <input type="text" id="ticketId" name="ticketId" class="form-control" placeholder="Nhập tên khách hàng" 
+                               th:value="${ticketId}" />
+                    </div>
+                    <input type="hidden" name="page" th:value="${currentPage}" />
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Tìm</button>
+                    </div>
+                </form>
+
+                <!-- Bảng danh sách hóa đơn -->
+                <div class="table-responsive">
+                    <table class="table styled-table table-hover text-center align-middle">
+                        <thead>
+                            <tr>
+                                <th>Mã hóa đơn</th>
+                                <th>Mã vé</th>
+                                <th>Tên chủ thanh toán</th>
+                                <th>Tổng cộng (VNĐ)</th>
+                                <th>Thời gian thanh toán</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="r : ${receipts}">
+                                <td>[[${r.transactionNumber}]]</td>
+                                <td>[[${r.ticketId}]]</td>
+                                <td>[[${r.username}]]</td>
+                                <td>
+                                    <span th:text="${#numbers.formatDecimal(r.totalPrice, 0, 'COMMA', 0, 'POINT')}"></span>
+                                </td>
+                                <td>[[${#dates.format(r.transactionDate, 'dd/MM/yyyy HH:mm:ss')}]]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/receipt?page={page}(page=${currentPage - 1})}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+
+                    <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${pageNum == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{/receipt?page={page}(page=${pageNum})}"
+                           th:text="${pageNum + 1}">1</a>
+                    </li>
+
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/receipt?page={page}(page=${currentPage + 1})}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
-        
+
         <div th:replace="fragments/footer :: footer"></div>
     </body>
 </html>

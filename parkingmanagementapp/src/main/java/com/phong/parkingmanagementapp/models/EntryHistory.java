@@ -78,6 +78,9 @@ public class EntryHistory {
     @ManyToOne()
     private Ticket ticket;
     
+    @Column(name = "license_number")
+    private String licenseNumber;
+    
     @Transient
     private MultipartFile file;
 }

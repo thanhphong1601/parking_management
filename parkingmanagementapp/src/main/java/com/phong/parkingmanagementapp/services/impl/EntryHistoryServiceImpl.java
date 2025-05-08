@@ -7,6 +7,7 @@ package com.phong.parkingmanagementapp.services.impl;
 import com.phong.parkingmanagementapp.exceptions.VehicleNotFoundException;
 import com.phong.parkingmanagementapp.models.EntryHistory;
 import com.phong.parkingmanagementapp.models.Position;
+import com.phong.parkingmanagementapp.models.PositionStatusEnum;
 import com.phong.parkingmanagementapp.models.Ticket;
 import com.phong.parkingmanagementapp.models.User;
 import com.phong.parkingmanagementapp.models.Vehicle;
@@ -17,6 +18,7 @@ import com.phong.parkingmanagementapp.repositories.VehicleRepository;
 import com.phong.parkingmanagementapp.services.EntryHistoryService;
 import com.phong.parkingmanagementapp.services.TicketService;
 import com.phong.parkingmanagementapp.services.VehicleService;
+import com.phong.parkingmanagementapp.utils.parseLocalDate;
 import io.github.cdimascio.dotenv.Dotenv;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,6 +27,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -67,7 +70,7 @@ public class EntryHistoryServiceImpl implements EntryHistoryService {
     private TicketService ticketService;
     @Autowired
     private PositionRepository posRepo;
-    
+
     private String vehicleIdString = "21";
 
     @Override
@@ -235,8 +238,9 @@ public class EntryHistoryServiceImpl implements EntryHistoryService {
     }
 
     @Override
-    public Page<EntryHistory> findAllByName(Pageable pageable, String name) {
-        return this.entryRepo.findAllByName(pageable, name);
+    public Page<EntryHistory> findAllByName(Pageable pageable, String name, Date startFilter,
+            Date endFilter, String plateLicense) {
+        return this.entryRepo.findAllByName(pageable, name, startFilter, endFilter, plateLicense);
     }
 
     @Override
@@ -362,7 +366,7 @@ public class EntryHistoryServiceImpl implements EntryHistoryService {
 
             userInfoResult.put("ticketId", t.getId());
 
-            userInfoResult.put("ticketType", t.getTicketType()!= null ? t.getTicketType().getType() : "");
+            userInfoResult.put("ticketType", t.getTicketType() != null ? t.getTicketType().getType() : "");
 
             //more info if needed here
             //->>>
@@ -401,9 +405,9 @@ public class EntryHistoryServiceImpl implements EntryHistoryService {
         }
         return resultMap;
     }
-    
+
     @Override
-    public void recordVehicleIn(Map<String, String> attributes){
+    public void recordVehicleIn(Map<String, String> attributes) {
         //attributes are timeIn, userId, creator_id, vehicleId, ticketId
         EntryHistory entry = new EntryHistory();
         entry.setPlateImgIn(attributes.get("inImgUrl"));
@@ -413,26 +417,46 @@ public class EntryHistoryServiceImpl implements EntryHistoryService {
         Date date = Date.from(zonedDateTime.toInstant());
 
         entry.setTimeIn(date);
-        
+
         //uploading to Cloudinary to get url
         entry.setPersonImgIn(attributes.get("personImgIn"));
-        
-        
+
         Ticket ticket = this.ticketService.findByTicketId(attributes.get("ticketId"));
         entry.setTicket(ticket);
+
+        //if anonymous means 1-time-use ticket -> setPaid = false for reused
+        if (ticket.getUserOwned() == this.userRepo.getAnonymousUser()) {
+            ticket.setIsPaid(Boolean.FALSE);
+            
+            LocalDateTime now = LocalDateTime.now();
+            LocalDate today = now.toLocalDate();
+            Date startDay = parseLocalDate.convertToDate(today);
+            ticket.setStartDay(startDay);
+
+            LocalDateTime endOfDay = today.plusDays(1).atStartOfDay();
+            Date endDay = Date.from(endOfDay.atZone(ZoneId.systemDefault()).toInstant());
+            ticket.setEndDay(endDay);
+
+            this.ticketService.addOrUpdate(ticket);
+        }
 
         User owner = this.userRepo.getUserById(Integer.parseInt(attributes.get("userId")));
         entry.setOwner(owner);
         entry.setCreator(this.userRepo.getUserById(Integer.parseInt(attributes.get("creatorId"))));
+
+        //chuyển state position qua occupied
+        Position currentPosition = ticket.getPosition();
+        currentPosition.setStatus(PositionStatusEnum.OCCUPIED);
+
         Vehicle vehicle = this.vehicleRepo.getVehicleById(Integer.parseInt(attributes.getOrDefault("vehicleId", vehicleIdString)));
         entry.setVehicle(vehicle);
-        
+
         //saving the plate number to ticket's plate number field -> on the controller
         //call recognizePlate() func on controller to recognize the plate -> put the result to attributes
         this.ticketService.updateLicenseField(ticket.getId(),
                 attributes.get("plateNumber"));
-        
-        
+
+        entry.setLicenseNumber(attributes.get("plateNumber"));
 
         this.entryRepo.save(entry);
     }
@@ -441,10 +465,10 @@ public class EntryHistoryServiceImpl implements EntryHistoryService {
     public void recordVehicleOut(Map<String, String> attributes) {
         //check ticket valid (date usage, paid, same id) on controller
         //compare 2 pics if same (plate number & person picture)
-        
+
         Ticket currentTicket = this.ticketService.findByTicketId(attributes.get("ticketId"));
         EntryHistory currentEntryRecord = this.entryRepo.getEntryHistoryByTicketId(currentTicket.getId());
-        
+
         currentEntryRecord.setPlateImgOut(attributes.get("outImgUrl"));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.ENGLISH);
@@ -453,13 +477,18 @@ public class EntryHistoryServiceImpl implements EntryHistoryService {
 
         currentEntryRecord.setTimeOut(date);
         
+        if (currentTicket.getUserOwned() == this.userRepo.getAnonymousUser()) {
+            currentTicket.setIsPaid(Boolean.FALSE);
+
+            this.ticketService.addOrUpdate(currentTicket);
+        }
+
         //uploading to Cloudinary to get url
         currentEntryRecord.setPersonImgOut(attributes.get("personImgOut"));
-        
+
 //        Position currentPosition = currentTicket.getPosition();
 //        currentPosition.setPlateImgUrl(null);
 //        this.posRepo.save(currentPosition);
-        
         this.entryRepo.save(currentEntryRecord);
     }
 
@@ -467,14 +496,14 @@ public class EntryHistoryServiceImpl implements EntryHistoryService {
     public Boolean processComparePlates(MultipartFile file1, MultipartFile file2) throws IOException {
         String plateResult1 = "**";
         String plateResult2 = "@@";
-        
+
         plateResult1 = this.recognizePlate(file1).get("plate");
         plateResult2 = this.recognizePlate(file2).get("plate");
-        
-        
-        if (plateResult1.equalsIgnoreCase(plateResult2))
+
+        if (plateResult1.equalsIgnoreCase(plateResult2)) {
             return true;
-        
+        }
+
         return false;
     }
 
@@ -486,5 +515,37 @@ public class EntryHistoryServiceImpl implements EntryHistoryService {
     @Override
     public Page<EntryHistory> getEntryHistoryListByLicensePlateNumberPageable(String licensePlateNumber, Pageable pageable) {
         return this.entryRepo.getEntryHistoryListByLicensePlateNumberPageable(licensePlateNumber, pageable);
+    }
+
+    @Override
+    public Page<EntryHistory> getAllEntryHistoryListByLicensePlateNumberPageable(String licensePlateNumber, Pageable pageable) {
+        return this.entryRepo.getAllEntryHistoryListByLicensePlateNumberPageable(licensePlateNumber, pageable);
+    }
+
+    @Override
+    public Map<String, String> processDetectFace(MultipartFile file) throws IOException {
+        Dotenv env = Dotenv.load();
+        Map<String, String> result = new HashMap<>();
+
+        try {
+            HttpResponse<String> response = Unirest.post(env.get("DETECT_FACES_REQUEST_URL"))
+                    .field("api_key", env.get("COMPARING_API_KEY"))
+                    .field("api_secret", env.get("COMPARING_API_SECRET"))
+                    .field("image_file", file.getInputStream(), file.getOriginalFilename())
+                    .asString();
+
+            JSONObject jsonResponse = new JSONObject(response.getBody());
+
+            if (jsonResponse.has("face_num")) {
+                int faceNum = jsonResponse.getInt("face_num");
+                result.put("face_num", String.valueOf(faceNum));
+            } else {
+                result.put("error", "Đã có lỗi xảy ra");
+            }
+        } catch (IOException | JSONException e) {
+            result.put("error", "Lỗi nhận diện khuôn mặt: " + e.getMessage());
+        }
+
+        return result;
     }
 }

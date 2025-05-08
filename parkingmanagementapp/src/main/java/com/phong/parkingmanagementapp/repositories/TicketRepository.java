@@ -46,8 +46,12 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     @Query("SELECT t FROM Ticket t WHERE t.userOwned.active = true AND (:idNum IS NULL OR t.userOwned.identityNumber LIKE %:idNum%) AND (:name IS NULL OR t.userOwned.name LIKE %:name%)")
     List<Ticket> getTicketsByUserOwnedActive(@Param("idNum") String identityNumber, @Param("name") String name);
 
-    @Query(value = "SELECT t FROM Ticket t WHERE (:name IS NULL OR t.userOwned.name LIKE %:name%)")
-    Page<Ticket> findTicketByUserOwnedPageable(@Param("name") String name, Pageable pageable);
+    @Query(value = """
+                   SELECT t FROM Ticket t 
+                    WHERE (:name IS NULL OR t.userOwned.name LIKE %:name%)
+                   AND (:status IS NULL OR t.active = :status)
+                   """)
+    Page<Ticket> findTicketByUserOwnedPageable(@Param("name") String name, @Param("status") Boolean status, Pageable pageable);
 
     @Query("SELECT t FROM Ticket t WHERE t.userOwned.active = true AND (:idNum IS NULL OR t.userOwned.identityNumber LIKE %:idNum%) AND (:name IS NULL OR t.userOwned.name LIKE %:name%)")
     Page<Ticket> getTicketsByUserOwnedActivePageable(@Param("idNum") String identityNumber, @Param("name") String name, Pageable pageable);
@@ -65,6 +69,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
         prc.price,
         t.vehicle.name,
         t.vehicle.plateLicense,
+        t.active,
         t.startDay,
         t.endDay,
         t.isPaid,
@@ -85,11 +90,21 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     Page<TicketDTO> getTicketsInfoByUserId(@Param("userId") int userId, Pageable pageable,
             @Param("startDay") Date startDay, @Param("endDay") Date endDay,
             @Param("isPaid") Boolean isPaid);
-    
+
     Ticket findTopByOrderByIdDesc();
-    
+
     Ticket findByTicketId(String ticketId);
-    
+
     @Query("SELECT CASE WHEN COUNT(t) > 0 THEN true ELSE false END FROM Ticket t WHERE :id = t.id AND (:currentDate BETWEEN t.startDay AND t.endDay)")
     boolean checkTicketDateValid(@Param("id") int ticketId, @Param("currentDate") Date currentDate);
+
+    //for statistic functions here
+    @Query("SELECT COUNT(t) FROM Ticket t WHERE t.active = TRUE AND t.userOwned.active = TRUE")
+    long countTotalTickets();
+
+    @Query("SELECT t.ticketType.type, COUNT(t) FROM Ticket t GROUP BY t.ticketType.type")
+    List<Object[]> countTicketsByType();
+
+    @Query("SELECT t.floor.floorNumber, COUNT(t) FROM Ticket t GROUP BY t.floor.floorNumber ORDER BY t.floor.floorNumber")
+    List<Object[]> countTicketsByFloor();
 }

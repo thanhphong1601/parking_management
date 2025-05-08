@@ -1,0 +1,52 @@
+.fail-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fail-box {
+    background: #fff5f5;
+    padding: 30px 50px;
+    border: 2px solid #e74c3c;
+    border-radius: 12px;
+    text-align: center;
+    animation: shake 0.4s ease-in-out;
+}
+
+.fail-icon {
+    font-size: 48px;
+    color: #e74c3c;
+    margin-bottom: 12px;
+}
+
+.fail-message {
+    font-size: 18px;
+    color: #c0392b;
+    font-weight: 600;
+}
+
+@keyframes shake {
+    0% {
+        transform: translateX(0px);
+    }
+
+    25% {
+        transform: translateX(-8px);
+    }
+
+    50% {
+        transform: translateX(8px);
+    }
+
+    75% {
+        transform: translateX(-4px);
+    }
+
+    100% {
+        transform: translateX(0px);
+    }
+}

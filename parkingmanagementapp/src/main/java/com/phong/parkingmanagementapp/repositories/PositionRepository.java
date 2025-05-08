@@ -16,21 +16,22 @@ import org.springframework.stereotype.Repository;
  * @author Admin
  */
 @Repository
-public interface PositionRepository extends JpaRepository<Position, Long>{
+public interface PositionRepository extends JpaRepository<Position, Long> {
+
     @Override
     public List<Position> findAll();
-    
+
     @Query(value = "SELECT p FROM Position p WHERE p.line.id = :id")
     List<Position> findPositionsByLineId(@Param("id") int id);
-    
+
     Position getPositionById(int id);
-    
+
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Position p WHERE p.line.id = :lineId AND p.take = false AND p.isDeleted = false")
     Boolean existsByStatus(@Param("lineId") int lineId);
-    
+
     @Query("SELECT COUNT(p) FROM Position p WHERE p.line.id = :lineId")
     int countPositionByLineId(@Param("lineId") int lineId);
-    
+
     @Query("""
         SELECT p FROM Position p
         WHERE p.take = false
@@ -44,4 +45,10 @@ public interface PositionRepository extends JpaRepository<Position, Long>{
             p.position ASC
     """)
     List<Position> findFirstAvailablePositionOrdered();
+
+    @Query("SELECT COUNT(p) FROM Position p WHERE p.take = false")
+    long countAvailablePositions();
+
+    @Query("SELECT COUNT(p) FROM Position p WHERE p.take = true")
+    long countTakenPositions();
 }

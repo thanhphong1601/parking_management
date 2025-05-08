@@ -84,11 +84,12 @@ public class TicketServiceImpl implements TicketService{
         if (ticket == null)
             return false;
         
-        Receipt r = this.receiptRepo.getReceiptByTicketId(ticket.getId());
-        if (r != null)
-            this.receiptRepo.delete(r);
+//        Receipt r = this.receiptRepo.getReceiptByTicketId(ticket.getId());
+//        if (r != null)
+//            this.receiptRepo.delete(r);
+        ticket.setActive(Boolean.FALSE);
+        this.ticketRepo.save(ticket);
         
-        ticketRepo.delete(ticket);
         return true;
     }
 
@@ -141,8 +142,8 @@ public class TicketServiceImpl implements TicketService{
     }
 
     @Override
-    public Page<Ticket> findTicketByUserOwnedPageable(String name, Pageable pageable) {
-        return this.ticketRepo.findTicketByUserOwnedPageable(name, pageable);
+    public Page<Ticket> findTicketByUserOwnedPageable(String name, Boolean status, Pageable pageable) {
+        return this.ticketRepo.findTicketByUserOwnedPageable(name, status, pageable);
     }
 
     @Override
@@ -220,6 +221,21 @@ public class TicketServiceImpl implements TicketService{
     @Override
     public boolean checkTicketDateValid(int ticketId, Date currentDate) {
         return this.ticketRepo.checkTicketDateValid(ticketId, currentDate);
+    }
+
+    @Override
+    public long countTotalTickets() {
+        return this.ticketRepo.countTotalTickets();
+    }
+
+    @Override
+    public List<Object[]> countTicketsByType() {
+        return this.ticketRepo.countTicketsByType();
+    }
+
+    @Override
+    public List<Object[]> countTicketsByFloor() {
+        return this.ticketRepo.countTicketsByFloor();
     }
 
     

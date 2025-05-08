@@ -31,7 +31,7 @@ public interface TicketService {
     List<Ticket> findValidTicketsByVehicleIdAndDate(Long vehicleId, 
                                                     Date currentDate);
     List<Ticket> getTicketsByUserOwnedActive(String identityNumber, String name);
-    Page<Ticket> findTicketByUserOwnedPageable(String name, Pageable pageable);
+    Page<Ticket> findTicketByUserOwnedPageable(String name, Boolean status, Pageable pageable);
     Page<Ticket> getTicketsByUserOwnedActivePageable(String identityNumber,String name, Pageable pageable);
     Ticket checkTicketDate(int ticketId, Date currentDate);
     void updateLicenseField(int ticketId, String plateNumber);
@@ -42,5 +42,7 @@ public interface TicketService {
     Ticket findTopByOrderByIdDesc();
     Ticket findByTicketId(String ticketId);
     boolean checkTicketDateValid(int ticketId, Date currentDate);
-
+    long countTotalTickets();
+    List<Object[]> countTicketsByType();
+    List<Object[]> countTicketsByFloor();
 }

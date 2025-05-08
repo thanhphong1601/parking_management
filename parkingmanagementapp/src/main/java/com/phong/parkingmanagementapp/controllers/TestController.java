@@ -5,22 +5,28 @@
 package com.phong.parkingmanagementapp.controllers;
 
 import com.phong.parkingmanagementapp.dtos.TicketDTO;
+import com.phong.parkingmanagementapp.models.EntryHistory;
 import com.phong.parkingmanagementapp.models.Floor;
 import com.phong.parkingmanagementapp.models.Line;
 import com.phong.parkingmanagementapp.models.Position;
+import com.phong.parkingmanagementapp.models.PositionStatusEnum;
 import com.phong.parkingmanagementapp.models.Role;
 import com.phong.parkingmanagementapp.models.Ticket;
 import com.phong.parkingmanagementapp.models.TicketPreIdEnum;
 import com.phong.parkingmanagementapp.models.User;
 import com.phong.parkingmanagementapp.models.Vehicle;
+import com.phong.parkingmanagementapp.repositories.EntryHistoryRepository;
 import com.phong.parkingmanagementapp.repositories.LineRepository;
 import com.phong.parkingmanagementapp.repositories.TicketRepository;
+import com.phong.parkingmanagementapp.services.CloudinaryService;
 import com.phong.parkingmanagementapp.services.EntryHistoryService;
 import com.phong.parkingmanagementapp.services.FloorService;
 import com.phong.parkingmanagementapp.services.LineService;
 import com.phong.parkingmanagementapp.services.PaymentService;
 import com.phong.parkingmanagementapp.services.PositionService;
+import com.phong.parkingmanagementapp.services.ReceiptService;
 import com.phong.parkingmanagementapp.services.RoleService;
+import com.phong.parkingmanagementapp.services.TextExtractorService;
 import com.phong.parkingmanagementapp.services.TicketService;
 import com.phong.parkingmanagementapp.services.TicketTypeService;
 import com.phong.parkingmanagementapp.services.UserService;
@@ -28,6 +34,7 @@ import com.phong.parkingmanagementapp.services.VehicleService;
 import com.phong.parkingmanagementapp.utils.parseLocalDate;
 import io.github.cdimascio.dotenv.Dotenv;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -38,6 +45,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -67,6 +78,12 @@ public class TestController {
     private final TicketService ticketService;
     private final RoleService roleService;
     private final VehicleService vehicleService;
+    
+    @Autowired
+    private CloudinaryService cloudinary;
+
+    @Autowired
+    private TextExtractorService textExtractor;
 
     @Autowired
     private TicketTypeService ticketTypeService;
@@ -89,6 +106,11 @@ public class TestController {
     private PositionService poService;
     @Autowired
     private TicketRepository ticketRepo;
+
+    @Autowired
+    private ReceiptService receiptService;
+    @Autowired
+    private EntryHistoryRepository entryRepo;
 
     @Autowired
     public TestController(UserService userService, TicketService ticketService, RoleService roleService, VehicleService vehicleService) {
@@ -115,13 +137,12 @@ public class TestController {
         return new ResponseEntity<>(this.ticketRepo.getTicketsInfoByUserId(userId, pageable, null, null, Boolean.FALSE), HttpStatus.OK);
     }
 
-    @GetMapping("/test3")
-    public ResponseEntity<?> test3(@RequestParam Map<String, String> params) {
-        System.out.println(System.getProperty("GOOGLE_CLIENT_ID"));
-System.out.println("System.getProperty(GOOGLE_CLIENT_ID) = " + System.getProperty("GOOGLE_CLIENT_ID"));
-
-
-        return new ResponseEntity<>("OKkk", HttpStatus.OK);
+    @PostMapping("/test3")
+    public ResponseEntity<?> test3(@RequestParam Map<String, String> params,
+            @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+        Map<String, ?> resultMap = this.textExtractor.extractTextFromImg(file);
+        String test = resultMap.get("text").toString();
+        return new ResponseEntity<>(test.trim(), HttpStatus.OK);
     }
 
     @GetMapping("/testRequestParams/")
@@ -149,7 +170,7 @@ System.out.println("System.getProperty(GOOGLE_CLIENT_ID) = " + System.getPropert
     public ResponseEntity<?> ticketList(@RequestParam(value = "name", required = false) String name, @RequestParam(value = "page", defaultValue = "0") int page) {
 
         Pageable pageable = PageRequest.of(page, pageSize);
-        Page<Ticket> ticketList = this.ticketService.findTicketByUserOwnedPageable(name, pageable);
+        Page<Ticket> ticketList = this.ticketService.findTicketByUserOwnedPageable(name, true, pageable);
 
         return ResponseEntity.ok(ticketList);
     }

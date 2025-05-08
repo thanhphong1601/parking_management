@@ -36,16 +36,11 @@ public class AdminHomeController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             u = this.userService.getUserByUsername(userDetails.getUsername());
         } else if (authentication != null) {
-            u = this.userService.getUserByUsername(authentication.getName()); // Trường hợp user không sử dụng UserDetails
+            u = this.userService.getUserByUsername(authentication.getName());
         }
 
         model.addAttribute("user", u);
         return "index";
-    }
-
-    @GetMapping("/hi")
-    public String hii() {
-        return "reallyyy";
     }
 
 }

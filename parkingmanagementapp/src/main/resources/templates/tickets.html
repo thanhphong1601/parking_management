@@ -9,108 +9,141 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <link rel="stylesheet" th:href="@{/css/header_style.css}" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
         <style>
-            .container {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                height: 100%;
-                align-items: center;
-            }
-            .searchBar {
-                margin-top: 30px;
-            }
             .styled-table {
                 border-collapse: collapse;
-                margin: 25px 0;
-                font-size: 0.9em;
-                font-family: sans-serif;
-                min-width: 400px;
-                box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+                font-size: 0.95em;
+                background-color: #fff;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
             }
+
             .styled-table thead tr {
-                background-color: #009879;
-                color: #ffffff;
-                text-align: left;
-            }
-            .styled-table th,
-            .styled-table td {
-                padding: 12px 15px;
-            }
-            .styled-table tbody tr {
-                border-bottom: 1px solid #dddddd;
-            }
-
-
-            .styled-table tbody tr:last-of-type {
-                border-bottom: 2px solid #009879;
-            }
-            .styled-table tbody tr.active-row {
+                background-color: #0d6efd;
+                color: white;
                 font-weight: bold;
-                color: #009879;
             }
+
+            .styled-table tbody tr:hover {
+                background-color: #f1f1f1;
+            }
+
+            .table-div {
+                margin-top: 20px;
+            }
+
         </style>
     </head>
-    <body>
+    <body class="d-flex flex-column min-vh-100">
         <!-- Include header -->
         <div th:replace="fragments/header :: header"></div>
 
         <!-- Main content -->
-        <div class="container" th:fragment="content">
-            <form class="searchBar" th:action="@{/tickets}" method="get">
-                <label for="name">Tìm tên chủ sở hữu vé:</label>
-                <input type="text" id="name" name="name" placeholder="Nhập tên khách hàng" />
-                <input type="hidden" name="page" th:value="${currentPage}" /> 
+        <div class="flex-grow-1 container py-4" th:fragment="content">
+            <div class="container mt-4">
+                <!-- Form tìm kiếm -->
+                <form class="row g-3 align-items-end mb-4" th:action="@{/tickets}" method="get">
+                    <div class="col-md-10">
+                        <label for="name" class="form-label">Tìm tên chủ sở hữu vé:</label>
+                        <input type="text" id="name" name="name" class="form-control" placeholder="Nhập tên khách hàng" th:value="${name}" />
+                    </div>
+                    <input type="hidden" name="page" th:value="${currentPage}" />
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Tìm</button>
+                    </div>
+                    
+                     <div class="col-md-12 mb-3">
+                        <div class="btn-group" role="group" aria-label="Filter by Status">
+                            <input type="radio" class="btn-check" name="status" id="status-all" value=""
+                                   th:checked="${status == ''}">
+                            <label class="btn btn-outline-primary" for="status-all">Tất cả</label>
 
-                <button type="submit">Tìm</button>
-            </form>
-            <table class="styled-table">
-                <thead>
-                    <tr>
-                        <th>Id vé</th>
-                        <th>Nhân viên</th>
-                        <th>Tầng</th>
-                        <th>Dãy</th>
-                        <th>Vị trí</th>
-                        <th>Khách hàng</th>
-                        <th><th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="t :${ticketList.content}">
-                        <td>[[${t.id}]]</td>
-                        <td>[[${t.userCreate.getName()}]]</td>
-                        <td>[[${t.floor?.getFloorNumber() ?: ''}]]</td>
-                        <td>[[${t.line?.getLine() ?: ''}]]</td>
-                        <td>[[${t.position?.getPosition() ?: ''}]]</td>
-                        <td>[[${t.userOwned.getName()}]]</td>
-                        <td>
-                            <a th:href="@{/tickets/{id}(id=${t.id})}" class="btn btn-info">Sửa thông tin</a>
-                        </td>
-                        <td>
-                            <a th:href="@{/tickets/{id}/delete(id=${t.id})}" class="btn btn-danger">Xóa</a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div>
-                <span th:if="${currentPage > 0}">
-                    <a th:href="@{/tickets?page={page}(page=${currentPage - 1})}">&lt; <</a>
-                </span>
-                <span th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}">
-                    <a th:href="@{/tickets?page={page}(page=${pageNum})}"
-                       th:text="${pageNum + 1}"
-                       th:classappend="${pageNum == currentPage} ? 'active' : ''">1</a>
-                </span>
-                <span th:if="${currentPage < totalPages - 1}">
-                    <a th:href="@{/tickets?page={page}(page=${currentPage + 1})}">>&gt;</a>
-                </span>
+                            <input type="radio" class="btn-check" name="status" id="status-current" value="true"
+                                   th:checked="${status == true}">
+                            <label class="btn btn-outline-success" for="status-current">Hiện tại</label>
+
+                            <input type="radio" class="btn-check" name="status" id="status-deleted" value="false"
+                                   th:checked="${status == false}">
+                            <label class="btn btn-outline-danger" for="status-deleted">Đã xóa</label>
+                        </div>
+                    </div>
+                </form>
+
+                <a class="btn btn-primary w-10" href="/tickets/add">Thêm Vé Mới</a>
+
+
+                <!-- Bảng danh sách vé -->
+                <div class="table-responsive table-div">
+                    <table class="table styled-table table-hover text-center align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID vé</th>
+                                <th>Nhân viên tạo</th>
+                                <th>Tầng</th>
+                                <th>Dãy</th>
+                                <th>Vị trí</th>
+                                <th>Chủ sở hữu</th>
+                                <th>Thời hạn</th>
+                                <th colspan="2">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="t : ${ticketList.content}"
+                                th:classappend="${t.active == false} ? 'table-danger' : (t.active == true ? 'table-success' : '')">
+                                <td>[[${t.ticketId}]]</td>
+                                <td>[[${t.userCreate.name}]]</td>
+                                <td>[[${t.floor?.floorNumber}]]</td>
+                                <td>[[${t.line?.line}]]</td>
+                                <td>[[${t.position?.position}]]</td>
+                                <td>[[${t.userOwned.name}]]</td>
+                                <td>[[${#dates.format(t.startDay, 'dd/MM/yyyy')}]] đến [[${#dates.format(t.endDay, 'dd/MM/yyyy')}]]</td>
+                                <td>
+                                    <a th:href="@{/tickets/{id}(id=${t.id})}" class="btn btn-outline-info btn-sm">Sửa</a>
+                                </td>
+                                <td>
+                                    <a th:href="@{/tickets/{id}/delete(id=${t.id})}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Bạn chắc chắn muốn xóa vé này?')">Xóa</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <a class="btn btn-info" href="/tickets/add">Thêm Vé Mới</a>
+
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/tickets(page=${currentPage - 1}, status=${status}, name=${name})}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+
+                    <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${pageNum == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{/tickets(page=${pageNum}, status=${status}, name=${name})}"
+                           th:text="${pageNum + 1}">1</a>
+                    </li>
+
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/tickets(page=${currentPage + 1}, status=${status}, name=${name})}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
         </div>
 
         <!-- Include footer -->
         <div th:replace="fragments/footer :: footer"></div>
+
+        <script>
+            document.querySelectorAll("input[name='status']").forEach(el => {
+                el.addEventListener("change", () => {
+                    el.closest("form").submit();
+                });
+            });
+        </script>
     </body>
 </html>

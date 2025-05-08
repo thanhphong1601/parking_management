@@ -23,4 +23,8 @@ public interface PositionService {
     List<Position> findFirstAvailablePositionOrdered();
     void assignPositionToTicket(int ticketId, int positionId);
     void emptyTakenPosition(int positionId);
+    void emptyTakenPositionOfDeactiveTicket(int ticketId);
+    long countAvailablePositions();
+    long countTakenPositions();
+    
 }

@@ -46,7 +46,8 @@ public interface EntryHistoryService {
 
     Double findAverageParkingDuration();
     
-    Page<EntryHistory> findAllByName(Pageable pageable, String name);
+    Page<EntryHistory> findAllByName(Pageable pageable, String name, Date startFilter,
+            Date endFilter, String plateLicense);
 
     Map<String, String> countEntriesByDay(LocalDate date);
     
@@ -65,4 +66,8 @@ public interface EntryHistoryService {
     EntryHistory getEntryHistoryByTicketId(int ticketId);
     
     Page<EntryHistory> getEntryHistoryListByLicensePlateNumberPageable(String licensePlateNumber, Pageable pageable);
+    
+    Page<EntryHistory> getAllEntryHistoryListByLicensePlateNumberPageable(String licensePlateNumber, Pageable pageable);
+    
+    Map<String, String> processDetectFace(MultipartFile file) throws IOException;
 }

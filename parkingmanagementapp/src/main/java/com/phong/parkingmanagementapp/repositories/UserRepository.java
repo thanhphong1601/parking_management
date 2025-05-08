@@ -32,7 +32,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findUsersByRoleId(@Param("role") int role);
 
     public User getUserByName(String name);
-    
+
     @Query("SELECT u FROM User u WHERE u.username = :username OR u.email = :username")
     Optional<User> getUserByUsernameOrEmail(@Param("username") String username);
 
@@ -47,25 +47,28 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUsername(String username);
 
     boolean existsByIdentityNumber(String identityNumber);
-    
+
     @Override
     List<User> findAll();
-    
+
     @Query(value = "SELECT u FROM User u WHERE u.name != 'BlankUser'")
     List<User> findAllExceptBlankUser();
-    
+
     User getUserByUsername(String username);
-    
+
     @Query("SELECT u FROM User u WHERE (:idNum IS NULL OR u.identityNumber LIKE %:idNum%) AND (:name IS NULL OR u.name LIKE %:name%) AND (:role IS NULL OR u.role.id = :role) AND u.active = true")
     public Page<User> findUserByIdentityNumberOrNameOrRolePageable(@Param("idNum") String identityNumber, @Param("name") String name, @Param("role") int role, Pageable pageable);
-    
+
     @Query("SELECT u FROM User u WHERE u.username = 'Anonymous'")
     public User getAnonymousUser();
-    
+
     User findByEmail(String email);
-    
+
     public User findByIdentityNumber(String identityNumber);
-    
+
     @Query("SELECT u.id FROM User u WHERE u.username = 'admin'")
     int getAdminId();
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.role.role = 'ROLE_CUSTOMER' AND u.active = TRUE")
+    long countCustomers();
 }

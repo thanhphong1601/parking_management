@@ -7,6 +7,7 @@ package com.phong.parkingmanagementapp.controllers;
 import com.phong.parkingmanagementapp.models.Floor;
 import com.phong.parkingmanagementapp.models.Line;
 import com.phong.parkingmanagementapp.models.Position;
+import com.phong.parkingmanagementapp.models.PositionStatusEnum;
 import com.phong.parkingmanagementapp.services.FloorService;
 import com.phong.parkingmanagementapp.services.LineService;
 import com.phong.parkingmanagementapp.services.PositionService;
@@ -136,6 +137,7 @@ public class AdminAreaController {
             try {
                 if (p.getId() == null){ //new position
                     p.setTake(Boolean.FALSE);
+                    p.setStatus(PositionStatusEnum.AVAILABLE);
                     p.setIsDeleted(false);
                 }
                 else {

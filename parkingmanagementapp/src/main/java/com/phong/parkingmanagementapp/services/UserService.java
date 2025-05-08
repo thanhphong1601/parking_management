@@ -37,4 +37,6 @@ public interface UserService {
     Optional<User> getUserByUsernameOrEmail(String username);
     boolean existsByUsername(String username);
     void save(User u);
+    long countCustomers();
+
 }

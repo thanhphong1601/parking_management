@@ -5,6 +5,7 @@
 package com.phong.parkingmanagementapp.controllers;
 
 import com.phong.parkingmanagementapp.models.Position;
+import com.phong.parkingmanagementapp.models.PositionStatusEnum;
 import com.phong.parkingmanagementapp.models.Ticket;
 import com.phong.parkingmanagementapp.services.CloudinaryService;
 import com.phong.parkingmanagementapp.services.EntryHistoryService;
@@ -88,9 +89,11 @@ public class ApiPositionController {
             return new ResponseEntity<>("Không tìm thấy vị trí hợp lệ", HttpStatus.NOT_FOUND);
         }
         currentPosition.setPlateImgUrl(inImgUrl);
-        this.poService.savePosition(currentPosition);
+        currentPosition.setCurrentTicketId((long) currentTicket.getId());
+        currentPosition.setTake(true);
+        currentPosition.setStatus(PositionStatusEnum.OCCUPIED);
 
-        this.poService.assignPositionToTicket(currentTicket.getId(), positionId);
+        this.poService.savePosition(currentPosition);
 
         return new ResponseEntity<>("Cập nhật trạng thái vị trí thành công", HttpStatus.OK);
     }
@@ -121,8 +124,6 @@ public class ApiPositionController {
         MultipartFile plateImgInUrlFile = downloadFile.downloadImageAsMultipartFile(plateImgInUrl);
 
         Boolean comparingResult = this.entryService.processComparePlates(plateImgInUrlFile, file);
-        
-        
 
         return new ResponseEntity<>(comparingResult, HttpStatus.OK);
     }

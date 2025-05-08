@@ -57,4 +57,7 @@ public class Receipt {
     
     @Column(name = "transaction_number")
     private String transactionNumber;
+    
+    @Column(name = "content")
+    private String content;
 }

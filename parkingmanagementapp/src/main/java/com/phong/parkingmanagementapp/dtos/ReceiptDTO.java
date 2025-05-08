@@ -23,7 +23,8 @@ import lombok.Setter;
 public class ReceiptDTO {
     String transactionNumber;
     Date transactionDate;
-    int ticketId;
+    String ticketId;
+    String username;
     String ticketType;
     Boolean isPaid;
     int totalPrice;

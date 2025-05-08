@@ -195,7 +195,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User u = this.userRepo.getUserByUsernameOrEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng"));
 
-        System.out.println(u);
 
 //        System.out.println(u.getPassword());
 //        System.out.println(password);
@@ -251,6 +250,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public void save(User u) {
         this.userRepo.save(u);
+    }
+
+    @Override
+    public long countCustomers() {
+        return this.userRepo.countCustomers();
     }
 
 }

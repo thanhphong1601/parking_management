@@ -31,6 +31,7 @@ public class TicketDTO {
     private int ticketPrice;
     private String vehicleName;
     private String vehicleLicensePlate;
+    private Boolean active;
     
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date startDay;
