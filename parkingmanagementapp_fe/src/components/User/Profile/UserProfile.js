@@ -1,8 +1,8 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import './UserProfile.css'
 import { MyDispatchContext, MyUserContext } from '../../../configs/Contexts';
 import { Link, useNavigate } from 'react-router-dom';
-import { Alert, Form } from 'react-bootstrap';
+import { Alert, Button, Form, Modal } from 'react-bootstrap';
 import { authApi, endpoints } from '../../../configs/APIs';
 
 const UserProfile = () => {
@@ -25,7 +25,7 @@ const UserProfile = () => {
     const [msg, setMsg] = useState("");
     const [infoMsg, setInfoMsg] = useState("");
     const [vehicleList, setVehicleList] = useState([]);
-
+    const [inform, setInform] = useState("");
 
 
     let currentUserAvatarUrl;
@@ -43,13 +43,70 @@ const UserProfile = () => {
             let url = `${endpoints['vehicle-list-user'](currentUser.id)}`;
             let res = await authApi().get(url);
 
-            if (res.status === 200){
+            if (res.status === 200) {
                 setVehicleList(res.data);
             }
         } catch (ex) {
             console.error(ex);
         }
     }
+    const files = useRef();
+    const [userAvtUrl, setUserAvtUrl] = useState();
+
+    const handleInPersonImgChange = async (event) => {
+        event.preventDefault();
+        setMsg("");
+        setInform("Đã Upload thành công");
+
+
+        const file = event.target.files[0];
+        if (file) {
+            const imageUrl = URL.createObjectURL(file);
+            setUserAvtUrl(imageUrl);
+
+            try {
+                let form = new FormData();
+                form.append("file1", file);
+                let url = `${endpoints['user-avatar-change']}?userId=${currentUser.id}`;
+
+                let res = await authApi().post(url, form);
+
+                if (res.status === 200){
+                    loadAvatar();
+                    showSuccess();
+
+                    setTimeout(() => {
+                        closeSuccess();
+                    }, 2000);
+                }
+            } catch (ex) {
+                if (ex.response.status === 404){
+                    setInform(ex.response.data);
+
+                    showSuccess();
+
+                    setTimeout(() => {
+                        closeSuccess();
+                    }, 2000);
+                }
+                console.error(ex);
+            }
+        }
+    };
+
+    //success modal
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const showSuccess = () => {
+        setShowSuccessModal(true);
+    };
+
+    const closeSuccess = () => {
+        setShowSuccessModal(false);
+    };
+
+    const changeAvatar = async () => {
+
+    };
 
     const submitChange = async (e) => {
         e.preventDefault();
@@ -91,7 +148,7 @@ const UserProfile = () => {
 
         currentUserAvatarUrl = loadAvatar();
 
-    }, [currentUser]);
+    }, [currentUser, files]);
 
     useEffect(() => {
         loadVehicle();
@@ -115,7 +172,7 @@ const UserProfile = () => {
                                     }} />
                                 <div class="file btn btn-lg btn-primary">
                                     Đổi ảnh đại diện
-                                    <input type="file" name="file" />
+                                    <input type="file" accept=".png,.jpg" ref={files} onChange={e => handleInPersonImgChange(e)} />
                                 </div>
                             </div>
                         </div>
@@ -325,6 +382,16 @@ const UserProfile = () => {
             </div>
         </>}
 
+        <Modal show={showSuccessModal} onHide={closeSuccess}>
+            <Modal.Body className="text-center">
+                <h2>{inform}</h2>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={closeSuccess}>
+                    Đóng
+                </Button>
+            </Modal.Footer>
+        </Modal>
     </>);
 }
 

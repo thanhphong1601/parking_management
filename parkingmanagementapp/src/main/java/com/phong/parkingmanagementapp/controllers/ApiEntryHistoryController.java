@@ -511,7 +511,7 @@ public class ApiEntryHistoryController {
 
         if (ticketIdString == null) {
             result.put("Ticket error: ", "Mã vé không hợp lệ.");
-            return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
         }
 
         Ticket currentTicket = this.ticketService.findByTicketId(ticketIdString);

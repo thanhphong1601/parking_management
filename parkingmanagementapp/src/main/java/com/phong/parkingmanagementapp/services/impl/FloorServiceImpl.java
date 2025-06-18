@@ -102,4 +102,9 @@ public class FloorServiceImpl implements FloorService {
         )).collect(Collectors.toList());
     }
 
+    @Override
+    public List<Floor> findAllFloorAvailable() {
+        return this.floorRepo.findAllFloorAvailable();
+    }
+
 }

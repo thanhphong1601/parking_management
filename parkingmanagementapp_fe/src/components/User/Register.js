@@ -92,7 +92,7 @@ const Register = () => {
 
                 if (res.status === 200) {
                     //localStorage.setItem("register_user", user);
-                    nav(`/verify?email=${encodeURIComponent(user.email)}`, { state: { user } });        
+                    nav(`/verify?email=${encodeURIComponent(user.email)}`, { state: { user: user } });        
                 }
             }
             else

@@ -56,7 +56,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User getUserByUsername(String username);
 
-    @Query("SELECT u FROM User u WHERE (:idNum IS NULL OR u.identityNumber LIKE %:idNum%) AND (:name IS NULL OR u.name LIKE %:name%) AND (:role IS NULL OR u.role.id = :role) AND u.active = true")
+    @Query("SELECT u FROM User u WHERE (:idNum IS NULL OR u.identityNumber LIKE %:idNum%) AND (:name IS NULL OR u.name LIKE %:name%) AND (:role IS NULL OR u.role.id = :role) AND u.active = true AND u.username != 'Anonymous'")
     public Page<User> findUserByIdentityNumberOrNameOrRolePageable(@Param("idNum") String identityNumber, @Param("name") String name, @Param("role") int role, Pageable pageable);
 
     @Query("SELECT u FROM User u WHERE u.username = 'Anonymous'")

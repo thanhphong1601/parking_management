@@ -20,7 +20,7 @@ public interface LineRepository extends JpaRepository<Line, Long>{
     @Override
     public List<Line> findAll();
     
-    @Query(value = "SELECT l FROM Line l WHERE l.floor.id = :id")
+    @Query(value = "SELECT l FROM Line l WHERE l.floor.id = :id AND (l.full = false AND l.isDeleted = false)")
     List<Line> findLinesByFloorId(@Param("id")int id);
     
     Line getLineById(int id);

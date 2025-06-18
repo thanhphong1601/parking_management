@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import "./CustomerIndex.css"
 import CustomerFooter from "../common/CustomerFooter";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MyUserContext } from "../../../configs/Contexts";
 
 const images = [
@@ -12,6 +12,7 @@ const images = [
 ];
 
 const CustomerIndex = () => {
+    const nav = useNavigate();
     const currentUser = useContext(MyUserContext);
     const [currentImage, setCurrentImage] = useState(0);
 
@@ -45,6 +46,10 @@ const CustomerIndex = () => {
         };
     }, []);
 
+    const goToRegisterPage = () => {
+        nav("/register");
+    };
+
     return (
         <div className="homepage-container">
             {/* Section 1: Hero */}
@@ -57,7 +62,7 @@ const CustomerIndex = () => {
                         Chúng tôi cung cấp giải pháp tối ưu cho việc quản lý và vận hành bãi đậu xe hiện đại, an toàn và tiện lợi.
                     </p>
                     <div className="hero-buttons">
-                        <Button variant="light" className="hero-btn">Đăng ký tài khoản ngay</Button>
+                        <Button variant="light" className="hero-btn" onClick={goToRegisterPage}>Đăng ký tài khoản ngay</Button>
                         <Button variant="outline-light" className="hero-btn">Xem bảng giá</Button>
                     </div>
                 </div>
@@ -70,7 +75,7 @@ const CustomerIndex = () => {
             <section className="cta-section fade-slide">
                 <h2>Quản lý vé xe dễ dàng và nhanh chóng</h2>
                 <p>Đã có tài khoản? Truy cập vào trang quản lý để kiểm tra thông tin vé xe và thao tác nhanh chóng.</p>
-                <Link to={currentUser? `/customer/${currentUser.id}/ticket/list`: '#'} className="cta-button">Vào trang quản lý vé</Link>
+                <Link to={currentUser? `/customer/${currentUser.id}/ticket/list`: '/login'} className="cta-button">Vào trang quản lý vé</Link>
             </section>
 
             <section className="hero-section-2 fade-slide">
@@ -82,7 +87,7 @@ const CustomerIndex = () => {
                         Bạn có thể đăng ký trước loại vé xe mình mong muốn
                     </p>
                     <div className="hero-buttons-2">
-                        <Button variant="light" className="hero-btn">Đăng ký vé ngay</Button>
+                        <Link variant="light" className="btn cta-button" to={currentUser? `/customer/${currentUser.id}/ticket/create`: '/login'}>Đăng ký vé ngay</Link>
                     </div>
                 </div>
                 <div className="hero-image">

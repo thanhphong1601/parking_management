@@ -125,7 +125,7 @@ public class TestController {
         Date start = new Date(2024 - 1900, 8, 21); // Tháng bắt đầu từ 0, tháng 9 là 8
         Date end = new Date(2024 - 1900, 9, 21);   // Tháng 10 là 9
 
-        String url = this.paymentService.createPaymentUrl(100000, "Xin chào");
+        String url = this.paymentService.createPaymentUrl(100000, "Xin chào", 12);
 
         return ResponseEntity.ok(url);
     }
@@ -140,9 +140,14 @@ public class TestController {
     @PostMapping("/test3")
     public ResponseEntity<?> test3(@RequestParam Map<String, String> params,
             @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
-        Map<String, ?> resultMap = this.textExtractor.extractTextFromImg(file);
-        String test = resultMap.get("text").toString();
-        return new ResponseEntity<>(test.trim(), HttpStatus.OK);
+        Map<String, String> plateRecognizeResult = this.entryService.recognizePlate(file);
+
+            //check if it's a riel plate img
+            if (plateRecognizeResult.get("plate") == null) {
+                return new ResponseEntity<>(plateRecognizeResult,
+                        HttpStatus.NOT_FOUND);
+            }
+        return new ResponseEntity<>(plateRecognizeResult, HttpStatus.OK);
     }
 
     @GetMapping("/testRequestParams/")

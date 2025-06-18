@@ -116,6 +116,7 @@ const TicketManage = () => {
     const nav = useNavigate();
     const location = useLocation();
     const currentPath = location.pathname + location.search;
+
     if (currentUser == null) {
         nav(`/login?continue=${encodeURIComponent(currentPath)}`);
     }
@@ -234,6 +235,7 @@ const TicketManage = () => {
                             <td>{t.isPaid ? "✅ Đã thanh toán" : "❌ Chưa thanh toán"}</td>
                             <td>
                                 <Button active={t.isPaid !== false}
+                                    disabled={t.isPaid !== false}
                                     variant={t.isPaid === true ? "secondary" : "primary"}
                                     onClick={e => createPayment(e, t)}
                                 >Thanh toán</Button>

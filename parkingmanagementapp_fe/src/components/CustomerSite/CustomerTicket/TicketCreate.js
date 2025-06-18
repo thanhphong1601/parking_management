@@ -27,7 +27,7 @@ const TicketCreate = () => {
     const [totalPrice, setTotalPrice] = useState(0);
     const unit = {
         1: "Ngày",
-        2: "Tháng",
+        2: "Ngày",
         3: "Tháng"
     };
 
@@ -373,9 +373,11 @@ const TicketCreate = () => {
         let ticketForm = new FormData();
         for (let key in form) {
             ticketForm.append(key, form[key]);
+            //console.info(`${key}` + ": " + `${form[key]}`);
         }
 
         try {
+            //let res;
             let res = await authApi().post(endpoints['ticket-create'], ticketForm);
 
             if (res.status == 201) {

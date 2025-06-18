@@ -26,13 +26,13 @@ const VerifyMail = () => {
 
         try {
             let res = await APIs.post(endpoints['verify-mail'](email));
-            if (res.status == 200){
+            if (res.status == 200) {
                 setInformMsg(res.data);
             }
 
         } catch (ex) {
             console.error(ex);
-            setInformMsg("Đã có lỗi xãy ra");
+            setInformMsg("Đã có lỗi xảy ra");
         }
     };
 
@@ -63,26 +63,27 @@ const VerifyMail = () => {
             else {
                 if (registerUser["confirm"] != null) {
                     res = await APIs.post(endpoints['register'], form);
-                    if (res.status == 201) {
+                    res = await APIs.get(endpoints['active-user'](registerUser['email']));
+                    if (res.status == 200) {
                         status = "successful";
-                        console.info("1 done");
+                        //console.info("1 done");
                         nav(`/verify/inform?email=${encodeURIComponent(email)}&success=${status}`);
                     };
                 } else {
                     res = await APIs.get(endpoints['active-user'](registerUser['email']));
-                    if (res.status == 200){
+                    if (res.status == 200) {
                         status = "successful";
-                        console.info("2 donee");
+                        //console.info("2 donee");
                         nav(`/verify/inform?email=${encodeURIComponent(email)}&success=${status}`);
                     }
                 }
             }
         } catch (ex) {
             console.error(ex);
-            if (ex.response && ex.status === 409)
+            if (ex.response && ex.response.status === 409)
                 setErrMsg(ex.response.data);
-            else
-                setErrMsg("Đã có lỗi xảy ra. Hãy thử lại sau!");
+            // else
+            //     setErrMsg("Đã có lỗi xảy ra. Hãy thử lại sau!");
         };
     };
 
@@ -114,7 +115,7 @@ const VerifyMail = () => {
                     </Alert>
                 )}
 
-                {errMsg && (
+                {errMsg !== "" && (
                     <Alert variant="danger" className="alert-danger">
                         <div>{errMsg}</div>
                     </Alert>

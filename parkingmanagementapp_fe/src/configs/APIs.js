@@ -20,6 +20,7 @@ export const endpoints = {
     'forget-password': '/api/auth/forgetPassword',
     'password-check': (userId) => `/api/auth/account/${userId}/password/check`,
     'user-info-update': (userId) => `/api/auth/account/${userId}/info/change`,
+    'user-avatar-change': '/api/auth/account/avatar/change',
     'customer-list': '/api/customer/list',
     'customer-list-all': '/api/customer/list/all',
     'security-list': '/api/security/list',

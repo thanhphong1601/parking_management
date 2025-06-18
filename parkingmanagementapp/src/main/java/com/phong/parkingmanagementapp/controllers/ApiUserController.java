@@ -7,11 +7,13 @@ package com.phong.parkingmanagementapp.controllers;
 import com.phong.parkingmanagementapp.dtos.AuthenticationRequest;
 import com.phong.parkingmanagementapp.models.User;
 import com.phong.parkingmanagementapp.services.AuthenticationService;
+import com.phong.parkingmanagementapp.services.CloudinaryService;
 import com.phong.parkingmanagementapp.services.JwtService;
 import com.phong.parkingmanagementapp.services.RoleService;
 import com.phong.parkingmanagementapp.services.UserService;
 import com.phong.parkingmanagementapp.services.VehicleService;
 import com.phong.parkingmanagementapp.utils.parseLocalDate;
+import java.io.IOException;
 import java.security.Principal;
 import java.util.Date;
 import java.util.List;
@@ -37,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -58,6 +61,8 @@ public class ApiUserController {
     private RoleService roleService;
     @Autowired
     private VehicleService vehicleService;
+    @Autowired
+    private CloudinaryService cloudService;
 
     @PostMapping("/authenticate")
     @CrossOrigin
@@ -273,4 +278,31 @@ public class ApiUserController {
         this.userService.save(currentUser);
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
+    
+    @PostMapping("/account/avatar/change")
+    public ResponseEntity<?> updateAvatar(@RequestParam(value = "file1", required = false) MultipartFile avatarFile,
+            @RequestParam(value = "userId") String userId) throws IOException {
+        String avatarUrl;
+        User currentUser;
+        if (!userId.isBlank() && !userId.isEmpty()) {
+            currentUser = this.userService.getUserById(Integer.parseInt(userId));
+
+            if (avatarFile != null) {
+                avatarUrl = this.cloudService.uploadImage(avatarFile);
+
+                currentUser.setAvatar(avatarUrl);
+
+                this.userService.save(currentUser);
+
+                return new ResponseEntity<>("Done", HttpStatus.OK);
+
+            } else {
+                return new ResponseEntity<>("Không tìm thấy file", HttpStatus.NOT_FOUND);
+
+            }
+        }
+        return new ResponseEntity<>("Không tìm thấy người dùng tương ứng", HttpStatus.NOT_FOUND);
+
+    }
+
 }

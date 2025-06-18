@@ -192,12 +192,12 @@ public class TicketServiceImpl implements TicketService{
             totalPrice = numberOfDays * this.ticketPriceRepo.getNormalPrice().getPrice();
         }
         
-        if (typeId == 2) { //month, 7k/day
-            totalPrice = numberOfDays * this.ticketPriceRepo.getMonthPrice().getPrice();
+        if (typeId == 2) { //discount, 10k/day
+            totalPrice = numberOfDays * this.ticketPriceRepo.getDiscountPrice().getPrice();
         }
         
-        if (typeId == 3) { //discount type, 10k/day
-            totalPrice = numberOfDays * this.ticketPriceRepo.getDiscountPrice().getPrice();
+        if (typeId == 3) { //month type, 280000/day
+            totalPrice = numberOfDays * this.ticketPriceRepo.getMonthPrice().getPrice();
         }
                 
         return totalPrice;

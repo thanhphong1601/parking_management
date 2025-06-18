@@ -39,6 +39,7 @@ const ManageIn = () => {
     const currentUser = useContext(MyUserContext);
     const [vehicleChoice, setVehicleChoice] = useState(null);
     const [plateLicense, setPlateLicense] = useState("");
+    const [updatedTicketId, setUpdatedTicketIt] = useState(0);
 
     const location = useLocation();
     const currentPath = location.pathname + location.search;
@@ -119,25 +120,39 @@ const ManageIn = () => {
 
                 if (res.status == 200) {
                     setTicketId(res.data);
-                    if (ticketId != "" || ticketId != null) {
-                        loadInfo();
-                        setLoading(false);
-                        showSuccess();
-                    }
+                    loadInfo(res.data);
+                    setLoading(false);
+                    showSuccess();
 
                     setTimeout(() => {
                         closeSuccess();
                     }, 2000);
                 }
             } catch (ex) {
-                if (ex.response.status == 409)
+                if (ex.response.status == 409) {
                     setMsg(ex.response.data);
-            } finally {
-                setLoading(false);
-                closeLoading();
+                    setLoading(false);
+                    setTicketId("");
+
+                    setTimeout(() => {
+                        closeLoading();
+                    }, 2000);
+                }
             }
         }
     };
+
+    // useEffect(() => {
+    //     if (ticketId !== "" && ticketId != null) {
+    //         loadInfo();
+    //         setLoading(false);
+    //         showSuccess();
+
+    //         setTimeout(() => {
+    //             closeSuccess();
+    //         }, 2000);
+    //     }
+    // }, [ticketId]);
 
     const handleInImgChange = async (event) => {
         event.preventDefault();
@@ -161,7 +176,7 @@ const ManageIn = () => {
         }
     };
 
-    const loadInfo = async () => {
+    const loadInfo = async (ticketId) => {
         // e.preventDefault();
         setMsg("");
         setInImgUrl("https://placehold.co/250x150/png");
@@ -239,7 +254,16 @@ const ManageIn = () => {
                 }, 4000);
             }
         } catch (ex) {
-            setMsg("Đã có lỗi xảy ra");
+            if (ex.response.status == 400 || ex.response.status == 404 || ex.response.status == 409) {
+                setMsg(ex.response.data);
+
+                setLoading(false);
+
+                setTimeout(() => {
+                    closeSuccess();
+                    closeLoading();
+                }, 2000);
+            }
             console.info(ex);
         }
     };
@@ -303,7 +327,7 @@ const ManageIn = () => {
                 res = await authApi().get(endpoints['ticket-get-newest']);
                 if (res.status == 200) {
                     setTicketId(res.data);
-                    loadInfo();
+                    loadInfo(res.data);
                     getPositionInfo();
                 }
 
@@ -356,14 +380,12 @@ const ManageIn = () => {
                 <label className='ticket-input-label' htmlFor="ticketInput">Mã vé</label>
                 <input className='' id="ticketInput" type='text' placeholder='Id vé' value={ticketId} onChange={e => setTicketId(e.target.value)}></input>
                 <div className=''>
-                    <Button onClick={e => loadInfo()} className='btn btn-success'>Xác nhận</Button>
+                    <Button onClick={e => loadInfo(ticketId)} className='btn btn-success'>Xác nhận</Button>
                 </div>
                 <div className=''>
                     <Button onClick={e => createAnonymousTicket(e)} className='btn btn-success'>Tạo vé mới</Button>
                 </div>
-                <Form.Group controlId="image" className="mb-3 me-1 mt-2">
-                    <Form.Control type="file" accept=".png,.jpg" ref={file3} onChange={(e) => ticketImageChoose(e)} />
-                </Form.Group>
+                <Form.Control type="file" accept=".png,.jpg" ref={file3} onChange={(e) => ticketImageChoose(e)} />
             </div>
 
             <div className="form-container">

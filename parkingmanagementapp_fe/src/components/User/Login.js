@@ -60,8 +60,9 @@ const Login = () => {
                     } else {
                         res = await authApi().put(endpoints['admin-ticket-status-update-all']);
                     }
-
-                    nav(continueUrl);
+                    if (continueUrl){
+                        nav(continueUrl);
+                    }
                 }
             }
         } catch (ex) {

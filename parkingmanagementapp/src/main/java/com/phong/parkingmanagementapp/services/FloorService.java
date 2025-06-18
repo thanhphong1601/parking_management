@@ -19,4 +19,5 @@ public interface FloorService {
     void checkStatus(int floorId);
     boolean deleteFloor(int floorId);
     List<FloorDTO> getAllFloorDTOs();
+    List<Floor> findAllFloorAvailable();
 }

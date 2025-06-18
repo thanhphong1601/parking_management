@@ -21,6 +21,9 @@ public interface FloorRepository extends JpaRepository<Floor, Long> {
     public List<Floor> findAll();
 
     public Floor getFloorById(int id);
+    
+    @Query("SELECT f FROM Floor f WHERE (f.isDeleted != true AND f.full != true)")
+    public List<Floor> findAllFloorAvailable();
 
 //    @Query("""
 //           SELECT com.phong.parkingmanagementapp.dtos.FloorDTO(

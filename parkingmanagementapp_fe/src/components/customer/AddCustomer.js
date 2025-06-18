@@ -141,18 +141,18 @@ const AddCustomer = () => {
                 <div className="form-row">
                     <div className="form-group">
                         <label>Username<span className="required">*</span></label>
-                        <input required type="text" className="form-control" value={user["username"]} onChange={(e) => change(e, "username")} placeholder='Tài khoản của bạn' />
+                        <input required type="text" className="form-control" value={user["username"]} onChange={(e) => change(e, "username")} placeholder='Tài khoản' />
                     </div>
                     <div className="form-group">
                         <label>Password<span className="required">*</span></label>
-                        <input required type="password" className="form-control" value={user["password"]} onChange={(e) => change(e, "password")} placeholder='Mật khẩu của bạn' />
+                        <input required type="password" className="form-control" value={user["password"]} onChange={(e) => change(e, "password")} placeholder='Mật khẩu' />
                     </div>
                 </div>
 
                 <div className="form-row">
                     <div className="form-group">
                         <label>Họ và tên<span className="required">*</span></label>
-                        <input required type="text" className="form-control" value={user["name"]} onChange={(e) => change(e, "name")} placeholder='Họ tên của bạn' />
+                        <input required type="text" className="form-control" value={user["name"]} onChange={(e) => change(e, "name")} placeholder='Họ tên' />
                     </div>
                     <div className="form-group">
                         <label>CMND/CCCD<span className="required">*</span></label>
@@ -167,14 +167,14 @@ const AddCustomer = () => {
                     </div>
                     <div className="form-group">
                         <label>Số điện thoại<span className="required">*</span></label>
-                        <input required maxLength="10" type="text" className="form-control" value={user["phone"]} onChange={(e) => change(e, "phone")} placeholder='Số điện thoại của bạn' />
+                        <input required maxLength="10" type="text" className="form-control" value={user["phone"]} onChange={(e) => change(e, "phone")} placeholder='Số điện thoại' />
                     </div>
                 </div>
 
                 <div className="form-row">
                     <div className="form-group">
                         <label>Email<span className="required">*</span></label>
-                        <input required type="email" className="form-control" value={user["email"]} onChange={(e) => change(e, "email")} placeholder='Email của bạn' />
+                        <input required type="email" className="form-control" value={user["email"]} onChange={(e) => change(e, "email")} placeholder='Email' />
                     </div>
                 </div>
 

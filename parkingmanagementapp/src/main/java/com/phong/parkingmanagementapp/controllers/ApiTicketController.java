@@ -151,17 +151,16 @@ public class ApiTicketController {
 
         //ticket register by day (normal, VIP or Month)
         int typeId = Integer.parseInt(params.get("typeId"));
-        if (typeId != 1 || typeId != 2 || typeId != 3) {
+        //System.out.println(typeId);
+        if (typeId != 1 && typeId != 2 && typeId != 3) {
             return new ResponseEntity<>("Loại vé không hợp lệ", HttpStatus.NOT_FOUND);
         }
-
         t.setPrice(typeId == 1 ? this.ticketPriceService.getNormalPrice()
                 : typeId == 2 ? this.ticketPriceService.getDiscountPrice()
                         : this.ticketPriceService.getMonthPrice());
         t.setTicketType(this.ticketTypeService.getTicketTypeById(typeId));
-
         int numberOfDays = Integer.parseInt(params.get("numberOfDays"));
-        numberOfDays = (typeId == 3 ? numberOfDays * 30 : numberOfDays);
+        numberOfDays = (typeId != 3 ? numberOfDays * 30 : numberOfDays);
 
         Date endDate = this.ticketService.calculateStartAndEndDate(numberOfDays, t.getStartDay());
         t.setEndDay(endDate);
@@ -246,6 +245,7 @@ public class ApiTicketController {
         //handle license plate img to get its number
 //        String licenseNumber = params.getOrDefault("licenseNumber", "0");
 //        t.setLicenseNumber(licenseNumber);
+        t.setActive(Boolean.TRUE);
         this.ticketService.addOrUpdate(t);
 
         Ticket newestTicketCreated = this.ticketService.findTopByOrderByIdDesc();
@@ -256,8 +256,8 @@ public class ApiTicketController {
             return new ResponseEntity<>("Hiện bãi đã hết vị trí trống", HttpStatus.NOT_FOUND);
         }
 
-        this.poService.assignPositionToTicket(newestTicketCreated.getId(),
-                availablePosition.getId());
+//        this.poService.assignPositionToTicket(newestTicketCreated.getId(),
+//                availablePosition.getId());
 
         return new ResponseEntity<>("Đã tạo vé mới thành công", HttpStatus.CREATED);
     }

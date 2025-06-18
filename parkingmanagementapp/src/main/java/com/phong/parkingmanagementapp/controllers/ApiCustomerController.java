@@ -99,7 +99,6 @@ public class ApiCustomerController {
             String birthday = params.get("birthday");
 
             u.setBirthday(parseLocalDate.parseStringToDate(birthday));
-            System.out.println(u.getBirthday());
             u.setIdentityNumber(params.get("identityNumber"));
             u.setPhone(params.get("phone"));
 

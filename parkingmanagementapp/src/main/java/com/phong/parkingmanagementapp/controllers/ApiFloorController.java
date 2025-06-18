@@ -28,7 +28,7 @@ public class ApiFloorController {
     
     @GetMapping("/floor/list")
     public ResponseEntity<List<Floor>> getFloorList(){
-        return ResponseEntity.ok(floorService.findAll());
+        return ResponseEntity.ok(this.floorService.findAllFloorAvailable());
     }
     
     @GetMapping("/floorDTO/list")

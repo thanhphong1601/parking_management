@@ -108,6 +108,7 @@ const ManageOut = () => {
     const [ticketEndDate, setTicketEndDate] = useState(null);
     const files = useRef();
     const files2 = useRef();
+    const file3 = useRef();
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState("");
     const [data, setData] = useState(null);
@@ -218,8 +219,44 @@ const ManageOut = () => {
         }
     };
 
-    const loadInfo = async (e) => {
+    const ticketImageChoose = async (e) => {
         e.preventDefault();
+        setMsg("");
+        setLoading(true);
+        showLoading();
+
+        const file = e.target.files[0];
+        if (file) {
+            try {
+                let form = new FormData();
+                form.append("file", file);
+                let res = await authApi().post(endpoints['entry-ticket-image-text-extract'], form);
+
+                if (res.status == 200) {
+                    setTicketId(res.data);
+                    loadInfo(res.data);
+                    setLoading(false);
+                    showSuccess();
+
+
+                    setTimeout(() => {
+                        closeSuccess();
+                    }, 2000);
+                }
+            } catch (ex) {
+                if (ex.response.status == 409) {
+                    setMsg(ex.response.data);
+                    setTicketId("");
+                }
+            } finally {
+                setLoading(false);
+                closeLoading();
+            }
+        }
+    };
+
+
+    const loadInfo = async (ticketId) => {
         setMsg("");
 
         setLoading(true);
@@ -360,7 +397,7 @@ const ManageOut = () => {
 
             if (res.status == 200) {
                 setTicketId(res.data);
-                loadInfo(e);
+                loadInfo(res.data);
             }
         } catch (ex) {
             if (ex.response.status == 404) {
@@ -382,7 +419,7 @@ const ManageOut = () => {
                 let res = await authApi().put(url);
                 if (res.status == 200) {
                     setMsg(res.data);
-                    loadInfo(e);
+                    loadInfo(ticketId);
 
                     let form = new FormData();
                     form.append("id", data.ticketId);
@@ -458,11 +495,13 @@ const ManageOut = () => {
                 <label className='ticket-input-label' htmlFor="ticketInput">Mã vé</label>
                 <input className='' id="ticketInput" type='text' placeholder='Id vé' value={ticketId} onChange={e => setTicketId(e.target.value)}></input>
                 <div className=''>
-                    <Button className='btn btn-success' onClick={e => loadInfo(e)}>Xác nhận</Button>
+                    <Button className='btn btn-success' onClick={e => loadInfo(ticketId)}>Xác nhận</Button>
                 </div>
                 <div className=''>
                     <Button className='btn btn-success' onClick={e => payTicket(e)}>Thanh toán</Button>
                 </div>
+                <Form.Control type="file" accept=".png,.jpg" ref={file3} onChange={(e) => ticketImageChoose(e)} />
+
             </div>
 
             <div className="form-container">

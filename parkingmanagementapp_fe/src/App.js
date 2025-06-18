@@ -43,7 +43,8 @@ function App() {
         <MyDispatchContext.Provider value={dispatch}>
           <Header />
           <Routes>
-            <Route path='/' element={<Index />}></Route>
+            <Route path='/otherIndex' element={<Index />}></Route>
+            <Route path='/' element={<CustomerIndex />}></Route>
             <Route path='/login' element={<Login />}></Route>
             <Route path='/register' element={<Register />}></Route>
             <Route path='/customer/list' element={<CustomerList />}></Route>
@@ -52,25 +53,25 @@ function App() {
             <Route path='/ticket/add' element={<TicketAdd />}></Route>
             <Route path='/manage/in' element={<ManageIn />}></Route>
             <Route path='/manage/out' element={<ManageOut />}></Route>
-            <Route path='/stats' element={<Stat />}></Route>
+            {/* <Route path='/stats' element={<Stat />}></Route> */}
             <Route path='/successPayment' element={<SuccessPayment />}></Route>
             <Route path='/verify' element={<VerifyMail />}></Route>
             <Route path='/verify/inform' element={<VerifyInform />}></Route>
-            <Route path='/customer/index' element={<CustomerIndex />}></Route>
-            <Route path='/customer/:userId/ticket/list' element={<TicketManage/>}></Route>
-            <Route path='/customer/:userId/ticket/create' element={<TicketCreate/>}></Route>
-            <Route path='/customer/:userId/receipt/list' element={<CustomerReceipt/>}></Route>
-            <Route path='/manage/map/show' element={<ParkingMap/>}></Route>
-            <Route path='/forgetPassword' element={<ForgetPassword/>}></Route>
-            <Route path='/oauth2/success' element={<GoogleLoginSuccess/>}></Route>
-            <Route path='/profile/:userId' element={<UserProfile/>}></Route>
-            <Route path='/entry/list' element={<EntryList/>}></Route>
-            <Route path='/customer/:userId/vehicle/list' element={<AddVehicle/>}></Route>
-            <Route path='/fast-payment' element={<FastPay/>}></Route>
+            {/* <Route path='/customer/index' element={<CustomerIndex />}></Route> */}
+            <Route path='/customer/:userId/ticket/list' element={<TicketManage />}></Route>
+            <Route path='/customer/:userId/ticket/create' element={<TicketCreate />}></Route>
+            <Route path='/customer/:userId/receipt/list' element={<CustomerReceipt />}></Route>
+            <Route path='/manage/map/show' element={<ParkingMap />}></Route>
+            <Route path='/forgetPassword' element={<ForgetPassword />}></Route>
+            <Route path='/oauth2/success' element={<GoogleLoginSuccess />}></Route>
+            <Route path='/profile/:userId' element={<UserProfile />}></Route>
+            <Route path='/entry/list' element={<EntryList />}></Route>
+            <Route path='/customer/:userId/vehicle/list' element={<AddVehicle />}></Route>
+            <Route path='/fast-payment' element={<FastPay />}></Route>
           </Routes>
           {/* {user !== null ? user.role.id === 3 ? <CustomerFooter /> : <Footer /> : <Footer />} */}
           {/* <Footer /> */}
-          {<CustomerFooter/> }
+          {<CustomerFooter />}
         </MyDispatchContext.Provider>
       </MyUserContext.Provider>
 

@@ -21,7 +21,7 @@ public interface PositionRepository extends JpaRepository<Position, Long> {
     @Override
     public List<Position> findAll();
 
-    @Query(value = "SELECT p FROM Position p WHERE p.line.id = :id")
+    @Query(value = "SELECT p FROM Position p WHERE p.line.id = :id AND (p.take = false AND p.isDeleted = false)")
     List<Position> findPositionsByLineId(@Param("id") int id);
 
     Position getPositionById(int id);

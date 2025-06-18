@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Alert, Button, Container, Form, Spinner, Table, ToggleButton, ToggleButtonGroup } from "react-bootstrap";
+import { Alert, Button, Container, Form, Modal, Spinner, Table, ToggleButton, ToggleButtonGroup } from "react-bootstrap";
 import { formatDate, formatDateWithHour } from "../../Utils/FormatDate";
 import { authApi, endpoints } from "../../../configs/APIs";
 import { MyUserContext } from "../../../configs/Contexts";
@@ -142,6 +142,16 @@ const CustomerReceipt = () => {
 
     };
 
+    //open/close modal
+    const [openModal, setOpenModal] = useState(false);
+    const processOpenModal = () => {
+        setOpenModal(true);
+    };
+
+    const processCloseModal = () => {
+        setOpenModal(false);
+    };
+
 
 
     useEffect(() => {
@@ -193,7 +203,7 @@ const CustomerReceipt = () => {
                         <th>Khách hàng</th>
                         <th>Mã vé thanh toán</th>
                         <th>Tổng giá</th>
-                        <th></th>
+                        {/* <th></th> */}
                     </tr>
                 </thead>
                 <tbody>
@@ -204,9 +214,9 @@ const CustomerReceipt = () => {
                             <td>{r.username}</td>
                             <td>{r.ticketId}</td>
                             <td>{r.totalPrice}</td>
-                            <td>
-                                <Button>Chi tiết</Button>
-                            </td>
+                            {/* <td>
+                                <Button onClick={processOpenModal}>Chi tiết</Button>
+                            </td> */}
                         </tr>
                     )) :
                         <tr>
@@ -237,6 +247,20 @@ const CustomerReceipt = () => {
                     →</Button>
             </div>
         </Container>
+
+        <Modal show={openModal} onHide={processCloseModal} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>Thông tin giao dịch</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <h1 className='fw-bold text-center text-danger'>Bạn có chắc chắn xóa thông tin người dùng này?</h1>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={processCloseModal}>
+                        OK
+                    </Button>
+                </Modal.Footer>
+            </Modal>
     </>);
 };
 

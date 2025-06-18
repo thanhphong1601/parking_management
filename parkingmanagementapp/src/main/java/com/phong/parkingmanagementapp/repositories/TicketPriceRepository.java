@@ -26,9 +26,9 @@ public interface TicketPriceRepository extends JpaRepository<TicketPrice, Long>{
     @Query("SELECT p FROM TicketPrice p WHERE p.id = 1")
     TicketPrice getNormalPrice();
     
-    @Query("SELECT p FROM TicketPrice p WHERE p.id = 3")
+    @Query("SELECT p FROM TicketPrice p WHERE p.id = 2")
     TicketPrice getDiscountPrice();
     
-    @Query("SELECT p FROM TicketPrice p WHERE p.id = 2")
+    @Query("SELECT p FROM TicketPrice p WHERE p.id = 3")
     TicketPrice getMonthPrice();
 }

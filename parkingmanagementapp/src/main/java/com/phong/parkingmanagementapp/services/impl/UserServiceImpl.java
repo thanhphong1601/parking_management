@@ -147,16 +147,17 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         u.setUsername(user.getUsername());
         u.setPassword(encodedPassword);
         u.setEmail(user.getEmail());
-        u.setActive(Boolean.TRUE);
+        u.setActive(Boolean.FALSE);
         u.setAddress(user.getAddress());
         u.setBirthday(user.getBirthday());
         u.setName(user.getName());
         u.setPhone(user.getPhone());
         u.setRole(user.getRole());
         u.setIdentityNumber(user.getIdentityNumber());
+        u.setAvatar("https://res.cloudinary.com/dstjar2iy/image/upload/v1750227841/noavatar_xqtxtc.png");
 
         if (user.getFile() == null) {
-            return userRepo.save(u);
+            return this.userRepo.save(u);
         }
 
         if (!user.getFile().isEmpty() && user.getAvatar() == null) {

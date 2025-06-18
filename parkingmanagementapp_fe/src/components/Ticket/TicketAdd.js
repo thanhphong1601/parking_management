@@ -124,6 +124,7 @@ const TicketAdd = () => {
             let res = await authApi().get(url);
 
             setCustomers(res.data.content);
+            setTotalPages(res.data.totalPages);
         } catch (ex) {
             console.error(ex);
         }
@@ -269,7 +270,7 @@ const TicketAdd = () => {
 
     useEffect(() => {
         loadCustomerList();
-    }, [customerName]);
+    }, [customerName, page]);
 
     useEffect(() => {
         loadVehicles();
@@ -293,6 +294,10 @@ const TicketAdd = () => {
         form.append("numberOfDays", numberOfDays);
         form.append("typeId", ticketType);
 
+        for (const [key, value] of form.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+
 
         try {
             // for (const [key, value] of form.entries()) {
@@ -310,6 +315,9 @@ const TicketAdd = () => {
             }
 
         } catch (ex) {
+            if (ex.response.status == 404){
+                console.error(ex.response.data);
+            }
             console.error(ex);
         }
     }
@@ -402,7 +410,7 @@ const TicketAdd = () => {
                             <Form.Control onChange={e => setStartDay(e.target.value)} value={startDay} type="date" />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Chọn ngày kết thúc</Form.Label>
+                            <Form.Label>Số lượng</Form.Label>
                             <Form.Control value={numberOfDays} onChange={e => { changeNumberOfDays(e) }} type="number" min={1} />
                         </Form.Group>
                     </div>

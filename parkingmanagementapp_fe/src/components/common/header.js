@@ -36,6 +36,7 @@ const Header = () => {
                         <Link to="#" className="nav-link">Hóa đơn</Link>
                     </>:<></>}
                     </>} */}
+                    <Link to='/' className="nav-link">Trang chủ</Link>
                     <Link to="/customer/list" className="nav-link">Khách hàng</Link>
                     <Link to="/ticket/list" className="nav-link">Vé xe</Link>
                     <NavDropdown title="Quản lý" id="basic-nav-dropdown">
@@ -44,11 +45,16 @@ const Header = () => {
                         <Link to="/manage/map/show" className="nav-link">Bản đồ</Link>
                     </NavDropdown>
                     <Link to="/entry/list" className="nav-link">Lịch sử ra vào</Link>
-                    <Link to='/customer/index' className="nav-link">Trang chủ</Link>
+
+                    <Link to={user ? `/customer/${user.id}/receipt/list` : "#"} className="nav-link">Lịch sử thanh toán</Link>
+
+                    <Link to={'#'} className="nav-link">||</Link>
                     <Link to='/fast-payment' className="nav-link">Thanh toán nhanh</Link>
 
-                    <Link to={user ? `/customer/${user.id}/receipt/list`: "#"} className="nav-link">Lịch sử thanh toán</Link>
-                    <Link to={user ? `/customer/${user.id}/vehicle/list`: "#"} className="nav-link">Phương tiện</Link>
+                    <Link to={user ? `/customer/${user.id}/ticket/list` : '/login'} className="nav-link">Quản lý vé</Link>
+                    <Link to={user ? `/customer/${user.id}/ticket/create` : '/login'} className="nav-link">Đăng ký vé</Link>
+
+                    <Link to={user ? `/customer/${user.id}/vehicle/list` : "#"} className="nav-link">Phương tiện</Link>
 
 
                     {user === null ? <>
