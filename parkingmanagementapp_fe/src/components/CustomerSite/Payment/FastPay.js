@@ -63,7 +63,7 @@ const FastPay = () => {
             <div className="row justify-content-center">
                 <div className="col-md-6 col-sm-10">
                     <div className="card shadow-sm rounded-4 p-4">
-                        <h4 className="mb-4 text-center">Fast Payment</h4>
+                        <h4 className="mb-4 text-center">Thanh Toán Nhanh</h4>
                         <form>
                             <div className="mb-3">
                                 <label htmlFor="name" className="form-label">Họ tên</label>
@@ -78,7 +78,7 @@ const FastPay = () => {
                                 <input minLength={1} maxLength={16} type="text" className="form-control" id="ticketId" placeholder="Nhập mã vé" onChange={e => handleChange(e)} />
                             </div>
                             <div className="d-grid">
-                                <button onClick={(e) => handleSubmit(e)} className="btn btn-primary">Thanh toán nhanhh</button>
+                                <button onClick={(e) => handleSubmit(e)} className="btn btn-primary">Thanh toán nhanh</button>
                             </div>
                         </form>
                     </div>

@@ -172,7 +172,7 @@ const TicketManage = () => {
         <Container className="ticket-container">
             <div className="ticket-header">
                 <h2>Danh sách vé xe</h2>
-                <Link to={`/customer/${currentUser.id}/ticket/create`} className="btn btn-primary" variant="primary">Đăng ký vé mới</Link>
+                <Link to={currentUser ? `/customer/${currentUser.id}/ticket/create` : "#"} className="btn btn-primary" variant="primary">Đăng ký vé mới</Link>
             </div>
 
             <div className="ticket-filters">

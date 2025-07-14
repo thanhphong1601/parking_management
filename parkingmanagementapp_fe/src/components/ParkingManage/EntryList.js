@@ -34,12 +34,12 @@ const EntryList = () => {
     const handleShow = (type, entry) => {
         setViewing(type);
         if (type === 'in') {
-            setPlateUrl(entry.plateImgIn);
-            setFaceUrl(entry.personImgIn);
+            setPlateUrl(entry.plateImgIn? entry.plateImgIn: "https://placehold.co/300x250/png");
+            setFaceUrl(entry.personImgIn? entry.personImgIn: "https://placehold.co/300x250/png");
         }
         else {
-            setPlateUrl(entry.plateImgOut);
-            setFaceUrl(entry.personImgOut);
+            setPlateUrl(entry.plateImgOut? entry.plateImgOut:"https://placehold.co/300x250/png");
+            setFaceUrl(entry.personImgOut? entry.personImgOut:"https://placehold.co/300x250/png");
         }
         setShow(true);
     };
@@ -102,6 +102,7 @@ const EntryList = () => {
                 <thead>
                     <tr>
                         <th>Khách hàng</th>
+                        <th>Mã vé</th>
                         <th>Biển số xe</th>
                         <th>Thời gian vào</th>
                         <th>Thời gian ra</th>
@@ -113,6 +114,7 @@ const EntryList = () => {
                     {entries.length > 0 ? entries.map((entry) =>
                         <tr key={entry.id}>
                             <td>{entry.owner.name}</td>
+                            <td>{entry.ticket.ticketId}</td>
                             <td>{entry.licenseNumber == 0 || entry.licenseNumber === null ? "Không có" : entry.licenseNumber.toUpperCase()}</td>
                             <td>{formatDateWithHour(entry.timeIn)}</td>
                             <td>{entry.timeOut !== null || entry.timeOut === "" ? formatDateWithHour(entry.timeOut) : "Chưa ghi nhận"}</td>
